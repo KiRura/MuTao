@@ -25,7 +25,7 @@ const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require('node-cron');
-const { error } = require("console");
+const internal = require("stream");
 
 client.once("ready", async () => {
   setInterval(async () => {
@@ -1864,25 +1864,26 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot || message.system || !message.guild) return;
   try {
     if (message.channel.id === "1078856959878508596" && !message.content.startsWith("=")) {
-      async function chat() {
-        let msg = await message.channel.send("生成中");
-        let id = String(fs.readFileSync("chatgpt.txt"));
-        id = id ? id : undefined;
-        const { ChatGPTAPI } = await import("chatgpt");
-        const chatgpt = new ChatGPTAPI({
-          apiKey: `${process.env.OPENAI_API_KEY}`,
-          // completionParams: {model: "gpt-4"}
-        });
-        const res = await chatgpt.sendMessage(message.content, {
-          parentMessageId: id
-        }).catch(async e => {
-          const error = e;
-          return await msg.edit(`エラー\n${error}`).catch(async e => { return await message.channel.send(`エラー\n${error}`) });
-        });
-        await msg.edit(res.text).catch(async e => await message.channel.send(res.text));
-        fs.writeFileSync("chatgpt.txt", res.id);
-      };
-      chat();
+      await message.channel.send("使えないよ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！");
+      // async function chat() {
+      //   let msg = await message.channel.send("生成中");
+      //   let id = String(fs.readFileSync("chatgpt.txt"));
+      //   id = id ? id : undefined;
+      //   const { ChatGPTAPI } = await import("chatgpt");
+      //   const chatgpt = new ChatGPTAPI({
+      //     apiKey: `${process.env.OPENAI_API_KEY}`,
+      //     // completionParams: {model: "gpt-4"}
+      //   });
+      //   const res = await chatgpt.sendMessage(message.content, {
+      //     parentMessageId: id
+      //   }).catch(async e => {
+      //     const error = e;
+      //     return await msg.edit(`エラー\n${error}`).catch(async e => { return await message.channel.send(`エラー\n${error}`) });
+      //   });
+      //   await msg.edit(res.text).catch(async e => await message.channel.send(res.text));
+      //   fs.writeFileSync("chatgpt.txt", res.id);
+      // };
+      // chat();
     };
   } catch (e) {
     const error = e;
