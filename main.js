@@ -758,6 +758,27 @@ client.once("ready", async () => {
     { // join
       name: "join",
       description: "読み上げを開始する"
+    },
+    { // banner
+      name: "banner",
+      description: "バナーを保存する",
+      options: [
+        {
+          type: 3,
+          name: "id",
+          description: "ID"
+        },
+        {
+          type: 6,
+          name: "member",
+          description: "メンバー"
+        },
+        {
+          type: 5,
+          name: "gif",
+          description: "gifの場合はTrueを選択"
+        }
+      ]
     }
   ];
   await client.application.commands.set(data);
@@ -1708,35 +1729,31 @@ client.on("interactionCreate", async (interaction) => {
       const apiurl = `https://api.irucabot.com/imgcheck/check_url?url=${imageurl}`;
       await interaction.deferReply();
 
-      request.get(apiurl).then(async res => {
-        const result = JSON.parse(res);
-        if (result.status === "error") return await interaction.followUp(result.message_ja);
-        if (!result.found) return await interaction.followUp({
-          embeds: [
-            {
-              description: "画像は見つかりませんでした。",
-              thumbnail: {
-                url: imageurl
-              },
-              color: 15158332
+      let result;
+      try {
+        result = await request(apiurl);
+      } catch (error) {
+        return await interaction.followUp(`${error.statusCode}\n${JSON.parse(error.error).message_ja}`);
+      };
+      let description;
+      let color;
+      if (!result.found) {
+        description = `画像はヒットしませんでした。`;
+        color = 15158332;
+      } else {
+        description = `[${result.count}個の画像がヒットしました。](${result.resulturl})`;
+        color = 16748800;
+      };
+      await interaction.followUp({
+        embeds: [
+          {
+            description: description,
+            color: color,
+            thumbnail: {
+              url: imageurl
             }
-          ]
-        });
-
-        await interaction.followUp({
-          embeds: [
-            {
-              description: `[${result.count}個の画像がヒットしました。](${result.resulturl})`,
-              thumbnail: {
-                url: imageurl
-              },
-              color: 16748800
-            }
-          ]
-        });
-      }).catch(async e => {
-        const error = JSON.parse(e.error);
-        await interaction.followUp(`${error.code}\n${error.message_ja}`);
+          }
+        ]
       });
     };
 
@@ -1834,6 +1851,41 @@ client.on("interactionCreate", async (interaction) => {
       //   channel: interaction.channel
       // });
       // fs.writeFileSync("yomiage.json", JSON.stringify(result));
+    };
+
+    if (interaction.commandName === "banner") {
+      const type = interaction.options.getBoolean("gif") ? "gif" : "png";
+      let id = interaction.options.getString("id");
+      const member = interaction.options.getUser("member");
+      if (id === null && !member) id = interaction.user.id;
+      if (member) id = member.id;
+      let result;
+      try {
+        result = await request(`https://discord.com/api/users/${id}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bot ${process.env.DISCORD_TOKEN}`
+          },
+          json: true
+        });
+      } catch (error) {
+        return await interaction.reply({content: "エラーが発生しました。", ephemeral: true});
+      };
+      if (!result.banner && !result.banner_color) return await interaction.reply({ content: "バナー画像も色も取得できませんでした。" });
+      const url = result.banner ? `https://cdn.discordapp.com/banners/${id}/${result.banner}.${type}?size=4096` : null;
+      const description = result.banner ? `[バナーの画像URL](${url})` : `バナーの色コード: ${result.banner_color}`;
+      const color = result.banner_color ? result.accent_color : 000000;
+      await interaction.reply({
+        embeds: [
+          {
+            description: description,
+            image: {
+              url: url
+            },
+            color: color
+          }
+        ]
+      });
     };
 
     if (interaction.commandName === 'test') {
