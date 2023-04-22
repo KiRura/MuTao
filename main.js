@@ -1961,4 +1961,20 @@ discordplayer.on("error", (error) => {
   return;
 });
 
+// client.on("messageReactionAdd", async (reaction, user) => { // https://discord.gg/M9MmS6k2jT
+//   console.log(reaction);
+//   if (reaction.message.id !== "1099317662854697091") return;
+//   if (reaction.emoji.name !== "✅") return;
+//   const member = reaction.message.guild.members.resolve(user);
+//   member.roles.add("1099312160284352512");
+// });
+
+// client.on("messageReactionRemove", async (reaction, user) => {
+//   console.log(reaction);
+//   if (reaction.message.id !== "1099317662854697091") return;
+//   if (reaction.emoji.name !== "✅") return;
+//   const member = reaction.message.guild.members.resolve(user);
+//   member.roles.remove("1099312160284352512");
+// });
+
 client.login(process.env.DISCORD_TOKEN).catch(e => console.log(e));
