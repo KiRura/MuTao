@@ -779,6 +779,18 @@ client.once("ready", async () => {
           description: "gifの場合はTrueを選択"
         }
       ]
+    },
+    { // getroleicon
+      name: "getroleicon",
+      description: "ロールアイコンを取得する",
+      options: [
+        {
+          type: 8,
+          name: "role",
+          description: "ロール",
+          required: true
+        }
+      ]
     }
   ];
   await client.application.commands.set(data);
@@ -1874,7 +1886,7 @@ client.on("interactionCreate", async (interaction) => {
           json: true
         });
       } catch (error) {
-        return await interaction.reply({content: "エラーが発生しました。", ephemeral: true});
+        return await interaction.reply({ content: "エラーが発生しました。", ephemeral: true });
       };
       if (!result.banner && !result.banner_color) return await interaction.reply({ content: "バナー画像も色も取得できませんでした。" });
       const url = result.banner ? `https://cdn.discordapp.com/banners/${id}/${result.banner}.${type}?size=4096` : null;
@@ -1893,14 +1905,26 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
+    if (interaction.commandName === "getroleicon") {
+      const role = interaction.options.getRole("role");
+      if (!role.iconURL()) return await interaction.reply({ content: "指定されたロールにアイコンはありませんでした。", ephemeral: true });
+      const url = `https://cdn.discordapp.com/role-icons/${role.id}/${role.icon}.png?size=4096`;
+      await interaction.reply({
+        embeds: [
+          {
+            description: `[アイコンの画像URL](${url})`,
+            image: { url: url },
+            color: role.color ? role.color : 000000
+          }
+        ]
+      });
+    }
+
     if (interaction.commandName === 'test') {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply('管理者及び開発者のみ実行可能です。');
       let text1 = interaction.options.getString('text1');
-      let text2 = interaction.options.getString("text2");
-      let attachment = interaction.options.getAttachment("attachment");
-      const channel = client.guilds.fetch("610020293208965151").then(guild => guild.channels.cache.find(channel => channel.name.match(text1)));
-      if (text2) channel.then(channel => channel.send(text2));
-      if (attachment) channel.then(channel => channel.send({ files: [attachment] }));
+      const icon = (await interaction.guild.roles.fetch(text1)).color;
+      console.log(icon);
       await interaction.user.send('てすとこんぷりーてっど！');
     };
   } catch (e) {
