@@ -1688,8 +1688,8 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === 'today') {
       const dt = new Date();
       const y = dt.getFullYear();
-      const m = ("00" + (dt.getMonth() + 1)).slice(-2);
-      const d = ("00" + (dt.getDate())).slice(-2);
+      const m = dt.getMonth();
+      const d = dt.getDate();
       const hour = ("00" + (dt.getHours())).slice(-2);
       const min = ("00" + (dt.getMinutes())).slice(-2);
       const sec = ("00" + (dt.getSeconds())).slice(-2);
@@ -1697,13 +1697,13 @@ client.on("interactionCreate", async (interaction) => {
       const weekItems = ["日", "月", "火", "水", "木", "金", "土"];
       const dayOfWeek = weekItems[dt.getDay()];
       const wareki = dt.toLocaleDateString("ja-JP-u-ca-japanese", { year: 'numeric' });
-      const mprog = Math.floor(dt.getDate() / (new Date(y, (dt.getMonth() + 1), 0).getDate()) * 100);
-      const drem = (new Date(y, (dt.getMonth() + 1), 0).getDate()) - dt.getDate();
-      const dprog = Math.floor((dt.getTime() - (new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime())) / (24 * 60 * 60 * 1000) * 100);
-      const mrem = Math.floor(((new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + 1).getTime()) - dt.getTime()) / 1000 / 60);
+      const mprog = Math.floor(dt.getDate() / (new Date(y, (m + 1), 0).getDate()) * 100);
+      const drem = (new Date(y, (m + 1), 0).getDate()) - dt.getDate();
+      const dprog = Math.floor((dt.getTime() - (new Date(y, m, d).getTime())) / (24 * 60 * 60 * 1000) * 100);
+      const mrem = Math.floor(((new Date(y, m, d + 1).getTime()) - dt.getTime()) / 1000 / 60);
       const yprog = Math.floor((dt.getTime() - (Date.parse(`${y - 1}/12/31`))) / (365 * 24 * 60 * 60 * 1000) * 100);
       const dyrem = Math.floor((Date.parse(`${y}/12/31`) - dt.getTime()) / 1000 / 60 / 60 / 24);
-      await interaction.reply(`${y}年(${wareki})${m}月${d}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`);
+      await interaction.reply(`${y}年(${wareki})${("00" + (m + 1)).slice(-2)}月${("00" + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`);
     };
 
     if (interaction.commandName === 'riseki') {
