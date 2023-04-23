@@ -18,15 +18,13 @@ const wait = (sec) => {
     setTimeout(resolve, sec * 1000);
   });
 };
+const fetch = require("undici");
 const { stream } = require("play-dl");
 const ping = require("ping");
-const request = require("request-promise");
 const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require('node-cron');
-const internal = require("stream");
-
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
@@ -1746,12 +1744,8 @@ client.on("interactionCreate", async (interaction) => {
       const apiurl = `https://api.irucabot.com/imgcheck/check_url?url=${imageurl}`;
       await interaction.deferReply();
 
-      let result;
-      try {
-        result = await request(apiurl);
-      } catch (error) {
-        return await interaction.followUp(`${error.statusCode}\n${JSON.parse(error.error).message_ja}`);
-      };
+      const result = await (await fetch.fetch(apiurl)).json();
+      if (result.status === "error") return await interaction.followUp(`${result.code}\n${result.message_ja}`);
       let description;
       let color;
       if (!result.found) {
@@ -1876,19 +1870,15 @@ client.on("interactionCreate", async (interaction) => {
       const member = interaction.options.getUser("member");
       if (id === null && !member) id = interaction.user.id;
       if (member) id = member.id;
-      let result;
-      try {
-        result = await request(`https://discord.com/api/users/${id}`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bot ${process.env.DISCORD_TOKEN}`
-          },
-          json: true
-        });
-      } catch (error) {
-        return await interaction.reply({ content: "エラーが発生しました。", ephemeral: true });
-      };
-      if (!result.banner && !result.banner_color) return await interaction.reply({ content: "バナー画像も色も取得できませんでした。" });
+      const result = await (await fetch.fetch(`https://discord.com/api/users/${id}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bot ${process.env.DISCORD_TOKEN}`
+        },
+        json: true
+      })).json();
+      if (result.user_id) return await interaction.reply({content: `ユーザーが見つかりませんでした。`, ephemeral: true})
+      if (!result.banner && !result.banner_color) return await interaction.reply({ content: "バナー画像も色も取得できませんでした。", ephemeral: true });
       const url = result.banner ? `https://cdn.discordapp.com/banners/${id}/${result.banner}.${type}?size=4096` : null;
       const description = result.banner ? `[バナーの画像URL](${url})` : `バナーの色コード: ${result.banner_color}`;
       const color = result.banner_color ? result.accent_color : 000000;
@@ -1923,8 +1913,14 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === 'test') {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply('管理者及び開発者のみ実行可能です。');
       let text1 = interaction.options.getString('text1');
-      const icon = (await interaction.guild.roles.fetch(text1)).color;
-      console.log(icon);
+      const result = await fetch.fetch(`https://discord.com/api/users/${text1}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bot ${process.env.DISCORD_TOKEN}`
+        },
+        json: true
+      });
+      console.log(await result.json());
       await interaction.user.send('てすとこんぷりーてっど！');
     };
   } catch (e) {
