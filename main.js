@@ -832,7 +832,7 @@ client.on("interactionCreate", async (interaction) => {
       if (interaction.guild === null) return await interaction.reply({ content: 'サーバー内でないと実行できません！', ephemeral: true });
       if (interaction.guild.members.me.voice.channel === null && interaction.member.voice.channel === null) return await interaction.reply({ content: 'playコマンド\nvcに入れ', ephemeral: true });
       if (interaction.guild.members.me.voice.channel === null) { // undefined回避
-        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel.id).has(PermissionFlagsBits.Connect) || !interaction.guild.members.me.permissions.has(PermissionFlagsBits.Administrator)) return interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
+        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel.id).has(PermissionFlagsBits.Connect)) return interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
       };
 
       await interaction.deferReply(); // タイムアウト防止
@@ -1518,7 +1518,7 @@ client.on("interactionCreate", async (interaction) => {
       const targetuser = interaction.options.getMember('user');
       const targetrole = interaction.options.get('role');
       if (interaction.options.getSubcommandGroup() === 'user') {
-        if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles) || interaction.guild.members.me.permissions.has(PermissionFlagsBits.Administrator)) {
+        if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
           if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply('管理者権限所持者のみ実行可能です。');
           try {
             if (interaction.options.getSubcommand() === 'add') {
@@ -1534,7 +1534,7 @@ client.on("interactionCreate", async (interaction) => {
             await interaction.reply({ content: "権限順位的に操作できませんでした。", ephemeral: true });
           };
         } else {
-          return interaction.reply("ロールを管理できる権限が無いよ！");
+          return interaction.reply({content: "ロールを管理できる権限が無いよ！", ephemeral: true});
         };
 
         if (interaction.options.getSubcommand() === 'list') {
