@@ -818,6 +818,15 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
+    if (interaction.commandName === "ping") {
+      const result = await ping.promise.probe("8.8.8.8");
+      let message = `**Websocket:** ${client.ws.ping}ms\n**API Endpoint:** please wait...\n**ping 8.8.8.8:** ${result.time}ms`
+      await interaction.reply(message);
+      const msg = await interaction.fetchReply();
+      message = message.replace("please wait...", `${msg.createdTimestamp - interaction.createdTimestamp}ms`);
+      await interaction.editReply(message);
+    };
+
     let queue;
     if (interaction.commandName === 'play') {
       if (interaction.guild === null) return await interaction.reply({ content: 'サーバー内でないと実行できません！', ephemeral: true });
