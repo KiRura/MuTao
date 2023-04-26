@@ -989,7 +989,7 @@ client.on("interactionCreate", async (interaction) => {
         if (hours !== "00") {
           queuelength = `キュー内合計: ${hours}:${minutes}:${seconds}`;
         } else if (minutes !== "00") {
-          queuelength = `キュー内合計: ${minutes}:${seconds}:`;
+          queuelength = `キュー内合計: ${minutes}:${seconds}`;
         } else {
           queuelength = `キュー内合計: 00:${seconds}`;
         };
