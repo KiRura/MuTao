@@ -1,9 +1,9 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, MessageFlags, quote, ContextMenuCommandAssertions } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError } = require('discord.js');
 const translate = require("deepl");
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
-const { QueryType, Player, QueueRepeatMode, onBeforeCreateStream } = require("discord-player");
+const { QueryType, Player, QueueRepeatMode } = require("discord-player");
 const discordplayer = new Player(client, {
   deafenOnJoin: true,
   lagMonitor: 1000,
@@ -1562,7 +1562,7 @@ client.on("interactionCreate", async (interaction) => {
       };
 
       if (interaction.options.getSubcommandGroup() === 'all') {
-        if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles) || interaction.guild.members.me.permissions.has(PermissionFlagsBits.Administrator)) {
+        if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
           if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply('管理者権限所持者のみ実行可能です。');
           if (interaction.options.getSubcommand() === 'add') {
             const guildmembers = await interaction.guild.members.fetch();
