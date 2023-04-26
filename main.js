@@ -1069,7 +1069,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "nowp" || interaction.commandName === "songinfo") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      queue = discordplayer.queues.get(interaction.guild);
+      const queue = discordplayer.queues.get(interaction.guild);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1144,7 +1144,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "loop") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      queue = discordplayer.queues.get(interaction.guild);
+      const queue = discordplayer.queues.get(interaction.guild);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1168,7 +1168,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "remove") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      queue = discordplayer.queues.get(interaction.guild);
+      const queue = discordplayer.queues.get(interaction.guild);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1183,7 +1183,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "songhistory") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      queue = discordplayer.queues.get(interaction.guild);
+      const queue = discordplayer.queues.get(interaction.guild);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1276,7 +1276,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "shuffle") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      queue = discordplayer.queues.get(interaction.guild);
+      const queue = discordplayer.queues.get(interaction.guild);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1289,7 +1289,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "setvolume") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      queue = discordplayer.queues.get(interaction.guild);
+      const queue = discordplayer.queues.get(interaction.guild);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
