@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError } = require("discord.js");
 const translate = require("deepl");
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
@@ -24,7 +24,7 @@ const ping = require("ping");
 const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
-const cron = require('node-cron');
+const cron = require("node-cron");
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
@@ -57,16 +57,16 @@ client.once("ready", async () => {
       description: "注意書き等"
     },
     { // ping
-      name: 'ping',
-      description: '遅延'
+      name: "ping",
+      description: "遅延"
     },
     { // leave
-      name: 'leave',
-      description: 'キューを削除しVCから退出'
+      name: "leave",
+      description: "キューを削除しVCから退出"
     },
     { // play
-      name: 'play',
-      description: `URL先の音源を再生する(YouTube等)/検索も可`,
+      name: "play",
+      description: "URL先の音源を再生する(YouTube等)/検索も可",
       options: [
         {
           type: 3,
@@ -87,12 +87,12 @@ client.once("ready", async () => {
       ]
     },
     { // pause
-      name: 'pause',
-      description: '再生中の音源を一時停止'
+      name: "pause",
+      description: "再生中の音源を一時停止"
     },
     { // unpause
-      name: 'unpause',
-      description: '一時停止を解除'
+      name: "unpause",
+      description: "一時停止を解除"
     },
     { // userinfo
       name: "userinfo",
@@ -214,8 +214,8 @@ client.once("ready", async () => {
       options: [
         {
           type: 3,
-          name: 'text1',
-          description: '色々1'
+          name: "text1",
+          description: "色々1"
         },
         {
           type: 3,
@@ -246,298 +246,298 @@ client.once("ready", async () => {
       description: "ggrks"
     },
     { // getthumbnail
-      name: 'getthumbnail',
-      description: 'YouTubeのサムネを取得',
+      name: "getthumbnail",
+      description: "YouTubeのサムネを取得",
       options: [
         {
           type: 3,
-          name: 'url',
-          description: 'YouTube URL',
+          name: "url",
+          description: "YouTube URL",
           required: true
         }
       ]
     },
     { // transdeepl
-      name: 'trans',
-      description: 'DeepLで翻訳する',
+      name: "trans",
+      description: "DeepLで翻訳する",
       options: [
         {
           type: 3,
-          name: 'sourcetext',
-          description: '翻訳する文',
+          name: "sourcetext",
+          description: "翻訳する文",
           required: true
         },
         {
           type: 3,
-          name: 'outlang',
-          description: '翻訳先の言語',
+          name: "outlang",
+          description: "翻訳先の言語",
           required: true,
           choices: [
             {
-              name: 'JA',
-              value: 'JA'
+              name: "JA",
+              value: "JA"
             },
             {
-              name: 'EN-GB',
-              value: 'EN-GB'
+              name: "EN-GB",
+              value: "EN-GB"
             },
             {
-              name: 'EN-US',
-              value: 'EN-US'
+              name: "EN-US",
+              value: "EN-US"
             },
             {
-              name: 'ES',
-              value: 'ES'
+              name: "ES",
+              value: "ES"
             },
             {
-              name: 'BG',
-              value: 'BG'
+              name: "BG",
+              value: "BG"
             },
             {
-              name: 'CS',
-              value: 'CS'
+              name: "CS",
+              value: "CS"
             },
             {
-              name: 'DA',
-              value: 'DA'
+              name: "DA",
+              value: "DA"
             },
             {
-              name: 'DE',
-              value: 'DE'
+              name: "DE",
+              value: "DE"
             },
             {
-              name: 'EL',
-              value: 'EL'
+              name: "EL",
+              value: "EL"
             },
             {
-              name: 'ET',
-              value: 'ET'
+              name: "ET",
+              value: "ET"
             },
             {
-              name: 'FR',
-              value: 'FR'
+              name: "FR",
+              value: "FR"
             },
             {
-              name: 'ID',
-              value: 'ID'
+              name: "ID",
+              value: "ID"
             },
             {
-              name: 'IT',
-              value: 'IT'
+              name: "IT",
+              value: "IT"
             },
             {
-              name: 'LT',
-              value: 'LT'
+              name: "LT",
+              value: "LT"
             },
             {
-              name: 'LV',
-              value: 'LV'
+              name: "LV",
+              value: "LV"
             },
             {
-              name: 'PL',
-              value: 'PL'
+              name: "PL",
+              value: "PL"
             },
             {
-              name: 'PT-BR',
-              value: 'PT-BR'
+              name: "PT-BR",
+              value: "PT-BR"
             },
             {
-              name: 'PT-PT',
-              value: 'PT-PT'
+              name: "PT-PT",
+              value: "PT-PT"
             },
             {
-              name: 'RO',
-              value: 'RO'
+              name: "RO",
+              value: "RO"
             },
             {
-              name: 'RU',
-              value: 'RU'
+              name: "RU",
+              value: "RU"
             },
             {
-              name: 'SL',
-              value: 'SL'
+              name: "SL",
+              value: "SL"
             },
             {
-              name: 'SV',
-              value: 'SV'
+              name: "SV",
+              value: "SV"
             },
             {
-              name: 'TR',
-              value: 'TR'
+              name: "TR",
+              value: "TR"
             },
             {
-              name: 'UK',
-              value: 'UK'
+              name: "UK",
+              value: "UK"
             },
             {
-              name: 'ZH',
-              value: 'ZH'
+              name: "ZH",
+              value: "ZH"
             }
           ]
         },
         {
           type: 3,
-          name: 'sourcelang',
-          description: '翻訳する文の言語',
+          name: "sourcelang",
+          description: "翻訳する文の言語",
           choices: [
             {
-              name: 'JA',
-              value: 'JA'
+              name: "JA",
+              value: "JA"
             },
             {
-              name: 'EN',
-              value: 'EN'
+              name: "EN",
+              value: "EN"
             },
             {
-              name: 'ES',
-              value: 'ES'
+              name: "ES",
+              value: "ES"
             },
             {
-              name: 'BG',
-              value: 'BG'
+              name: "BG",
+              value: "BG"
             },
             {
-              name: 'CS',
-              value: 'CS'
+              name: "CS",
+              value: "CS"
             },
             {
-              name: 'DA',
-              value: 'DA'
+              name: "DA",
+              value: "DA"
             },
             {
-              name: 'DE',
-              value: 'DE'
+              name: "DE",
+              value: "DE"
             },
             {
-              name: 'EL',
-              value: 'EL'
+              name: "EL",
+              value: "EL"
             },
             {
-              name: 'ET',
-              value: 'ET'
+              name: "ET",
+              value: "ET"
             },
             {
-              name: 'FR',
-              value: 'FR'
+              name: "FR",
+              value: "FR"
             },
             {
-              name: 'ID',
-              value: 'ID'
+              name: "ID",
+              value: "ID"
             },
             {
-              name: 'IT',
-              value: 'IT'
+              name: "IT",
+              value: "IT"
             },
             {
-              name: 'LT',
-              value: 'LT'
+              name: "LT",
+              value: "LT"
             },
             {
-              name: 'LV',
-              value: 'LV'
+              name: "LV",
+              value: "LV"
             },
             {
-              name: 'NL',
-              value: 'NL'
+              name: "NL",
+              value: "NL"
             },
             {
-              name: 'PL',
-              value: 'PL'
+              name: "PL",
+              value: "PL"
             },
             {
-              name: 'PT',
-              value: 'PT'
+              name: "PT",
+              value: "PT"
             },
             {
-              name: 'RO',
-              value: 'RO'
+              name: "RO",
+              value: "RO"
             },
             {
-              name: 'RU',
-              value: 'RU'
+              name: "RU",
+              value: "RU"
             },
             {
-              name: 'SK',
-              value: 'SK'
+              name: "SK",
+              value: "SK"
             },
             {
-              name: 'SL',
-              value: 'SL'
+              name: "SL",
+              value: "SL"
             },
             {
-              name: 'SV',
-              value: 'SV'
+              name: "SV",
+              value: "SV"
             },
             {
-              name: 'TR',
-              value: 'TR'
+              name: "TR",
+              value: "TR"
             },
             {
-              name: 'UK',
-              value: 'UK'
+              name: "UK",
+              value: "UK"
             },
             {
-              name: 'ZH',
-              value: 'ZH'
+              name: "ZH",
+              value: "ZH"
             }
           ]
         }
       ]
     },
     { // today
-      name: 'today',
-      description: '今日の日付を表示する。'
+      name: "today",
+      description: "今日の日付を表示する。"
     },
     { // queue
-      name: 'queue',
-      description: 'キューを表示する',
+      name: "queue",
+      description: "キューを表示する",
       options: [
         {
           type: 4,
-          name: 'page',
-          description: 'ページ'
+          name: "page",
+          description: "ページ"
         }
       ]
     },
     { // skip
-      name: 'skip',
-      description: '再生中の曲か指定した曲数スキップする',
+      name: "skip",
+      description: "再生中の曲か指定した曲数スキップする",
       options: [
         {
           type: 4,
-          name: 'number',
-          description: 'スキップする曲数'
+          name: "number",
+          description: "スキップする曲数"
         }
       ]
     },
     { // nowp
-      name: 'nowp',
-      description: '再生中の曲の詳細を表示'
+      name: "nowp",
+      description: "再生中の曲の詳細を表示"
     },
     { // loop
-      name: 'loop',
-      description: '再生中の曲をループ',
+      name: "loop",
+      description: "再生中の曲をループ",
       options: [
         {
           type: 4,
-          name: 'mode',
-          description: 'track: 1曲だけ, queue: キューをループ, autoplay: おすすめの曲を勝手に追加し続ける(無限ループに陥りやすい), off: 解除',
+          name: "mode",
+          description: "track: 1曲だけ, queue: キューをループ, autoplay: おすすめの曲を勝手に追加し続ける(無限ループに陥りやすい), off: 解除",
           required: true,
           choices: [
             {
-              name: 'track',
+              name: "track",
               value: QueueRepeatMode.TRACK
             },
             {
-              name: 'queue',
+              name: "queue",
               value: QueueRepeatMode.QUEUE
             },
             {
-              name: 'autoplay',
+              name: "autoplay",
               value: QueueRepeatMode.AUTOPLAY
             },
             {
-              name: 'off',
+              name: "off",
               value: QueueRepeatMode.OFF
             }
           ]
@@ -545,42 +545,42 @@ client.once("ready", async () => {
       ]
     },
     { // remove
-      name: 'remove',
-      description: '指定したキュー内の曲を削除する。',
+      name: "remove",
+      description: "指定したキュー内の曲を削除する。",
       options: [
         {
           type: 4,
-          name: 'number',
-          description: '/queueでタイトルの左に表示された番号',
+          name: "number",
+          description: "/queueでタイトルの左に表示された番号",
           required: true
         }
       ]
     },
     { // history
-      name: 'songhistory',
-      description: 'VCに接続した時から今までに追加した曲を表示する。',
+      name: "songhistory",
+      description: "VCに接続した時から今までに追加した曲を表示する。",
       options: [
         {
           type: 4,
-          name: 'page',
-          description: 'ページ',
+          name: "page",
+          description: "ページ",
         }
       ]
     },
     { // riseki
-      name: 'riseki',
-      description: 'ニックネームに「(離席)」を追加する',
+      name: "riseki",
+      description: "ニックネームに「(離席)」を追加する",
       options: [
         {
           type: 3,
-          name: 'word',
-          description: '括弧内の文字をカスタム'
+          name: "word",
+          description: "括弧内の文字をカスタム"
         }
       ]
     },
     { // shuffle
-      name: 'shuffle',
-      description: 'キュー内をかき混ぜる'
+      name: "shuffle",
+      description: "キュー内をかき混ぜる"
     },
     { // songinfo
       name: "songinfo",
@@ -808,7 +808,7 @@ client.on("interactionCreate", async (interaction) => {
       const result = await ping.promise.probe("8.8.8.8");
       await interaction.reply({
         embeds: [{
-          description: '**ゆた鯖兼サポート**: https://discord.gg/cpSp6kRXM5\n\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。',
+          description: "**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
           color: 16748800,
           footer: {
             icon_url: `${adminicon}`,
@@ -827,16 +827,15 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.editReply(message);
     };
 
-    let queue;
-    if (interaction.commandName === 'play') {
-      if (interaction.guild === null) return await interaction.reply({ content: 'サーバー内でないと実行できません！', ephemeral: true });
-      if (interaction.guild.members.me.voice.channel === null && interaction.member.voice.channel === null) return await interaction.reply({ content: 'playコマンド\nvcに入れ', ephemeral: true });
+    if (interaction.commandName === "play") {
+      if (interaction.guild === null) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+      if (interaction.guild.members.me.voice.channel === null && interaction.member.voice.channel === null) return await interaction.reply({ content: "playコマンド\nvcに入れ", ephemeral: true });
       if (interaction.guild.members.me.voice.channel === null) { // undefined回避
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel.id).has(PermissionFlagsBits.Connect)) return interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
       };
 
       await interaction.deferReply(); // タイムアウト防止
-      const url = await interaction.options.getString('url');
+      const url = await interaction.options.getString("url");
       let vc = await interaction.options.getChannel("vc");
       vc = vc ? vc : interaction.member.voice.channel;
       const volume = await interaction.options.getInteger("vol");
@@ -853,6 +852,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const getqueue = discordplayer.queues.get(interaction.guild);
       const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${getqueue.size + track.tracks.length}曲` : "再生開始";
+      let queue;
 
       // https://github.com/Androz2091/discord-player/issues/1705
       try {
@@ -879,148 +879,76 @@ client.on("interactionCreate", async (interaction) => {
         return await interaction.followUp(`処理中にエラーが発生しました。\n${error}`);
       };
 
-      let embed;
-      let songlength;
-      if (track.playlist === null && track.tracks[0].durationMS === 0) {
-        songlength = 'ライブ配信';
-      } else if (track.playlist === null) {
-        const length = track.tracks[0].durationMS / 1000;
-        const hours = Math.floor(length / 3600);
-        const minutes = Math.floor((length % 3600) / 60);
-        const seconds = Math.floor((length % 3600) % 60);
-        if (hours !== 0) {
-          songlength = `${hours}時間${minutes}分${seconds}秒`;
-        } else if (minutes !== 0) {
-          songlength = `${minutes}分${seconds}秒`;
-        } else {
-          songlength = `${seconds}秒`;
-        };
-      };
+      let t; let description; let thumbnail;
 
-      if (track.playlist === null && !url.match('http')) {
-        let word;
-        if (url.length <= 15) {
-          word = url;
-        } else {
-          word = `${url.substring(0, 15)}...`;
-        };
-        const song = track.tracks[0];
-        embed = {
-          embeds: [{
-            title: song.title,
-            description: `**投稿者:** ${song.author}\n**長さ:** ${songlength}\n**検索ワード:** ${word}`,
-            thumbnail: {
-              url: song.thumbnail
-            },
-            url: song.url,
-            color: 16748800,
-            footer: {
-              text: queuenumber
-            }
-          }]
-        };
-      } else if (!track.playlist) {
-        const song = track.tracks[0];
-        embed = {
-          embeds: [{
-            title: song.title,
-            description: `**投稿者:** ${song.author}\n**長さ:** ${songlength}`,
-            thumbnail: {
-              url: song.thumbnail
-            },
-            url: song.url,
-            color: 16748800,
-            footer: {
-              text: queuenumber
-            }
-          }]
-        };
+      if (track.hasPlaylist()) {
+        t = track.playlist;
+        thumbnail = t.tracks[0].thumbnail;
+        description = `**合計時間:** ${t.durationFormatted}\n**曲数:** ${t.tracks.length}曲`;
       } else {
-        const list = track.playlist;
-        let playlisttime;
-        let length;
-        if (list.tracks.length === 1) {
-          length = list.tracks[0].durationMS / 1000;
-        } else {
-          const trackslengthms = list.tracks.map((m) => {
-            return m.durationMS;
-          });
-          const reducer = (sum, currentValue) => sum + currentValue;
-          length = trackslengthms.reduce(reducer) / 1000;
-        };
-        const hours = Math.floor(length / 3600);
-        const minutes = Math.floor((length % 3600) / 60);
-        const seconds = Math.floor((length % 3600) % 60);
-        if (hours !== 0) {
-          playlisttime = `${hours}時間${minutes}分${seconds}秒`
-        } else if (minutes !== 0) {
-          playlisttime = `${minutes}分${seconds}秒`
-        } else {
-          playlisttime = `${seconds}秒`
-        };
-
-        embed = {
-          embeds: [{
-            title: list.title,
-            description: `**合計時間:** ${playlisttime}\n**曲数:** ${list.tracks.length}曲`,
-            thumbnail: {
-              url: list.tracks[0].thumbnail
-            },
-            url: list.url,
-            color: 16748800,
-            footer: {
-              text: queuenumber
-            }
-          }]
-        };
+        t = track.tracks[0];
+        thumbnail = t.thumbnail;
+        description = `**投稿者:** ${t.author}\n**長さ:** ${t.duration}`;
       };
-
+      if (!url.match("http")) description = `${description}\n**検索ワード:** ${url.substring(0, 15)}${url.length > 15 ? "..." : ""}`;
+      
       if (!getqueue) queue.queue.history.push(queue.queue.currentTrack);
-      await interaction.followUp(embed);
+      await interaction.followUp({
+        embeds: [
+          {
+            title: t.title,
+            description: description,
+            thumbnail: { url: thumbnail },
+            footer: { text: queuenumber },
+            url: t.url,
+            color: 16748800
+          }
+        ]
+      });
     };
 
-    if (interaction.commandName === 'leave') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+    if (interaction.commandName === "leave") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       await interaction.deferReply();
 
       queue.delete();
-      await interaction.followUp('またね！');
+      await interaction.followUp("またね！");
       await wait(3); // そういう演出
       await interaction.deleteReply();
     };
 
-    if (interaction.commandName === 'pause') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+    if (interaction.commandName === "pause") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
       let paused = queue.node.setPaused(true);
-      paused ? await interaction.reply('一時停止したよ') : await interaction.reply({ content: '既に一時停止中だよ！', ephemeral: true }); // deferReply/followUpをするとephemeralが使えないらしい
+      paused ? await interaction.reply("一時停止したよ") : await interaction.reply({ content: "既に一時停止中だよ！", ephemeral: true }); // deferReply/followUpをするとephemeralが使えないらしい
     };
 
-    if (interaction.commandName === 'unpause') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+    if (interaction.commandName === "unpause") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
       let paused = queue.node.setPaused(false);
-      paused ? await interaction.reply('一時停止を解除したよ') : await interaction.reply({ content: '一時停止がされてなかったよ', ephemeral: true });
+      paused ? await interaction.reply("一時停止を解除したよ") : await interaction.reply({ content: "一時停止がされてなかったよ", ephemeral: true });
     };
 
-    if (interaction.commandName === 'clear') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+    if (interaction.commandName === "clear") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
-      if (queue.tracks.data.length === 0) return await interaction.reply({ content: 'キューの中は既に再生中の曲だけだよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      if (queue.tracks.data.length === 0) return await interaction.reply({ content: "キューの中は既に再生中の曲だけだよ！", ephemeral: true });
       const losttracks = queue.tracks.data.length - 1;
 
       await interaction.deferReply(); // 100万曲追加する輩がいるかもしれないのでタイムアウト防止
@@ -1030,24 +958,24 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(`${losttracks}曲がダイソンの手によってまっさらになったよ`);
     };
 
-    if (interaction.commandName === 'queue') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+    if (interaction.commandName === "queue") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
-      let page = interaction.options.getInteger('page');
+      let page = interaction.options.getInteger("page");
       if (page === null) { page = 1; };
       const maxpages = (Math.floor(queue.tracks.data.length / 10)) + 1;
-      if (page < 1 || page > maxpages) return await interaction.reply({ content: 'ページ数があたおか', ephemeral: true }); // あたおかな数字入れられたらエラー吐くかもしれないので念のため
+      if (page < 1 || page > maxpages) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true }); // あたおかな数字入れられたらエラー吐くかもしれないので念のため
 
       await interaction.deferReply(); // タイムアウト防止
 
       const pageStart = 10 * (page - 1); // 埋め込み作り☆
       const pageEnd = pageStart + 10;
       const tracks = queue.tracks.data.slice(pageStart, pageEnd).map((m, i) => { // ですくりぷしょん
-        return `**${i + pageStart + 1}.** (${m.duration === '0:00' ? 'ライブ' : m.duration}) [${m.title.length <= 20 ? m.title : `${m.title.substring(0, 20)}...`}](${m.url.replace('https://www.youtube.com/watch?v=', 'https://youtu.be/')})`
+        return `**${i + pageStart + 1}.** (${m.duration === "0:00" ? "ライブ" : m.duration}) [${m.title.length <= 20 ? m.title : `${m.title.substring(0, 20)}...`}](${m.url})`
       });
 
       let queuelength;
@@ -1055,21 +983,21 @@ client.on("interactionCreate", async (interaction) => {
       if (length === 0) {
         queuelength = "ライブ配信のみ";
       } else {
-        const hours = Math.floor(length / 3600);
-        const minutes = Math.floor((length % 3600) / 60);
-        const seconds = Math.floor((length % 3600) % 60);
-        if (hours !== 0) {
-          queuelength = `キュー内合計: ${hours}時間${minutes}分${seconds}秒`;
-        } else if (minutes !== 0) {
-          queuelength = `キュー内合計: ${minutes}分${seconds}秒`;
+        const hours = ("00" + Math.floor(length / 3600)).slice(-2)
+        const minutes = ("00" + Math.floor((length % 3600) / 60)).slice(-2)
+        const seconds = ("00" + Math.floor((length % 3600) % 60)).slice(-2)
+        if (hours !== "00") {
+          queuelength = `キュー内合計: ${hours}:${minutes}:${seconds}`;
+        } else if (minutes !== "00") {
+          queuelength = `キュー内合計: ${minutes}:${seconds}:`;
         } else {
-          queuelength = `キュー内合計: ${seconds}秒`;
+          queuelength = `キュー内合計: 00:${seconds}`;
         };
       };
 
       let streamtime; // 埋め込みの文章
       if (queue.currentTrack.durationMS === 0) {
-        streamtime = `ライブ`;
+        streamtime = "ライブ";
       } else {
         const length = (queue.node.streamTime / 1000);
         const minutes = Math.floor(length / 60);
@@ -1081,7 +1009,7 @@ client.on("interactionCreate", async (interaction) => {
       return await interaction.followUp({
         embeds: [{
           title: queuelength,
-          description: `**再生中:** (${streamtime}) [${queue.currentTrack.title.length <= 20 ? queue.currentTrack.title : `${queue.currentTrack.title.substring(0, 20)}...`}](${queue.currentTrack.url})\n\n${tracks.join('\n')}${queue.tracks.data.length > pageEnd ? `\n**...**\n**他:** ${queue.tracks.data.length - pageEnd}曲` : ``}`, // 表示したキューの後にいくつかの曲があったらその曲数を表示
+          description: `**再生中:** (${streamtime}) [${queue.currentTrack.title.length <= 20 ? queue.currentTrack.title : `${queue.currentTrack.title.substring(0, 20)}...`}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.tracks.data.length > pageEnd ? `\n**...**\n**他:** ${queue.tracks.data.length - pageEnd}曲` : ``}`, // 表示したキューの後にいくつかの曲があったらその曲数を表示
           thumbnail: {
             url: queue.currentTrack.thumbnail
           },
@@ -1093,200 +1021,77 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === 'skip') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+    if (interaction.commandName === "skip") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
-      let number = interaction.options.getInteger('number');
-      if (number !== null && number < 1 || number > queue.tracks.data.length) return await interaction.reply({ content: '指定した数字があたおか', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      let number = interaction.options.getInteger("number");
+      if (number !== null && number < 1 || number > queue.tracks.data.length) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
       await interaction.deferReply();
 
-      if (queue.repeatMode === 3 && !queue.tracks.data[0]) { // loopがAUTOPLAY(無限追加のやつ)で次に再生する曲が無い時
-
+      let t; let description;
+      if (queue.repeatMode === 3 && !queue.tracks.data[0]) {
         queue.node.skip();
-        await wait(5); // 検索待ち
+        await wait(5);
 
-        let title; // 次の曲のタイトル
-        if (queue.currentTrack.title.length <= 20) {
-          title = queue.currentTrack.title;
-        } else {
-          title = `${queue.currentTrack.title.substring(0, 20)}...`
-        };
-
-        let replacedurl; // youtu.beに置き換えた後のURL
-        let songlength; // 曲の長さ(a時間b分c秒)
-        if (queue.currentTrack.durationMS === 0) {
-          songlength = 'ライブ配信';
-        } else {
-          const length = queue.currentTrack.durationMS / 1000;
-          const hours = Math.floor(length / 3600);
-          const minutes = Math.floor((length % 3600) / 60);
-          const seconds = Math.floor((length % 3600) % 60);
-          if (hours !== 0) {
-            songlength = `${hours}時間${minutes}分${seconds}秒`;
-          } else if (minutes !== 0) {
-            songlength = `${minutes}分${seconds}秒`;
-          } else {
-            songlength = `${seconds}秒`;
-          };
-          replacedurl = queue.currentTrack.url.replace('https://www.youtube.com/watch?v=', 'https://youtu.be/');
-        };
-
-        await interaction.followUp({
-          embeds: [{
-            title: queue.currentTrack.title,
-            description: `**投稿者:** ${queue.currentTrack.author}\n**長さ:** ${songlength}`,
-            thumbnail: {
-              url: queue.currentTrack.thumbnail
-            },
-            url: replacedurl,
-            color: 16748800
-          }]
-        });
-
-      } else if (!queue.tracks.data[0]) { // 次に再生する曲が無い時
-
-        await interaction.followUp('キューが空になったよ！またね！');
+        t = queue.currentTrack;
+      } else if (!queue.tracks.data[0]) {
+        await interaction.followUp("キューが空になったよ！またね！");
         await wait(1); // そういう演出
         queue.delete();
         await wait(2);
         await interaction.deleteReply();
-
-      } else if (number !== null) { // スキップ先の曲が指定されてて次の曲があった時
+        return;
+      } else if (number !== null) {
         number = number - 1;
-        let title;
-        if (queue.tracks.data[number].title.length <= 20) {
-          title = queue.tracks.data[number].title
-        } else {
-          title = `${queue.tracks.data[number].title.substring(0, 20)}...`
-        };
-
-        let queuelength;
-        if (queue.tracks.data.length === 1) {
-          queuelength = "";
-        } else {
-          queuelength = `**残り:** ${queue.tracks.data.length - (number + 1)}曲 / `;
-        };
-
-        let time;
-        let length;
-        if (queue.tracks.data.length === 1) {
-          length = queue.tracks.data[number].durationMS / 1000; // 負荷軽減(意味ない)
-        } else {
-          const trackslengthms = queue.tracks.data.slice(number, queue.tracks.data.length).map((m) => {
-            return m.durationMS;
-          });
-          const reducer = (sum, currentValue) => sum + currentValue;
-          length = trackslengthms.reduce(reducer) / 1000;
-        };
-        const hours = Math.floor(length / 3600);
-        const minutes = Math.floor((length % 3600) / 60);
-        const seconds = Math.floor((length % 3600) % 60);
-        if (hours !== 0) {
-          time = `${hours}時間${minutes}分${seconds}秒`
-        } else if (minutes !== 0) {
-          time = `${minutes}分${seconds}秒`
-        } else {
-          time = `${seconds}秒`
-        };
-        if (time === '0秒') {
-          time = '';
-        };
-
-        await interaction.followUp({
-          embeds: [{
-            title: `${queuelength}${time}`,
-            description: `**再生開始:** [${title}](${queue.tracks.data[number].url}) (${queue.tracks.data[number].duration})`,
-            thumbnail: {
-              url: queue.tracks.data[number].thumbnail
-            },
-            color: 16748800,
-            footer: {
-              text: `${number}曲をスキップ`
-            }
-          }]
-        });
+        t = queue.tracks.data[number];
         queue.node.skipTo(number);
-      } else { // あって番号指定が無かった時
-
-        let title;
-        if (queue.tracks.data[0].title.length <= 20) {
-          title = queue.tracks.data[0].title
-        } else {
-          title = `${queue.tracks.data[0].title.substring(0, 20)}...`
-        };
-
-        let queuelength;
-        if (queue.tracks.data.length === 1) {
-          queuelength = "";
-        } else {
-          queuelength = `**残り:** ${queue.tracks.data.length - 1}曲`;
-        };
-
-        let time;
-        let length;
-        if (queue.tracks.data.length === 1) {
-          length = queue.tracks.data[0].durationMS / 1000; // 負荷軽減(意味ない)
-        } else {
-          const trackslengthms = queue.tracks.data.map((m) => {
-            return m.durationMS;
-          });
-          const reducer = (sum, currentValue) => sum + currentValue;
-          length = trackslengthms.reduce(reducer) / 1000;
-        };
-        const hours = Math.floor(length / 3600);
-        const minutes = Math.floor((length % 3600) / 60);
-        const seconds = Math.floor((length % 3600) % 60);
-        if (hours !== 0) {
-          time = `${hours}時間${minutes}分${seconds}秒`
-        } else if (minutes !== 0) {
-          time = `${minutes}分${seconds}秒`
-        } else {
-          time = `${seconds}秒`
-        };
-        if (time === 0) time = "";
-
-        await interaction.followUp({
-          embeds: [{
-            title: `${queuelength}${time}`,
-            description: `**再生開始:** [${title}](${queue.tracks.data[0].url}) (${queue.tracks.data[0].duration === "0:00" ? "ライブ" : queue.tracks.data[0].duration})`,
-            thumbnail: {
-              url: queue.tracks.data[0].thumbnail
-            },
-            color: 16748800,
-          }]
-        });
+      } else {
+        t = queue.tracks.data[0];
         queue.node.skip();
       };
+
+      let embed = {
+        embeds: [
+          {
+            description: `**再生開始:** [${t.title.substring(0, 20)}${t.title > 20 ? "..." : ""}](${t.url}) (${t.duration})`,
+            color: 16748800,
+            thumbnail: { url: t.thumbnail}
+          }
+        ]
+      };
+      if (queue.tracks.data.length !== 0) embed.embeds[0].title = `**残り:** ${queue.durationFormatted} / ${queue.tracks.data.length}曲`;
+      if (number !== null) embed.embeds[0].description = `${embed.embeds[0].description}\n${number + 1}曲スキップしました。`;
+      await interaction.followUp(embed);
     };
 
-    if (interaction.commandName === 'nowp' || interaction.commandName === 'songinfo') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+    if (interaction.commandName === "nowp" || interaction.commandName === "songinfo") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let num = interaction.options.getInteger("number");
       if (num < 0 || num > queue.tracks.data.length) return await interaction.reply({ content: "数字があたおか", ephemeral: true });
       const vol = queue.node.volume;
 
       let embed;
-      if (interaction.commandName === 'nowp' || num === 0 || num === null) {
+      if (interaction.commandName === "nowp" || num === 0 || num === null) {
         await interaction.deferReply();
         const progress = queue.node.createProgressBar(); // 埋め込み作り(discordplayer神)
         const perc = queue.node.getTimestamp();
         let time;
         if (perc.progress === Infinity) {
-          time = 'ライブ配信';
+          time = "ライブ配信";
         } else {
           time = progress
         };
         embed = {
           embeds: [{
             title: queue.currentTrack.title,
-            url: queue.currentTrack.url.replace('https://www.youtube.com/watch?v=', 'https://youtu.be/'),
+            url: queue.currentTrack.url.replace("https://www.youtube.com/watch?v=", "https://youtu.be/"),
             thumbnail: {
               url: queue.currentTrack.thumbnail
             },
@@ -1321,7 +1126,7 @@ client.on("interactionCreate", async (interaction) => {
         embed = {
           embeds: [{
             title: queue.tracks.data[num].title,
-            url: queue.tracks.data[num].url.replace('https://www.youtube.com/watch?v=', 'https://youtu.be/'),
+            url: queue.tracks.data[num].url.replace("https://www.youtube.com/watch?v=", "https://youtu.be/"),
             thumbnail: {
               url: queue.tracks.data[num].thumbnail
             },
@@ -1337,54 +1142,54 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(embed);
     };
 
-    if (interaction.commandName === 'loop') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+    if (interaction.commandName === "loop") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
-      const mode = interaction.options.get('mode');
+      const mode = interaction.options.get("mode");
       if (queue.repeatMode === mode.value) return await interaction.reply({ content: "既にそのモードです！", ephemeral: true });
       queue.setRepeatMode(mode.value);
       let sendmode;
 
       if (mode.value === QueueRepeatMode.TRACK) {
-        sendmode = 'リピート対象を**1曲**に変えたよ！';
+        sendmode = "リピート対象を**1曲**に変えたよ！";
       } else if (mode.value === QueueRepeatMode.QUEUE) {
-        sendmode = 'リピート対象を**キュー**に変えたよ！';
+        sendmode = "リピート対象を**キュー**に変えたよ！";
       } else if (mode.value === QueueRepeatMode.AUTOPLAY) {
-        sendmode = 'リピートをautoplayに設定したよ！';
+        sendmode = "リピートをautoplayに設定したよ！";
       } else if (mode.value === QueueRepeatMode.OFF) {
-        sendmode = 'リピートを解除したよ！';
+        sendmode = "リピートを解除したよ！";
       };
       await interaction.reply(sendmode);
     };
 
-    if (interaction.commandName === 'remove') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+    if (interaction.commandName === "remove") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
-      const number = (interaction.options.getInteger('number'));
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const number = (interaction.options.getInteger("number"));
 
-      if (number <= 0 || number > queue.tracks.data.length) return await interaction.reply({ content: '指定した番号の曲は存在しません。', ephemeral: true });
+      if (number <= 0 || number > queue.tracks.data.length) return await interaction.reply({ content: "指定した番号の曲は存在しません。", ephemeral: true });
 
       await interaction.deferReply();
       await interaction.followUp(`**${number}.** ${queue.tracks.data[number - 1].title}を削除したよ！`);
       queue.tracks.removeOne(number - 1);
     };
 
-    if (interaction.commandName === 'songhistory') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+    if (interaction.commandName === "songhistory") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
-      let page = interaction.options.getInteger('page');
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      let page = interaction.options.getInteger("page");
       if (page === null) { page = 1 };
-      if (page < 1 || page > ((Math.floor(queue.history.tracks.data.length / 10)) + 1)) return await interaction.reply({ content: 'ページ数があたおか', ephemeral: true });
+      if (page < 1 || page > ((Math.floor(queue.history.tracks.data.length / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
       if (queue.history.tracks.data.length === 0) return await interaction.reply({ content: "履歴はまだ保存されていません", ephemeral: true });
 
       await interaction.deferReply();
@@ -1398,12 +1203,12 @@ client.on("interactionCreate", async (interaction) => {
           title = `${m.title.substring(0, 20)}...`;
         };
         let duration;
-        if (m.duration === '0:00') {
-          duration = 'ライブ';
+        if (m.duration === "0:00") {
+          duration = "ライブ";
         } else {
           duration = m.duration;
         };
-        return `**${i + (pageEnd * -1)}.** (${duration}) [${title}](${m.url.replace('https://www.youtube.com/watch?v=', 'https://youtu.be/')})`;
+        return `**${i + (pageEnd * -1)}.** (${duration}) [${title}](${m.url.replace("https://www.youtube.com/watch?v=", "https://youtu.be/")})`;
       });
 
       let currenttitle; // 再生中のタイトル
@@ -1448,15 +1253,15 @@ client.on("interactionCreate", async (interaction) => {
       } else {
         trackslength = `${seconds}秒`
       };
-      if (trackslength === '0秒') {
-        trackslength = 'ライブ';
+      if (trackslength === "0秒") {
+        trackslength = "ライブ";
       };
 
       await interaction.followUp({
         embeds: [
           {
             title: `今までに${queue.history.tracks.data.length}曲 / ${trackslength}再生したよ！`,
-            description: `**再生中:** (${streamtime}) [${currenttitle}](${queue.currentTrack.url})\n\n${tracks.join('\n')}${queue.history.tracks.data.length > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.tracks.data.length + pageStart}曲` : ``}`,
+            description: `**再生中:** (${streamtime}) [${currenttitle}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.tracks.data.length > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.tracks.data.length + pageStart}曲` : ``}`,
             color: 16748800,
             thumbnail: {
               url: queue.currentTrack.thumbnail
@@ -1469,13 +1274,13 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === 'shuffle') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+    if (interaction.commandName === "shuffle") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
-      if (queue.tracks.data.length === 1) return await interaction.reply({ content: 'キュー内は1曲しか無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      if (queue.tracks.data.length === 1) return await interaction.reply({ content: "キュー内は1曲しか無いよ！", ephemeral: true });
 
       await interaction.deferReply();
       queue.tracks.shuffle();
@@ -1483,11 +1288,11 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.commandName === "setvolume") {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       queue = discordplayer.queues.get(interaction.guild);
-      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true });
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: '再生中の曲が無いよ！', ephemeral: true });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let vol = interaction.options.getInteger("vol");
       if (vol < 1) vol = 1;
       if (vol > 20 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 20;
@@ -1497,8 +1302,8 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : "なんかセットできませんでした。"}`);
     };
 
-    if (interaction.commandName === 'userinfo') {
-      const id = await interaction.options.getString('id');
+    if (interaction.commandName === "userinfo") {
+      const id = await interaction.options.getString("id");
       const userinfo = await client.users.fetch(id).catch(async e => await interaction.reply({ content: "指定したIDはユーザーではありません。", ephemeral: true }));
       if (userinfo.interaction) return;
       const avatar = `${userinfo.avatar ? `https://cdn.discordapp.com/avatars/${userinfo.id}/${userinfo.avatar}.png` : userinfo.defaultAvatarURL}?size=4096`;
@@ -1513,20 +1318,20 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === 'role') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
-      const targetuser = interaction.options.getMember('user');
-      const targetrole = interaction.options.get('role');
-      if (interaction.options.getSubcommandGroup() === 'user') {
+    if (interaction.commandName === "role") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const targetuser = interaction.options.getMember("user");
+      const targetrole = interaction.options.get("role");
+      if (interaction.options.getSubcommandGroup() === "user") {
         if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-          if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply('管理者権限所持者のみ実行可能です。');
+          if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
           try {
-            if (interaction.options.getSubcommand() === 'add') {
+            if (interaction.options.getSubcommand() === "add") {
               targetuser.roles.add(targetrole.role);
               await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
             };
 
-            if (interaction.options.getSubcommand() === 'remove') {
+            if (interaction.options.getSubcommand() === "remove") {
               targetuser.roles.remove(targetrole.role);
               await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
             };
@@ -1537,7 +1342,7 @@ client.on("interactionCreate", async (interaction) => {
           return interaction.reply({content: "ロールを管理できる権限が無いよ！", ephemeral: true});
         };
 
-        if (interaction.options.getSubcommand() === 'list') {
+        if (interaction.options.getSubcommand() === "list") {
           const guildroles = interaction.guild.roles.cache.size
           if (targetuser.roles.highest.rawPosition === 0) {
             await interaction.reply("何も...無いじゃないか...ッ！！！");
@@ -1561,10 +1366,10 @@ client.on("interactionCreate", async (interaction) => {
         }
       };
 
-      if (interaction.options.getSubcommandGroup() === 'all') {
+      if (interaction.options.getSubcommandGroup() === "all") {
         if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-          if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply('管理者権限所持者のみ実行可能です。');
-          if (interaction.options.getSubcommand() === 'add') {
+          if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
+          if (interaction.options.getSubcommand() === "add") {
             const guildmembers = await interaction.guild.members.fetch();
             await interaction.reply(`${targetrole.role.name}を${interaction.guild.memberCount}人に付与中`);
             await Promise.all(guildmembers.map(member => member.roles.add(targetrole.role))).catch(async e => await interaction.editReply("権限が変更されました。").catch(async e => await interaction.channel.send("権限が変更されました。").catch(async e => await interaction.user.send("権限が変更されました。").catch(e => { return; }))));
@@ -1572,7 +1377,7 @@ client.on("interactionCreate", async (interaction) => {
             await interaction.user.send(`ロールの付与が完了しました。`).catch(e => { return; });
           };
 
-          if (interaction.options.getSubcommand() === 'remove') {
+          if (interaction.options.getSubcommand() === "remove") {
             const guildmembers = await interaction.guild.members.fetch();
             interaction.reply(`${targetrole.role.name}を${interaction.guild.memberCount}人から奪取中`);
             await Promise.all(guildmembers.map(member => member.roles.remove(targetrole.role))).catch(async e => await interaction.editReply("権限が変更されました。").catch(async e => await interaction.channel.send("権限が変更されました。").catch(async e => await interaction.user.send("権限が変更されました。").catch(e => { return; }))));
@@ -1585,16 +1390,16 @@ client.on("interactionCreate", async (interaction) => {
       };
     };
 
-    if (interaction.commandName === 'send') {
-      let title = interaction.options.getString('title')
-      let url = interaction.options.getString('url')
-      let description = interaction.options.getString('description')
-      let color = interaction.options.getString('color')
-      let thumbnail = interaction.options.getString('thumbnail')
+    if (interaction.commandName === "send") {
+      let title = interaction.options.getString("title")
+      let url = interaction.options.getString("url")
+      let description = interaction.options.getString("description")
+      let color = interaction.options.getString("color")
+      let thumbnail = interaction.options.getString("thumbnail")
 
-      const onoff = interaction.options.get('embedonoff')
-      if (onoff.value === 'true') {
-        if (!description) return await interaction.reply('説明文はゼッタイ');
+      const onoff = interaction.options.get("embedonoff")
+      if (onoff.value === "true") {
+        if (!description) return await interaction.reply("説明文はゼッタイ");
         await interaction.reply({
           embeds: [{
             title: `${title}`,
@@ -1609,32 +1414,32 @@ client.on("interactionCreate", async (interaction) => {
             },
           }]
         });
-      } else if (onoff.value === 'false') {
+      } else if (onoff.value === "false") {
         await interaction.reply(`${description}`);
       }
     };
 
-    if (interaction.commandName === 'siranami') {
-      await interaction.reply('https://www.youtube.com/@ShiranamIroriCH');
+    if (interaction.commandName === "siranami") {
+      await interaction.reply("https://www.youtube.com/@ShiranamIroriCH");
     };
 
-    if (interaction.commandName === 'yutamaruattack') {
-      if (interaction.guildId !== "610020293208965151") return await interaction.reply('ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5');
-      await interaction.reply('多分できた');
+    if (interaction.commandName === "yutamaruattack") {
+      if (interaction.guildId !== "610020293208965151") return await interaction.reply("ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5");
+      await interaction.reply("多分できた");
       client.channels.cache.get("822410173850320916").send(`<@610018861319716866> Hey! ${interaction.member.displayName}がアタックしたよ！`);
     };
 
-    if (interaction.commandName === 'yutashistory') {
-      if (interaction.guildId !== "610020293208965151") return await interaction.reply('ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5');
-      await interaction.reply('http://simp.ly/p/jNclcr')
+    if (interaction.commandName === "yutashistory") {
+      if (interaction.guildId !== "610020293208965151") return await interaction.reply("ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5");
+      await interaction.reply("http://simp.ly/p/jNclcr")
     };
 
-    if (interaction.commandName === 'ggrks') {
+    if (interaction.commandName === "ggrks") {
       await interaction.reply("https://google.com");
     };
 
-    if (interaction.commandName === 'getthumbnail') {
-      const url = interaction.options.getString('url');
+    if (interaction.commandName === "getthumbnail") {
+      const url = interaction.options.getString("url");
       const track = await discordplayer.search(url, {
         searchEngine: QueryType.AUTO
       });
@@ -1655,11 +1460,11 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === 'trans') {
+    if (interaction.commandName === "trans") {
       await interaction.deferReply();
       let outtext;
-      const sourcetext = interaction.options.getString('sourcetext');
-      const outlang = interaction.options.getString('outlang');
+      const sourcetext = interaction.options.getString("sourcetext");
+      const outlang = interaction.options.getString("outlang");
 
       return translate({
         free_api: true,
@@ -1683,7 +1488,7 @@ client.on("interactionCreate", async (interaction) => {
         });
     };
 
-    if (interaction.commandName === 'today') {
+    if (interaction.commandName === "today") {
       const dt = new Date();
       const y = dt.getFullYear();
       const m = dt.getMonth();
@@ -1694,7 +1499,7 @@ client.on("interactionCreate", async (interaction) => {
       const msec = dt.getMilliseconds();
       const weekItems = ["日", "月", "火", "水", "木", "金", "土"];
       const dayOfWeek = weekItems[dt.getDay()];
-      const wareki = dt.toLocaleDateString("ja-JP-u-ca-japanese", { year: 'numeric' });
+      const wareki = dt.toLocaleDateString("ja-JP-u-ca-japanese", { year: "numeric" });
       const mprog = Math.floor(dt.getDate() / (new Date(y, (m + 1), 0).getDate()) * 100);
       const drem = (new Date(y, (m + 1), 0).getDate()) - dt.getDate();
       const dprog = Math.floor((dt.getTime() - (new Date(y, m, d).getTime())) / (24 * 60 * 60 * 1000) * 100);
@@ -1704,20 +1509,20 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(`${y}年(${wareki})${("00" + (m + 1)).slice(-2)}月${("00" + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`);
     };
 
-    if (interaction.commandName === 'riseki') {
-      if (interaction.guild === null) return await interaction.reply('サーバー内でないと実行できません！');
+    if (interaction.commandName === "riseki") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageNicknames) || !interaction.guild.members.me.permissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("ニックネームを管理できる権限が無いよ！");
-      let word = await interaction.options.getString('word');
-      if (!word) { word = '離席'; };
+      let word = await interaction.options.getString("word");
+      if (!word) { word = "離席"; };
       try {
         await interaction.member.setNickname(`${interaction.member.displayName} (${word})`);
         await interaction.reply({ content: `${word}に設定しました`, ephemeral: true });
       } catch (e) {
-        await interaction.reply({ content: '君の権限高すぎるよ！', ephemeral: true });
+        await interaction.reply({ content: "君の権限高すぎるよ！", ephemeral: true });
       };
     };
 
-    if (interaction.commandName === 'memberinfo') {
+    if (interaction.commandName === "memberinfo") {
       const member = interaction.options.getMember("member");
       console.log(member);
       if (!member) return await interaction.reply({ content: "例外のエラーが発生しました。", ephemeral: true });
@@ -1910,9 +1715,9 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-    if (interaction.commandName === 'test') {
-      if (interaction.user.id !== "606093171151208448") return await interaction.reply('管理者及び開発者のみ実行可能です。');
-      let text1 = interaction.options.getString('text1');
+    if (interaction.commandName === "test") {
+      if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
+      let text1 = interaction.options.getString("text1");
       const result = await fetch.fetch(`https://discord.com/api/users/${text1}`, {
         method: "GET",
         headers: {
@@ -1921,7 +1726,7 @@ client.on("interactionCreate", async (interaction) => {
         json: true
       });
       console.log(await result.json());
-      await interaction.user.send('てすとこんぷりーてっど！');
+      await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
     if (e == DiscordAPIError[10008]) return;
