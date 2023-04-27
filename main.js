@@ -808,7 +808,7 @@ client.on("interactionCreate", async (interaction) => {
       const result = await ping.promise.probe("8.8.8.8");
       await interaction.reply({
         embeds: [{
-          description: "**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
+          description: "**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
           color: 16748800,
           footer: {
             icon_url: `${adminicon}`,
@@ -952,9 +952,10 @@ client.on("interactionCreate", async (interaction) => {
       const losttracks = queue.tracks.data.length - 1;
 
       await interaction.deferReply(); // 100万曲追加する輩がいるかもしれないのでタイムアウト防止
-      do {
-        queue.tracks.removeOne(0);
-      } while (queue.tracks.data.length !== 0); // clear()だと/playで追加すると再生中の曲が途切れてうんともすんとも言わなくなるので対策として
+      queue.tracks.clear();
+      // do {
+      //   queue.tracks.remove();
+      // } while (queue.tracks.data.length !== 0); // clear()だと/playで追加すると再生中の曲が途切れてうんともすんとも言わなくなるので対策として
       await interaction.followUp(`${losttracks}曲がダイソンの手によってまっさらになったよ`);
     };
 
@@ -1031,7 +1032,7 @@ client.on("interactionCreate", async (interaction) => {
       if (number !== null && number < 1 || number > queue.tracks.data.length) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
       await interaction.deferReply();
 
-      let t; let description;
+      let t;
       if (queue.repeatMode === 3 && !queue.tracks.data[0]) {
         queue.node.skip();
         await wait(5);
@@ -1056,7 +1057,7 @@ client.on("interactionCreate", async (interaction) => {
       let embed = {
         embeds: [
           {
-            description: `**再生開始:** [${t.title.substring(0, 20)}${t.title > 20 ? "..." : ""}](${t.url}) (${t.duration})`,
+            description: `**再生開始:** [${t.title.substring(0, 20)}${t.title.length > 20 ? "..." : ""}](${t.url}) (${t.duration})`,
             color: 16748800,
             thumbnail: { url: t.thumbnail}
           }
@@ -1077,69 +1078,33 @@ client.on("interactionCreate", async (interaction) => {
       if (num < 0 || num > queue.tracks.data.length) return await interaction.reply({ content: "数字があたおか", ephemeral: true });
       const vol = queue.node.volume;
 
-      let embed;
+      let t; let time;
       if (interaction.commandName === "nowp" || num === 0 || num === null) {
-        await interaction.deferReply();
+        t = queue.currentTrack;
         const progress = queue.node.createProgressBar(); // 埋め込み作り(discordplayer神)
-        const perc = queue.node.getTimestamp();
-        let time;
-        if (perc.progress === Infinity) {
-          time = "ライブ配信";
+        if (queue.node.getTimestamp().progress === Infinity) {
+          time = "**ライブ配信**";
         } else {
-          time = progress
-        };
-        embed = {
-          embeds: [{
-            title: queue.currentTrack.title,
-            url: queue.currentTrack.url.replace("https://www.youtube.com/watch?v=", "https://youtu.be/"),
-            thumbnail: {
-              url: queue.currentTrack.thumbnail
-            },
-            description: `**投稿者:** ${queue.currentTrack.author}\n**リクエスト:** ${queue.currentTrack.requestedBy.username}\n\n**${time}**`,
-            color: 16748800,
-            footer: {
-              text: `今までに${queue.history.size}曲再生しました。｜ボリューム: ${vol}%`
-            }
-          }]
+          time = `\n\n**${progress}**`
         };
       } else {
-        await interaction.deferReply();
         num = num - 1;
-
-        let time;
-        if (queue.tracks.data[num].durationMS === 0) {
-          time = "ライブ中";
-        } else {
-          const length = queue.tracks.data[num].durationMS / 1000;
-          const hours = Math.floor(length / 3600);
-          const minutes = Math.floor(((length % 3600)) / 60);
-          const seconds = Math.floor((length % 3600) % 60);
-          if (hours != 0) {
-            time = `${hours}時間${minutes}分${seconds}秒`;
-          } else if (minutes != 0) {
-            time = `${minutes}分${seconds}秒`;
-          } else {
-            time = `${seconds}秒`;
-          };
-        };
-
-        embed = {
-          embeds: [{
-            title: queue.tracks.data[num].title,
-            url: queue.tracks.data[num].url.replace("https://www.youtube.com/watch?v=", "https://youtu.be/"),
-            thumbnail: {
-              url: queue.tracks.data[num].thumbnail
-            },
-            description: `**投稿者:** ${queue.tracks.data[num].author}\n**リクエスト:** ${queue.tracks.data[num].requestedBy.username}\n**長さ:**${time}`,
-            color: 16748800,
-            footer: {
-              text: `今までに${queue.history.size}曲再生しました。｜ボリューム: ${vol}%`
-            }
-          }]
-        };
+        t = queue.tracks.data[num];
+        time = `\n**長さ:** ${t.duration}`;
       };
 
-      await interaction.followUp(embed);
+      await interaction.reply({
+        embeds: [
+          {
+            title: t.title,
+            url: t.url,
+            thumbnail: { url: t.thumbnail },
+            description: `**投稿者:** ${t.author}\n**リクエスト:** ${t.requestedBy.username}${time}`,
+            color: 16748800,
+            footer: { text: `今までに${queue.history.getSize()}曲再生しました。｜ボリューム: ${vol}%` }
+          }
+        ]
+      });
     };
 
     if (interaction.commandName === "loop") {
@@ -1178,7 +1143,7 @@ client.on("interactionCreate", async (interaction) => {
 
       await interaction.deferReply();
       await interaction.followUp(`**${number}.** ${queue.tracks.data[number - 1].title}を削除したよ！`);
-      queue.tracks.removeOne(number - 1);
+      queue.tracks.removeOne(queue.tracks.data[number - 1]);
     };
 
     if (interaction.commandName === "songhistory") {
@@ -1196,38 +1161,8 @@ client.on("interactionCreate", async (interaction) => {
       const pageEnd = (-10 * (page - 1)) - 1;
       const pageStart = (pageEnd - 10);
       const tracks = queue.history.tracks.data.slice(pageStart, pageEnd).reverse().map((m, i) => {
-        let title;
-        if (m.title.length <= 20) {
-          title = m.title;
-        } else {
-          title = `${m.title.substring(0, 20)}...`;
-        };
-        let duration;
-        if (m.duration === "0:00") {
-          duration = "ライブ";
-        } else {
-          duration = m.duration;
-        };
-        return `**${i + (pageEnd * -1)}.** (${duration}) [${title}](${m.url.replace("https://www.youtube.com/watch?v=", "https://youtu.be/")})`;
+        return `**${i + (pageEnd * -1)}.** (${m.duration === "0:00" ? "ライブ" : m.duration}) [${m.title.substring(0, 20)}${m.title.length > 20 ? "..." : ""}](${m.url})`;
       });
-
-      let currenttitle; // 再生中のタイトル
-      if (queue.currentTrack.title.length <= 20) {
-        currenttitle = queue.currentTrack.title
-      } else {
-        currenttitle = `${queue.currentTrack.title.substring(0, 20)}...`
-      };
-      let streamtime; // 埋め込みの文章
-      if (queue.currentTrack.durationMS === 0) {
-        streamtime = `(ライブ)`;
-      } else {
-        const length = (queue.node.streamTime / 1000);
-        const minutes = Math.floor(length / 60);
-        const minutesamari = length % 60;
-        let seconds = Math.floor(minutesamari);
-        if (seconds.toString().length === 1) seconds = `0${seconds}`;
-        streamtime = `${minutes}:${seconds}/${queue.currentTrack.duration}`;
-      };
 
       let trackslength
       if (queue.history.tracks.data.length === 1) {
@@ -1241,27 +1176,25 @@ client.on("interactionCreate", async (interaction) => {
       };
       trackslength = trackslength / 1000;
 
-      const hours = Math.floor(trackslength / 3600);
-      const hoursamari = trackslength % 3600;
-      const minutes = Math.floor(hoursamari / 60);
-      const minutesamari = hoursamari % 60;
-      const seconds = Math.floor(minutesamari);
-      if (hours != 0) {
-        trackslength = `${hours}時間${minutes}分${seconds}秒`
-      } else if (minutes != 0) {
-        trackslength = `${minutes}分${seconds}秒`
+      const hours = ("00" + Math.floor(trackslength / 3600)).slice(-2);
+      const minutes = ("00" + Math.floor((trackslength % 3600) / 60)).slice(-2);
+      const seconds = ("00" + Math.floor((trackslength % 3600) % 60)).slice(-2);
+      if (hours !== "00") {
+        trackslength = `${hours}:${minutes}:${seconds}`
+      } else if (minutes !== "00") {
+        trackslength = `${minutes}:${seconds}`
       } else {
-        trackslength = `${seconds}秒`
+        trackslength = `00:${seconds}`
       };
-      if (trackslength === "0秒") {
+      if (trackslength === "00:00") {
         trackslength = "ライブ";
       };
 
       await interaction.followUp({
         embeds: [
           {
-            title: `今までに${queue.history.tracks.data.length}曲 / ${trackslength}再生したよ！`,
-            description: `**再生中:** (${streamtime}) [${currenttitle}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.tracks.data.length > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.tracks.data.length + pageStart}曲` : ``}`,
+            title: `今までに${trackslength} / ${queue.history.getSize()}曲再生したよ！`,
+            description: `**再生中:** (${queue.node.getTimestamp().progress === Infinity ? "ライブ" : `${queue.node.getTimestamp().current.label}/${queue.currentTrack.duration}`}) [${queue.currentTrack.title.substring(0, 20)}${queue.currentTrack.title.length > 20 ? "..." : ""}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.tracks.data.length > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.tracks.data.length + pageStart}曲` : ""}`,
             color: 16748800,
             thumbnail: {
               url: queue.currentTrack.thumbnail
@@ -1718,14 +1651,8 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
       let text1 = interaction.options.getString("text1");
-      const result = await fetch.fetch(`https://discord.com/api/users/${text1}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bot ${process.env.DISCORD_TOKEN}`
-        },
-        json: true
-      });
-      console.log(await result.json());
+      const queue = discordplayer.queues.get(interaction.guild);
+      console.log(queue.node.getTimestamp());
       await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
