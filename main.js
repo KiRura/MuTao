@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError } = require("discord.js");
+const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, ChannelType, ApplicationCommandOptionType } = require("discord.js");
 const translate = require("deepl");
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
@@ -69,20 +69,22 @@ client.once("ready", async () => {
       description: "URL先の音源を再生する(YouTube等)/検索も可",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "url",
           description: "URLもしくは検索",
           required: true
         },
         {
-          type: 7,
+          type: ApplicationCommandOptionType.Channel,
           name: "vc",
           description: "再生先のVC"
         },
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "vol",
-          description: "管理者無: 1~20%・有: 1~100% | デフォルト: 15%"
+          description: "管理者無: 1~20%・有: 1~100% | デフォルト: 15%",
+          minValue: 1,
+          maxValue: 100
         }
       ]
     },
@@ -99,7 +101,7 @@ client.once("ready", async () => {
       description: "ユーザー情報を表示",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "id",
           description: "ID",
           required: true
@@ -111,24 +113,24 @@ client.once("ready", async () => {
       description: "ロール管理",
       options: [
         {
-          type: 2,
+          type: ApplicationCommandOptionType.SubcommandGroup,
           name: "user",
           description: "特定のユーザーのロールを管理",
           options: [
             {
               // /role user add
-              type: 1,
+              type: ApplicationCommandOptionType.Subcommand,
               name: "add",
               description: "追加",
               options: [
                 {
-                  type: 6,
+                  type: ApplicationCommandOptionType.User,
                   name: "user",
                   description: "ユーザー",
                   required: true
                 },
                 {
-                  type: 8,
+                  type: ApplicationCommandOptionType.Role,
                   name: "role",
                   description: "ロール",
                   required: true
@@ -136,18 +138,18 @@ client.once("ready", async () => {
               ]
             },
             {
-              type: 1,
+              type: ApplicationCommandOptionType.Subcommand,
               name: "remove",
               description: "削除",
               options: [
                 {
-                  type: 6,
+                  type: ApplicationCommandOptionType.User,
                   name: "user",
                   description: "ユーザー",
                   required: true
                 },
                 {
-                  type: 8,
+                  type: ApplicationCommandOptionType.Role,
                   name: "role",
                   description: "ロール",
                   required: true
@@ -155,12 +157,12 @@ client.once("ready", async () => {
               ]
             },
             {
-              type: 1,
+              type: ApplicationCommandOptionType.Subcommand,
               name: "list",
               description: "一覧",
               options: [
                 {
-                  type: 6,
+                  type: ApplicationCommandOptionType.User,
                   name: "user",
                   description: "ユーザー",
                   required: true
@@ -170,17 +172,17 @@ client.once("ready", async () => {
           ]
         },
         {
-          type: 2,
+          type: ApplicationCommandOptionType.SubcommandGroup,
           name: "all",
           description: "全てのユーザーのロールを管理",
           options: [
             {
-              type: 1,
+              type: ApplicationCommandOptionType.Subcommand,
               name: "add",
               description: "追加",
               options: [
                 {
-                  type: 8,
+                  type: ApplicationCommandOptionType.Role,
                   name: "role",
                   description: "ロール",
                   required: true
@@ -188,12 +190,12 @@ client.once("ready", async () => {
               ]
             },
             {
-              type: 1,
+              type: ApplicationCommandOptionType.Subcommand,
               name: "remove",
               description: "削除",
               options: [
                 {
-                  type: 8,
+                  type: ApplicationCommandOptionType.Role,
                   name: "role",
                   description: "ロール",
                   required: true
@@ -213,17 +215,17 @@ client.once("ready", async () => {
       description: "おいフータオ！ピンポンしようぜ！",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "text1",
           description: "色々1"
         },
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "text2",
           description: "色々2"
         },
         {
-          type: 11,
+          type: ApplicationCommandOptionType.Attachment,
           name: "attachment",
           description: "ファイル"
         }
@@ -250,7 +252,7 @@ client.once("ready", async () => {
       description: "YouTubeのサムネを取得",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "url",
           description: "YouTube URL",
           required: true
@@ -262,13 +264,13 @@ client.once("ready", async () => {
       description: "DeepLで翻訳する",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "sourcetext",
           description: "翻訳する文",
           required: true
         },
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "outlang",
           description: "翻訳先の言語",
           required: true,
@@ -376,7 +378,7 @@ client.once("ready", async () => {
           ]
         },
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "sourcelang",
           description: "翻訳する文の言語",
           choices: [
@@ -493,9 +495,10 @@ client.once("ready", async () => {
       description: "キューを表示する",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "page",
-          description: "ページ"
+          description: "ページ",
+          minValue: 1
         }
       ]
     },
@@ -504,7 +507,7 @@ client.once("ready", async () => {
       description: "再生中の曲か指定した曲数スキップする",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "number",
           description: "スキップする曲数"
         }
@@ -519,7 +522,7 @@ client.once("ready", async () => {
       description: "再生中の曲をループ",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "mode",
           description: "track: 1曲だけ, queue: キューをループ, autoplay: おすすめの曲を勝手に追加し続ける(無限ループに陥りやすい), off: 解除",
           required: true,
@@ -549,7 +552,7 @@ client.once("ready", async () => {
       description: "指定したキュー内の曲を削除する。",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "number",
           description: "/queueでタイトルの左に表示された番号",
           required: true
@@ -561,7 +564,7 @@ client.once("ready", async () => {
       description: "VCに接続した時から今までに追加した曲を表示する。",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "page",
           description: "ページ",
         }
@@ -572,7 +575,7 @@ client.once("ready", async () => {
       description: "ニックネームに「(離席)」を追加する",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "word",
           description: "括弧内の文字をカスタム"
         }
@@ -587,9 +590,10 @@ client.once("ready", async () => {
       description: "指定した番号の曲の情報を表示する",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "number",
-          description: "/queueの番号"
+          description: "/queueの番号",
+          minValue: 0
         }
       ]
     },
@@ -598,9 +602,11 @@ client.once("ready", async () => {
       description: "ボリュームを設定する",
       options: [
         {
-          type: 4,
+          type: ApplicationCommandOptionType.Integer,
           name: "vol",
           description: "管理者無: 1~20%・有: 1~100% | デフォルト: 15%",
+          minValue: 1,
+          maxValue: 100,
           required: true
         }
       ]
@@ -610,7 +616,7 @@ client.once("ready", async () => {
       description: "サーバー内のメンバーの情報を取得する",
       options: [
         {
-          type: 6,
+          type: ApplicationCommandOptionType.User,
           name: "member",
           description: "メンバー"
         }
@@ -621,12 +627,12 @@ client.once("ready", async () => {
       description: "画像検索",
       options: [
         {
-          type: 11,
+          type: ApplicationCommandOptionType.Attachment,
           name: "image",
           description: "画像",
         },
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "url",
           description: "画像のURL"
         }
@@ -637,12 +643,12 @@ client.once("ready", async () => {
       description: "指定したIDやメンバーのアイコンを取得する",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "id",
           description: "ID"
         },
         {
-          type: 6,
+          type: ApplicationCommandOptionType.User,
           name: "member",
           description: "メンバー"
         }
@@ -653,7 +659,7 @@ client.once("ready", async () => {
       description: "アクティビティに入れるURLを生成する",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "activity",
           description: "アクティビティの名前",
           choices: [
@@ -723,13 +729,13 @@ client.once("ready", async () => {
       description: "指定した絵文字を画像にする",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "emojiid",
           description: "絵文字のID(絵文字をそのまま入力すると分解した結果が返って来ます。)",
           required: true
         },
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "type",
           description: "拡張子",
           choices: [
@@ -747,7 +753,15 @@ client.once("ready", async () => {
     },
     { // leaveall
       name: "leaveall",
-      description: "VC内にいる全員を退出させる"
+      description: "VC内にいる全員を退出させる",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Channel,
+          name: "vc",
+          description: "VC",
+          channelTypes: [ChannelType.GuildVoice]
+        }
+      ]
     },
     { // messages
       name: "messages",
@@ -787,6 +801,101 @@ client.once("ready", async () => {
           name: "role",
           description: "ロール",
           required: true
+        }
+      ]
+    },
+    { // send
+      name: "send",
+      description: "埋め込みを送る",
+      options: [
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "description",
+          description: "説明文",
+          required: true
+        },
+        {
+          type: ApplicationCommandOptionType.Channel,
+          name: "channel",
+          description: "送信先のチャンネル",
+          channelTypes: [ChannelType.GuildText],
+          required: true
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "title",
+          description: "タイトル"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "url",
+          description: "タイトル文字のURL"
+        },
+        {
+          type: ApplicationCommandOptionType.Attachment,
+          name: "attachmentimage",
+          description: "画像(アップ)"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "urlimage",
+          description: "画像(URL)"
+        },
+        {
+          type: ApplicationCommandOptionType.Attachment,
+          name: "attachmentthumbnail",
+          description: "サムネイル(アップ)"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "urlthumbnail",
+          description: "サムネイル(URL)"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "authortext",
+          description: "一番上の小さい文字"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "authorurl",
+          description: "一番上の小さい文字のURL"
+        },
+        {
+          type: ApplicationCommandOptionType.Attachment,
+          name: "attachmentauthorimage",
+          description: "一番上の小さい画像(アップ)"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "urlauthorimage",
+          description: "一番上の小さい画像(URL)"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "footertext",
+          description: "一番下の小さい文字"
+        },
+        {
+          type: ApplicationCommandOptionType.Attachment,
+          name: "attachmentfooterimage",
+          description: "一番下の小さい画像(アップ)"
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "urlfooterimage",
+          description: "一番下の小さい画像(URL)"
+        },
+        {
+          type: ApplicationCommandOptionType.Integer,
+          name: "color",
+          description: "10進数のカラーコード",
+          maxValue: 16777215
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "hexcolor",
+          description: "16進数のカラーコード"
         }
       ]
     }
@@ -840,9 +949,7 @@ client.on("interactionCreate", async (interaction) => {
       vc = vc ? vc : interaction.member.voice.channel;
       const volume = await interaction.options.getInteger("vol");
       let vol = volume ? volume : 15;
-      if (vol < 1) vol = 1;
       if (vol > 20 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 20;
-      if (vol > 100) vol = 100;
 
       const track = await discordplayer.search(url, {
         requestedBy: interaction.user,
@@ -891,7 +998,7 @@ client.on("interactionCreate", async (interaction) => {
         description = `**投稿者:** ${t.author}\n**長さ:** ${t.duration}`;
       };
       if (!url.match("http")) description = `${description}\n**検索ワード:** ${url.substring(0, 15)}${url.length > 15 ? "..." : ""}`;
-      
+
       if (!getqueue) queue.queue.history.push(queue.queue.currentTrack);
       await interaction.followUp({
         embeds: [
@@ -969,7 +1076,7 @@ client.on("interactionCreate", async (interaction) => {
       let page = interaction.options.getInteger("page");
       if (page === null) { page = 1; };
       const maxpages = (Math.floor(queue.tracks.data.length / 10)) + 1;
-      if (page < 1 || page > maxpages) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true }); // あたおかな数字入れられたらエラー吐くかもしれないので念のため
+      if (page > maxpages) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true }); // あたおかな数字入れられたらエラー吐くかもしれないので念のため
 
       await interaction.deferReply(); // タイムアウト防止
 
@@ -1059,7 +1166,7 @@ client.on("interactionCreate", async (interaction) => {
           {
             description: `**再生開始:** [${t.title.substring(0, 20)}${t.title.length > 20 ? "..." : ""}](${t.url}) (${t.duration})`,
             color: 16748800,
-            thumbnail: { url: t.thumbnail}
+            thumbnail: { url: t.thumbnail }
           }
         ]
       };
@@ -1227,9 +1334,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let vol = interaction.options.getInteger("vol");
-      if (vol < 1) vol = 1;
       if (vol > 20 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 20;
-      if (vol > 100) vol = 100;
 
       const success = queue.node.setVolume(vol);
       await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : "なんかセットできませんでした。"}`);
@@ -1272,7 +1377,7 @@ client.on("interactionCreate", async (interaction) => {
             await interaction.reply({ content: "権限順位的に操作できませんでした。", ephemeral: true });
           };
         } else {
-          return interaction.reply({content: "ロールを管理できる権限が無いよ！", ephemeral: true});
+          return interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
         };
 
         if (interaction.options.getSubcommand() === "list") {
@@ -1324,32 +1429,60 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.commandName === "send") {
-      let title = interaction.options.getString("title")
-      let url = interaction.options.getString("url")
-      let description = interaction.options.getString("description")
-      let color = interaction.options.getString("color")
-      let thumbnail = interaction.options.getString("thumbnail")
-
-      const onoff = interaction.options.get("embedonoff")
-      if (onoff.value === "true") {
-        if (!description) return await interaction.reply("説明文はゼッタイ");
-        await interaction.reply({
-          embeds: [{
-            title: `${title}`,
-            url: `${url}`,
-            description: `${description}`,
-            color: `${color}`,
-            thumbnail: {
-              url: `${thumbnail}`
-            },
-            image: {
-              url: `${url}`
-            },
-          }]
-        });
-      } else if (onoff.value === "false") {
-        await interaction.reply(`${description}`);
-      }
+      const description = interaction.options.getString("description");
+      let embed = {
+        embeds: [
+          {
+            description: description
+          }
+        ]
+      };
+      const title = interaction.options.getString("title");
+      if (title !== null) embed.embeds[0].title = title;
+      const url = interaction.options.getString("url");
+      if (url !== null) embed.embeds[0].url = url;
+      const attachmentimage = interaction.options.getAttachment("attachmentimage");
+      const urlimage = interaction.options.getString("urlimage");
+      const image = attachmentimage ? attachmentimage.url : urlimage;
+      if (image !== null) embed.embeds[0].image = { url: image };
+      const attachmentthumbnail = interaction.options.getAttachment("attachmentthumbnail");
+      const urlthumbnail = interaction.options.getString("urlthumbnail");
+      const thumbnail = attachmentthumbnail ? attachmentthumbnail.url : urlthumbnail;
+      if (thumbnail !== null) embed.embeds[0].thumbnail = { url: thumbnail };
+      const authortext = interaction.options.getString("authortext");
+      const authorurl = interaction.options.getString("authorurl");
+      const attachmentauthorimage = interaction.options.getAttachment("attachmentauthorimage");
+      const urlauthorimage = interaction.options.getString("urlauthorimage");
+      if (authortext !== null || authorurl !== null || attachmentauthorimage !== null || urlauthorimage !== null) embed.embeds[0].author = {};
+      if (authortext !== null) embed.embeds[0].author.name = authortext;
+      if (authorurl !== null) embed.embeds[0].author.url = authorurl;
+      const authorimage = attachmentauthorimage ? attachmentauthorimage.url : urlauthorimage;
+      if (authorimage !== null) embed.embeds[0].author.icon_url = authorimage;
+      const footertext = interaction.options.getString("footertext");
+      const attachmentfooterimage = interaction.options.getAttachment("attachmentfooterimage");
+      const urlfooterimage = interaction.options.getString("urlfooterimage");
+      if (footertext !== null || attachmentfooterimage !== null || urlfooterimage !== null) embed.embeds[0].footer = {};
+      if (footertext !== null) embed.embeds[0].footer.text = footertext;
+      const footerimage = attachmentfooterimage ? attachmentfooterimage.url : urlfooterimage;
+      if (footerimage !== null) embed.embeds[0].footer.icon_url = footerimage;
+      const rgbcolor = interaction.options.getInteger("color");
+      const hexcolor = interaction.options.getString("hexcolor");
+      if (rgbcolor !== null || hexcolor !== null) {
+        if (hexcolor === null || (hexcolor !== null && rgbcolor !== null)) embed.embeds[0].color = rgbcolor;
+        if (rgbcolor === null) {
+          const color = parseInt(hexcolor, 16);
+          if (!color) return await interaction.reply({content: `カラーコード${hexcolor}は16進数である必要があります。`, ephemeral: true});
+          if (color > 16777215) return await interaction.reply({content: `変換後のカラーコード(${color})が16777215を超えているため適応できません。`, ephemeral: true});
+          embed.embeds[0].color = color;
+        };
+      };
+      const channel = interaction.options.getChannel("channel");
+      try {
+        (await (await interaction.guild.channels.fetch(channel.id)).send(embed));
+      } catch (error) {
+        return await interaction.reply({ content: `権限的か開発者のミスで送信できませんでした。\n${error}`, ephemeral: true });
+      };
+      await interaction.reply("送信できました！");
     };
 
     if (interaction.commandName === "siranami") {
@@ -1584,10 +1717,18 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "leaveall") {
       if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
       if (interaction.member.voice.channel === null) return await interaction.reply({ content: "VCに入室してからコマンドを実行して下さい", ephemeral: true });
+      const vc = interaction.options.getChannel("vc");
+      if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: "VCを指定するかVCに入室して下さい。", ephemeral: true });
+      if (vc === null) vc = interaction.member.voice.channel;
+      if (!vc.members) return await interaction.reply({ content: "指定先のVCには誰もいません。", ephemeral: true });
+      const memberssize = vc.members.size;
       await interaction.deferReply();
-      const membersize = interaction.member.voice.members.size;
-      Promise.all(interaction.member.voice.members.map(m => m.voice.disconnect())).catch(async e => await interaction.followUp("権限が変更されました。"));
-      await interaction.followUp(`${membersize}人を切断しました。`);
+      try {
+        await vc.members.map(async m => await m.voice.disconnect());
+      } catch (error) {
+        return await interaction.followUp("権限が変更されました。");
+      };
+      await interaction.followUp(`${memberssize}人を切断しました。`);
     };
 
     if (interaction.commandName === "join") {
@@ -1615,7 +1756,7 @@ client.on("interactionCreate", async (interaction) => {
         },
         json: true
       })).json();
-      if (result.user_id) return await interaction.reply({content: `ユーザーが見つかりませんでした。`, ephemeral: true})
+      if (result.user_id) return await interaction.reply({ content: `ユーザーが見つかりませんでした。`, ephemeral: true })
       if (!result.banner && !result.banner_color) return await interaction.reply({ content: "バナー画像も色も取得できませんでした。", ephemeral: true });
       const url = result.banner ? `https://cdn.discordapp.com/banners/${id}/${result.banner}.${type}?size=4096` : null;
       const description = result.banner ? `[バナーの画像URL](${url})` : `バナーの色コード: ${result.banner_color}`;
@@ -1651,8 +1792,7 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
       let text1 = interaction.options.getString("text1");
-      const queue = discordplayer.queues.get(interaction.guild);
-      console.log(queue.node.getTimestamp());
+      console.log(parseInt(text1, 16));
       await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
