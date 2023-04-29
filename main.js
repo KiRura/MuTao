@@ -752,8 +752,8 @@ client.once("ready", async () => {
         }
       ]
     },
-    { // leaveall
-      name: "leaveall",
+    { // disconall
+      name: "disconall",
       description: "VC内にいる全員を退出させる",
       options: [
         {
@@ -900,7 +900,7 @@ client.once("ready", async () => {
         }
       ]
     },
-    { //deafall
+    { // deafall
       name: "deafall",
       description: "VC内の全員をサーバースピーカーミュートする",
       options: [
@@ -1732,7 +1732,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "leaveall") {
+    if (interaction.commandName === "disconall") {
       if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
       if (interaction.member.voice.channel === null) return await interaction.reply({ content: "VCに入室してからコマンドを実行して下さい", ephemeral: true });
       const vc = interaction.options.getChannel("vc");
