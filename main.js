@@ -1444,11 +1444,11 @@ client.on("interactionCreate", async (interaction) => {
       const attachmentimage = interaction.options.getAttachment("attachmentimage");
       const urlimage = interaction.options.getString("urlimage");
       const image = attachmentimage ? attachmentimage.url : urlimage;
-      if (image !== null) embed.embeds[0].image = { url: image };
+      if (image !== null && image.startsWith("http")) embed.embeds[0].image = { url: image };
       const attachmentthumbnail = interaction.options.getAttachment("attachmentthumbnail");
       const urlthumbnail = interaction.options.getString("urlthumbnail");
       const thumbnail = attachmentthumbnail ? attachmentthumbnail.url : urlthumbnail;
-      if (thumbnail !== null) embed.embeds[0].thumbnail = { url: thumbnail };
+      if (thumbnail !== null && thumbnail.startsWith("http")) embed.embeds[0].thumbnail = { url: thumbnail };
       const authortext = interaction.options.getString("authortext");
       const authorurl = interaction.options.getString("authorurl");
       const attachmentauthorimage = interaction.options.getAttachment("attachmentauthorimage");
@@ -1457,14 +1457,14 @@ client.on("interactionCreate", async (interaction) => {
       if (authortext !== null) embed.embeds[0].author.name = authortext;
       if (authorurl !== null) embed.embeds[0].author.url = authorurl;
       const authorimage = attachmentauthorimage ? attachmentauthorimage.url : urlauthorimage;
-      if (authorimage !== null) embed.embeds[0].author.icon_url = authorimage;
+      if (authorimage !== null && authorimage.startsWith("http")) embed.embeds[0].author.icon_url = authorimage;
       const footertext = interaction.options.getString("footertext");
       const attachmentfooterimage = interaction.options.getAttachment("attachmentfooterimage");
       const urlfooterimage = interaction.options.getString("urlfooterimage");
       if (footertext !== null || attachmentfooterimage !== null || urlfooterimage !== null) embed.embeds[0].footer = {};
       if (footertext !== null) embed.embeds[0].footer.text = footertext;
       const footerimage = attachmentfooterimage ? attachmentfooterimage.url : urlfooterimage;
-      if (footerimage !== null) embed.embeds[0].footer.icon_url = footerimage;
+      if (footerimage !== null && footerimage.startsWith("http")) embed.embeds[0].footer.icon_url = footerimage;
       const rgbcolor = interaction.options.getInteger("color");
       const hexcolor = interaction.options.getString("hexcolor");
       if (rgbcolor !== null || hexcolor !== null) {
