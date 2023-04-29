@@ -25,6 +25,7 @@ const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require("node-cron");
+const { triggerAsyncId } = require("async_hooks");
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
@@ -896,6 +897,23 @@ client.once("ready", async () => {
           type: ApplicationCommandOptionType.String,
           name: "hexcolor",
           description: "16進数のカラーコード"
+        }
+      ]
+    },
+    { //deafall
+      name: "deafall",
+      description: "VC内の全員をサーバースピーカーミュートする",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Channel,
+          name: "vc",
+          description: "VC",
+          channelTypes: [ChannelType.GuildVoice]
+        },
+        {
+          type: ApplicationCommandOptionType.Boolean,
+          name: "cancel",
+          description: "ミュート解除"
         }
       ]
     }
@@ -1787,7 +1805,25 @@ client.on("interactionCreate", async (interaction) => {
           }
         ]
       });
-    }
+    };
+
+    if (interaction.commandName === "deafall") {
+      if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({content: "管理者権限所持者のみ実行できます。", ephemeral: true});
+      let vc = interaction.options.getChannel("vc");
+      vc = vc ? vc : interaction.member.voice.channel;
+      if (!vc) return await interaction.reply({content: "vcに参加するか指定して下さい。", ephemeral: true});
+      if (!vc.members) return await interaction.reply({content: "指定先のvcには誰もいません", ephemeral: true});
+      let cancel = interaction.options.getBoolean("cancel");
+      cancel = cancel ? false : true;
+      const membersize = vc.members.size;
+      await interaction.deferReply();
+      try {
+        await vc.members.map(async m => await m.voice.setDeaf(cancel));
+      } catch (error) {
+        return await interaction.followUp("権限的に無理でした。");
+      };
+      await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
+    };
 
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
