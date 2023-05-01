@@ -1609,7 +1609,6 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "memberinfo") {
       const member = interaction.options.getMember("member");
-      console.log(member);
       if (!member) return await interaction.reply({ content: "例外のエラーが発生しました。", ephemeral: true });
       const createdat = `${member.user.createdAt.getFullYear()}年${member.user.createdAt.getMonth()}月${member.user.createdAt.getDate()}日${member.user.createdAt.getHours()}時${member.user.createdAt.getMinutes()}分${member.user.createdAt.getSeconds()}秒`;
       const joinedat = `${member.joinedAt.getFullYear()}年${member.joinedAt.getMonth()}月${member.joinedAt.getDate()}日${member.joinedAt.getHours()}時${member.joinedAt.getMinutes()}分${member.joinedAt.getSeconds()}秒`
