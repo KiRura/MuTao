@@ -78,7 +78,8 @@ client.once("ready", async () => {
         {
           type: ApplicationCommandOptionType.Channel,
           name: "vc",
-          description: "再生先のVC"
+          description: "再生先のVC",
+          channelTypes: [ChannelType.GuildVoice]
         },
         {
           type: ApplicationCommandOptionType.Integer,
