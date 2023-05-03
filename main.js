@@ -32,6 +32,11 @@ client.once("ready", async () => {
     client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${client.guilds.cache.size} servers・${client.users.cache.size} users・${result.time}ms` });
   }, 60000);
 
+  // const guilds = JSON.parse(fs.readFileSync("guilds.json"));
+  // client.guilds.cache.map(g => {
+  //   if (!guilds.find(guild => guild === g)) guilds.
+  // })
+
   cron.schedule("59 59 23 * * *", () => {
     const data = Number(fs.readFileSync("yutasaba.txt"));
     const dt = new Date();
@@ -1382,19 +1387,15 @@ client.on("interactionCreate", async (interaction) => {
       if (interaction.options.getSubcommandGroup() === "user") {
         if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
           if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
-          try {
             if (interaction.options.getSubcommand() === "add") {
-              targetuser.roles.add(targetrole.role);
+              targetuser.roles.add(targetrole.role).catch(async e => { return await interaction.reply({content: "順位的に操作できませんでした。", ephemeral: true}) });
               await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
             };
 
             if (interaction.options.getSubcommand() === "remove") {
-              targetuser.roles.remove(targetrole.role);
+              targetuser.roles.remove(targetrole.role).catch(async e => { return await interaction.reply({content: "順位的に操作できませんでした。", ephemeral: true}) });
               await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
             };
-          } catch (e) {
-            await interaction.reply({ content: "権限順位的に操作できませんでした。", ephemeral: true });
-          };
         } else {
           return interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
         };
@@ -1828,7 +1829,11 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
       let text1 = interaction.options.getString("text1");
-      console.log(parseInt(text1, 16));
+      // let array = [];
+      // array.push(`${interaction.guild.id}`);
+      // let result = array.find(g => g === interaction.guild.id);
+      // result = {text: text1};
+      // console.log(array);
       await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
