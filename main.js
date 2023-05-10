@@ -1736,7 +1736,6 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "disconall") {
       if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
-      if (interaction.member.voice.channel === null) return await interaction.reply({ content: "VCに入室してからコマンドを実行して下さい", ephemeral: true });
       const vc = interaction.options.getChannel("vc");
       if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: "VCを指定するかVCに入室して下さい。", ephemeral: true });
       if (vc === null) vc = interaction.member.voice.channel;
