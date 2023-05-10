@@ -783,17 +783,17 @@ client.once("ready", async () => {
       description: "バナーを保存する",
       options: [
         {
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           name: "id",
           description: "ID"
         },
         {
-          type: 6,
+          type: ApplicationCommandOptionType.User,
           name: "member",
           description: "メンバー"
         },
         {
-          type: 5,
+          type: ApplicationCommandOptionType.Boolean,
           name: "gif",
           description: "gifの場合はTrueを選択"
         }
@@ -804,7 +804,7 @@ client.once("ready", async () => {
       description: "ロールアイコンを取得する",
       options: [
         {
-          type: 8,
+          type: ApplicationCommandOptionType.Role,
           name: "role",
           description: "ロール",
           required: true
