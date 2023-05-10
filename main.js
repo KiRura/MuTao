@@ -982,7 +982,8 @@ client.on("interactionCreate", async (interaction) => {
       if (!track.hasTracks()) return await interaction.followUp({ content: "何かしらの原因により処理できません。", ephemeral: true });
 
       const getqueue = discordplayer.queues.get(interaction.guild);
-      const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${getqueue.size + track.tracks.length}曲` : "再生開始";
+      const queuesize = url.match("http") ? getqueue.size + track.tracks.length : getqueue.size + 1;
+      const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${queuesize}曲` : "再生開始";
       let queue;
 
       // https://github.com/Androz2091/discord-player/issues/1705
