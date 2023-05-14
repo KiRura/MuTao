@@ -922,6 +922,18 @@ client.once("ready", async () => {
           description: "ミュート解除"
         }
       ]
+    },
+    { // seek
+      name: "seek",
+      description: "シークバーをいじいじする",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Number,
+          name: "duration",
+          description: "秒数",
+          required: true
+        }
+      ]
     }
   ];
   await client.application.commands.set(data);
@@ -982,7 +994,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!track.hasTracks()) return await interaction.followUp({ content: "何かしらの原因により処理できません。", ephemeral: true });
 
       const getqueue = discordplayer.queues.get(interaction.guild);
-      const queuesize = url.match("http") ? getqueue.size + track.tracks.length : getqueue.size + 1;
+      const queuesize = url.match("http") ? (getqueue ? getqueue.size : 0) + track.tracks.length : (getqueue ? getqueue.size : 0) + 1;
       const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${queuesize}曲` : "再生開始";
       let queue;
 
@@ -1363,6 +1375,17 @@ client.on("interactionCreate", async (interaction) => {
 
       const success = queue.node.setVolume(vol);
       await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : "なんかセットできませんでした。"}`);
+    };
+
+    if (interaction.commandName === "seek") {
+      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
+      const queue = discordplayer.queues.get(interaction.guild);
+      if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
+      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
+      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const duration = interaction.options.getNumber("duration");
+
+      await queue.node.seek(duration * 1000) ? await interaction.reply(`${duration}秒に移動したよ！`) : await interaction.reply({content: "数字があたおかだったかも", ephemeral: true});
     };
 
     if (interaction.commandName === "userinfo") {
