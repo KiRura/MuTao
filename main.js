@@ -26,6 +26,7 @@ const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require("node-cron");
 const { triggerAsyncId } = require("async_hooks");
+const { AppleMusicExtractor } = require("@discord-player/extractor");
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
@@ -829,6 +830,12 @@ client.once("ready", async () => {
           required: true
         },
         {
+          type: ApplicationCommandOptionType.Boolean,
+          name: "embed",
+          description: "埋め込みか否か",
+          required: true
+        },
+        {
           type: ApplicationCommandOptionType.String,
           name: "title",
           description: "タイトル"
@@ -953,7 +960,7 @@ client.on("interactionCreate", async (interaction) => {
       const result = await ping.promise.probe("8.8.8.8");
       await interaction.reply({
         embeds: [{
-          description: "**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
+          description: "サポート鯖: https://discord.gg/ky97Uqu3YY\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
           color: 16748800,
           footer: {
             icon_url: `${adminicon}`,
@@ -1385,7 +1392,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       const duration = interaction.options.getNumber("duration");
 
-      await queue.node.seek(duration * 1000) ? await interaction.reply(`${duration}秒に移動したよ！`) : await interaction.reply({content: "数字があたおかだったかも", ephemeral: true});
+      await queue.node.seek(duration * 1000) ? await interaction.reply(`${duration}秒に移動したよ！`) : await interaction.reply({ content: "数字があたおかだったかも", ephemeral: true });
     };
 
     if (interaction.commandName === "userinfo") {
@@ -1411,15 +1418,15 @@ client.on("interactionCreate", async (interaction) => {
       if (interaction.options.getSubcommandGroup() === "user") {
         if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
           if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
-            if (interaction.options.getSubcommand() === "add") {
-              targetuser.roles.add(targetrole.role).catch(async e => { return await interaction.reply({content: "順位的に操作できませんでした。", ephemeral: true}) });
-              await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
-            };
+          if (interaction.options.getSubcommand() === "add") {
+            targetuser.roles.add(targetrole.role).catch(async e => { return await interaction.reply({ content: "順位的に操作できませんでした。", ephemeral: true }) });
+            await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
+          };
 
-            if (interaction.options.getSubcommand() === "remove") {
-              targetuser.roles.remove(targetrole.role).catch(async e => { return await interaction.reply({content: "順位的に操作できませんでした。", ephemeral: true}) });
-              await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
-            };
+          if (interaction.options.getSubcommand() === "remove") {
+            targetuser.roles.remove(targetrole.role).catch(async e => { return await interaction.reply({ content: "順位的に操作できませんでした。", ephemeral: true }) });
+            await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
+          };
         } else {
           return interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
         };
@@ -1474,6 +1481,18 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "send") {
       const description = interaction.options.getString("description");
+      if (!interaction.options.getBoolean("embed")) {
+        const attachmentimage = interaction.options.getAttachment("attachmentimage");
+        const urlimage = interaction.options.getString("urlimage");
+        const image = attachmentimage ? attachmentimage.url : urlimage;
+        let content = {};
+        content.content = description;
+        if (image !== null && image.startsWith("http")) {
+          content.files = [];
+          content.files.push(image);
+        };
+        return await interaction.reply(content);
+      };
       let embed = {
         embeds: [
           {
@@ -1515,8 +1534,8 @@ client.on("interactionCreate", async (interaction) => {
         if (hexcolor === null || (hexcolor !== null && rgbcolor !== null)) embed.embeds[0].color = rgbcolor;
         if (rgbcolor === null) {
           const color = parseInt(hexcolor, 16);
-          if (!color) return await interaction.reply({content: `カラーコード${hexcolor}は16進数である必要があります。`, ephemeral: true});
-          if (color > 16777215) return await interaction.reply({content: `変換後のカラーコード(${color})が16777215を超えているため適応できません。`, ephemeral: true});
+          if (!color) return await interaction.reply({ content: `カラーコード${hexcolor}は16進数である必要があります。`, ephemeral: true });
+          if (color > 16777215) return await interaction.reply({ content: `変換後のカラーコード(${color})が16777215を超えているため適応できません。`, ephemeral: true });
           embed.embeds[0].color = color;
         };
       };
@@ -1832,11 +1851,11 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.commandName === "deafall") {
-      if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({content: "管理者権限所持者のみ実行できます。", ephemeral: true});
+      if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
       let vc = interaction.options.getChannel("vc");
       vc = vc ? vc : interaction.member.voice.channel;
-      if (!vc) return await interaction.reply({content: "vcに参加するか指定して下さい。", ephemeral: true});
-      if (!vc.members) return await interaction.reply({content: "指定先のvcには誰もいません", ephemeral: true});
+      if (!vc) return await interaction.reply({ content: "vcに参加するか指定して下さい。", ephemeral: true });
+      if (!vc.members) return await interaction.reply({ content: "指定先のvcには誰もいません", ephemeral: true });
       let cancel = interaction.options.getBoolean("cancel");
       cancel = cancel ? false : true;
       const membersize = vc.members.size;
