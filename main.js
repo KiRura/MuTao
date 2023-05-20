@@ -25,8 +25,7 @@ const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require("node-cron");
-const { triggerAsyncId } = require("async_hooks");
-const { AppleMusicExtractor } = require("@discord-player/extractor");
+const { joinVoiceChannel } = require("@discordjs/voice");
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
@@ -1792,18 +1791,6 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(`${memberssize}人を切断しました。`);
     };
 
-    if (interaction.commandName === "join") {
-      await interaction.reply({ content: "まだ未実装です。", ephemeral: true });
-      // const vc = interaction.member.voice.channel;
-      // if (vc === null) return await interaction.reply({ content: "vcに入室して下さい", ephemeral: true });
-      // const data = JSON.parse(fs.readFileSync("yomiage.json"));
-      // const result = data.push({
-      //   vc: vc,
-      //   channel: interaction.channel
-      // });
-      // fs.writeFileSync("yomiage.json", JSON.stringify(result));
-    };
-
     if (interaction.commandName === "banner") {
       const type = interaction.options.getBoolean("gif") ? "gif" : "png";
       let id = interaction.options.getString("id");
@@ -1871,11 +1858,7 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
       let text1 = interaction.options.getString("text1");
-      // let array = [];
-      // array.push(`${interaction.guild.id}`);
-      // let result = array.find(g => g === interaction.guild.id);
-      // result = {text: text1};
-      // console.log(array);
+      console.log(await (await fetch.fetch("http://127.0.0.1:50021/")).json());
       await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
@@ -1894,34 +1877,6 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot || message.system || !message.guild) return;
-  // try {
-  //   // if (message.channel.id === "1078856959878508596" && !message.content.startsWith("=")) {
-  //     // async function chat() {
-  //     //   let msg = await message.channel.send("生成中");
-  //     //   let id = String(fs.readFileSync("chatgpt.txt"));
-  //     //   id = id ? id : undefined;
-  //     //   const { ChatGPTAPI } = await import("chatgpt");
-  //     //   const chatgpt = new ChatGPTAPI({
-  //     //     apiKey: `${process.env.OPENAI_API_KEY}`,
-  //     //     // completionParams: {model: "gpt-4"}
-  //     //   });
-  //     //   const res = await chatgpt.sendMessage(message.content, {
-  //     //     parentMessageId: id
-  //     //   }).catch(async e => {
-  //     //     const error = e;
-  //     //     return await msg.edit(`エラー\n${error}`).catch(async e => { return await message.channel.send(`エラー\n${error}`) });
-  //     //   });
-  //     //   await msg.edit(res.text).catch(async e => await message.channel.send(res.text));
-  //     //   fs.writeFileSync("chatgpt.txt", res.id);
-  //     // };
-  //     // chat();
-  //   // };
-  // } catch (e) {
-  //   const error = e;
-  //   console.log(error);
-  //   client.users.cache.get("606093171151208448").send(`メッセージの方のエラー\n${error}`);
-  //   await message.channel.send(`エラー\n${error}`).catch(async e => await message.author.send(`エラー\n${error}`).catch(e => { return; }));
-  // };
 
   try {
     if (message.guild.id === "610020293208965151") {
