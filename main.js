@@ -25,7 +25,6 @@ const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require("node-cron");
-const { joinVoiceChannel } = require("@discordjs/voice");
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
@@ -940,6 +939,10 @@ client.once("ready", async () => {
           required: true
         }
       ]
+    },
+    { // partyactivate
+      name: "partyactivate",
+      description: "HAPPY BIRTHDAY"
     }
   ];
   await client.application.commands.set(data);
@@ -1855,10 +1858,19 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
     };
 
+    if (interaction.commandName === "partyactivate") {
+      try {
+        const party = client.party.activate("Happy birthday");
+        await interaction.reply(party);  
+      } catch (error) {
+        await interaction.reply(`${error}`);
+      };
+    };
+
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
       let text1 = interaction.options.getString("text1");
-      console.log(await (await fetch.fetch("http://127.0.0.1:50021/")).json());
+      
       await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
