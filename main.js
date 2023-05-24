@@ -3,7 +3,7 @@ const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, Channel
 const translate = require("deepl");
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
-const { QueryType, Player, QueueRepeatMode } = require("discord-player");
+const { QueryType, Player, QueueRepeatMode, onBeforeCreateStream } = require("discord-player");
 const discordplayer = new Player(client, {
   deafenOnJoin: true,
   lagMonitor: 1000,
@@ -1001,7 +1001,9 @@ client.on("interactionCreate", async (interaction) => {
         requestedBy: interaction.user,
         searchEngine: QueryType.AUTO
       });
-      if (!track.hasTracks()) return await interaction.followUp({ content: "何かしらの原因により処理できません。", ephemeral: true });
+      if (!track.hasTracks()) return await interaction.followUp("何かしらの原因により処理できません。");
+      const streaming = track.tracks.map(track => { return track.durationMS === 0 });
+      if (streaming) return await interaction.followUp("一時的なバグか何かによりライブ配信は再生できません。");
 
       const getqueue = discordplayer.queues.get(interaction.guild);
       const queuesize = url.match("http") ? (getqueue ? getqueue.size : 0) + track.tracks.length : (getqueue ? getqueue.size : 0) + 1;
@@ -1018,15 +1020,15 @@ client.on("interactionCreate", async (interaction) => {
               requestedBy: interaction.user
             },
             volume: vol,
-            onAfterCreateStream: {
-              async onBeforeCreateStream(track) {
-                try {
-                  (await stream(track.url, { discordPlayerCompatibility: true })).stream;
-                } catch (error) {
-                  true;
-                };
-              }
-            }
+            // onBeforeCreateStream: {
+            //   async onBeforeCreateStream(track) {
+            //     try {
+            //       (await stream({ url: track.url })).stream
+            //     } catch (error) {
+            //       true;
+            //     };
+            //   }
+            // }
           }
         });
       } catch (error) {
