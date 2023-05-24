@@ -13,6 +13,7 @@ const discordplayer = new Player(client, {
     highWaterMark: 1 << 25
   }
 });
+discordplayer.extractors.loadDefault();
 const wait = (sec) => {
   return new Promise((resolve) => {
     setTimeout(resolve, sec * 1000);
