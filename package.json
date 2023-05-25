@@ -20,6 +20,7 @@
     "play-dl": "^1.9.6",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "ytdl-core": "^4.9.1"
   }
 }

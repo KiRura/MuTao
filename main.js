@@ -3,16 +3,8 @@ const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, Channel
 const translate = require("deepl");
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
-const { QueryType, Player, QueueRepeatMode, onBeforeCreateStream } = require("discord-player");
-const discordplayer = new Player(client, {
-  deafenOnJoin: true,
-  lagMonitor: 1000,
-  ytdlOptions: {
-    filter: "audioonly",
-    quality: "highestaudio",
-    highWaterMark: 1 << 25
-  }
-});
+const { QueryType, Player, QueueRepeatMode, useQueue } = require("discord-player");
+const discordplayer = Player.singleton(client);
 discordplayer.extractors.loadDefault();
 const wait = (sec) => {
   return new Promise((resolve) => {
@@ -1002,10 +994,10 @@ client.on("interactionCreate", async (interaction) => {
         searchEngine: QueryType.AUTO
       });
       if (!track.hasTracks()) return await interaction.followUp("何かしらの原因により処理できません。");
-      const streaming = track.tracks.map(track => { return track.durationMS === 0 });
-      if (streaming) return await interaction.followUp("一時的なバグか何かによりライブ配信は再生できません。");
+      // const streaming = track.tracks.map(track => { return track.durationMS === 0 });
+      // if (!streaming) return await interaction.followUp("一時的なバグか何かによりライブ配信は再生できません。");
 
-      const getqueue = discordplayer.queues.get(interaction.guild);
+      const getqueue = useQueue(interaction.guild.id);
       const queuesize = url.match("http") ? (getqueue ? getqueue.size : 0) + track.tracks.length : (getqueue ? getqueue.size : 0) + 1;
       const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${queuesize}曲` : "再生開始";
       let queue;
@@ -1015,7 +1007,7 @@ client.on("interactionCreate", async (interaction) => {
         queue = await discordplayer.play(vc, track, {
           nodeOptions: {
             metadata: {
-              channel: vc,
+              channel: interaction.channel,
               client: interaction.guild.members.me,
               requestedBy: interaction.user
             },
@@ -1065,7 +1057,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "leave") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       await interaction.deferReply();
@@ -1078,29 +1070,29 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "pause") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
-      let paused = queue.node.setPaused(true);
+      let paused = queue.node.pause();
       paused ? await interaction.reply("一時停止したよ") : await interaction.reply({ content: "既に一時停止中だよ！", ephemeral: true }); // deferReply/followUpをするとephemeralが使えないらしい
     };
 
     if (interaction.commandName === "unpause") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
-      let paused = queue.node.setPaused(false);
+      let paused = queue.node.resume();
       paused ? await interaction.reply("一時停止を解除したよ") : await interaction.reply({ content: "一時停止がされてなかったよ", ephemeral: true });
     };
 
     if (interaction.commandName === "clear") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1117,26 +1109,26 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "queue") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
 
       let page = interaction.options.getInteger("page");
       if (page === null) { page = 1; };
-      const maxpages = (Math.floor(queue.tracks.data.length / 10)) + 1;
+      const maxpages = (Math.floor(queue.tracks.size / 10)) + 1;
       if (page > maxpages) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true }); // あたおかな数字入れられたらエラー吐くかもしれないので念のため
 
       await interaction.deferReply(); // タイムアウト防止
 
       const pageStart = 10 * (page - 1); // 埋め込み作り☆
       const pageEnd = pageStart + 10;
-      const tracks = queue.tracks.data.slice(pageStart, pageEnd).map((m, i) => { // ですくりぷしょん
+      const tracks = queue.tracks.toArray().slice(pageStart, pageEnd).map((m, i) => { // ですくりぷしょん
         return `**${i + pageStart + 1}.** (${m.duration === "0:00" ? "ライブ" : m.duration}) [${m.title.length <= 20 ? m.title : `${m.title.substring(0, 20)}...`}](${m.url})`
       });
 
       let queuelength;
-      const length = (queue.node.queue.estimatedDuration + (queue.currentTrack.durationMS - queue.node.streamTime)) / 1000; // 再生中の曲の長さが含まれてないから足す
+      const length = (queue.estimatedDuration + (queue.currentTrack.durationMS - queue.node.streamTime)) / 1000; // 再生中の曲の長さが含まれてないから足す
       if (length === 0) {
         queuelength = "ライブ配信のみ";
       } else {
@@ -1180,7 +1172,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "skip") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1226,7 +1218,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "nowp" || interaction.commandName === "songinfo") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1265,7 +1257,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "loop") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1289,7 +1281,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "remove") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1304,7 +1296,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "songhistory") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1365,7 +1357,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "shuffle") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1378,7 +1370,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "setvolume") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1391,7 +1383,7 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "seek") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      const queue = discordplayer.queues.get(interaction.guild);
+      const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
@@ -1904,10 +1896,9 @@ client.on("messageCreate", async (message) => {
   };
 });
 
-discordplayer.on("error", (error) => {
+discordplayer.events.on("error", (error) => {
   if (error.message.match("The operation was aborted")) return;
   console.log(error);
-  return;
 });
 
 // client.on("messageReactionAdd", async (reaction, user) => { // https://discord.gg/M9MmS6k2jT
