@@ -9,4 +9,5 @@
 トークン流出でbotが暴走してしまった場合は...想像したくないですね。
 
 導入: https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275300797504&scope=bot%20applications.commands
+
 サポート鯖: https://discord.gg/ky97Uqu3YY
