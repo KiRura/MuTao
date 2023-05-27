@@ -81,7 +81,7 @@ client.once("ready", async () => {
         {
           type: ApplicationCommandOptionType.Integer,
           name: "vol",
-          description: "管理者無: 1~20%・有: 1~100% | デフォルト: 15%",
+          description: "管理者無: 1~50%・有: 1~100% | デフォルト: 30%",
           minValue: 1,
           maxValue: 100
         }
@@ -603,7 +603,7 @@ client.once("ready", async () => {
         {
           type: ApplicationCommandOptionType.Integer,
           name: "vol",
-          description: "管理者無: 1~20%・有: 1~100% | デフォルト: 15%",
+          description: "管理者無: 1~50%・有: 1~100% | デフォルト: 30%",
           minValue: 1,
           maxValue: 100,
           required: true
@@ -986,8 +986,8 @@ client.on("interactionCreate", async (interaction) => {
       let vc = await interaction.options.getChannel("vc");
       vc = vc ? vc : interaction.member.voice.channel;
       const volume = await interaction.options.getInteger("vol");
-      let vol = volume ? volume : 15;
-      if (vol > 20 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 20;
+      let vol = volume ? volume : 30;
+      if (vol > 50 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 50;
 
       const track = await discordplayer.search(url, {
         requestedBy: interaction.user,
@@ -1375,7 +1375,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let vol = interaction.options.getInteger("vol");
-      if (vol > 20 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 20;
+      if (vol > 50 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 50;
 
       const success = queue.node.setVolume(vol);
       await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : "なんかセットできませんでした。"}`);
