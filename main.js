@@ -1211,7 +1211,7 @@ client.on("interactionCreate", async (interaction) => {
           }
         ]
       };
-      if (queue.tracks.data.length !== 0) embed.embeds[0].title = `**残り:** ${queue.durationFormatted} / ${queue.tracks.data.length}曲`;
+      if (queue.tracks.data.length !== 0) embed.embeds[0].title = `**残り:** ${queue.durationFormatted === "0:00" ? "ライブのみ" : queue.durationFormatted} / ${queue.tracks.data.length}曲`;
       if (number !== null) embed.embeds[0].description = `${embed.embeds[0].description}\n${number + 1}曲スキップしました。`;
       await interaction.followUp(embed);
     };
