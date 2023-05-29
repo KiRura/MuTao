@@ -1129,7 +1129,7 @@ client.on("interactionCreate", async (interaction) => {
 
       let queuelength;
       const length = (queue.estimatedDuration + (queue.currentTrack.durationMS - queue.node.streamTime)) / 1000; // 再生中の曲の長さが含まれてないから足す
-      if (length === 0) {
+      if (queue.estimatedDuration === 0) {
         queuelength = "ライブ配信のみ";
       } else {
         const hours = ("00" + Math.floor(length / 3600)).slice(-2)
