@@ -1032,11 +1032,11 @@ client.on("interactionCreate", async (interaction) => {
       if (track.hasPlaylist()) {
         t = track.playlist;
         thumbnail = t.tracks[0].thumbnail;
-        description = `**合計時間:** ${t.durationFormatted}\n**曲数:** ${t.tracks.length}曲`;
+        description = `**合計時間:** ${t.durationFormatted === "0:00" ? "ライブのみ" : t.durationFormatted}\n**曲数:** ${t.tracks.length}曲`;
       } else {
         t = track.tracks[0];
         thumbnail = t.thumbnail;
-        description = `**投稿者:** ${t.author}\n**長さ:** ${t.duration}`;
+        description = `**投稿者:** ${t.author}\n**長さ:** ${t.duration === "0:00" ? "ライブ" : t.duration}`;
       };
       if (!url.match("http")) description = `${description}\n**検索ワード:** ${url.substring(0, 15)}${url.length > 15 ? "..." : ""}`;
 
@@ -1205,7 +1205,7 @@ client.on("interactionCreate", async (interaction) => {
       let embed = {
         embeds: [
           {
-            description: `**再生開始:** [${t.title.substring(0, 20)}${t.title.length > 20 ? "..." : ""}](${t.url}) (${t.duration})`,
+            description: `**再生開始:** [${t.title.substring(0, 20)}${t.title.length > 20 ? "..." : ""}](${t.url}) (${t.duration === "0:00" ? "ライブ" : t.duration})`,
             color: 16748800,
             thumbnail: { url: t.thumbnail }
           }
@@ -1365,7 +1365,7 @@ client.on("interactionCreate", async (interaction) => {
 
       await interaction.deferReply();
       queue.tracks.shuffle();
-      await interaction.followUp(`${queue.tracks.data.length}曲をシャッフルしました。`);
+      await interaction.followUp(`${queue.tracks.data.length}曲をぐしゃぐしゃにしたよ！`);
     };
 
     if (interaction.commandName === "setvolume") {
