@@ -1196,7 +1196,7 @@ client.on("interactionCreate", async (interaction) => {
       } else if (number !== null) {
         number = number - 1;
         t = queue.tracks.data[number];
-        queue.node.skipTo(number);
+        queue.node.skipTo(t);
       } else {
         t = queue.tracks.data[0];
         queue.node.skip();
