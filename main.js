@@ -1504,11 +1504,11 @@ client.on("interactionCreate", async (interaction) => {
       const attachmentimage = interaction.options.getAttachment("attachmentimage");
       const urlimage = interaction.options.getString("urlimage");
       const image = attachmentimage ? attachmentimage.url : urlimage;
-      if (image !== null && image.startsWith("http")) embed.embeds[0].image = { url: image };
+      if (image !== null && (image.startsWith("http://") || image.startsWith("https://"))) embed.embeds[0].image = { url: image };
       const attachmentthumbnail = interaction.options.getAttachment("attachmentthumbnail");
       const urlthumbnail = interaction.options.getString("urlthumbnail");
       const thumbnail = attachmentthumbnail ? attachmentthumbnail.url : urlthumbnail;
-      if (thumbnail !== null && thumbnail.startsWith("http")) embed.embeds[0].thumbnail = { url: thumbnail };
+      if (thumbnail !== null && (thumbnail.startsWith("http://") || thumbnail.startsWith("https://"))) embed.embeds[0].thumbnail = { url: thumbnail };
       const authortext = interaction.options.getString("authortext");
       const authorurl = interaction.options.getString("authorurl");
       const attachmentauthorimage = interaction.options.getAttachment("attachmentauthorimage");
@@ -1517,14 +1517,14 @@ client.on("interactionCreate", async (interaction) => {
       if (authortext !== null) embed.embeds[0].author.name = authortext;
       if (authorurl !== null) embed.embeds[0].author.url = authorurl;
       const authorimage = attachmentauthorimage ? attachmentauthorimage.url : urlauthorimage;
-      if (authorimage !== null && authorimage.startsWith("http")) embed.embeds[0].author.icon_url = authorimage;
+      if (authorimage !== null && (authorimage.startsWith("http://") || authorimage.startsWith("https://"))) embed.embeds[0].author.icon_url = authorimage;
       const footertext = interaction.options.getString("footertext");
       const attachmentfooterimage = interaction.options.getAttachment("attachmentfooterimage");
       const urlfooterimage = interaction.options.getString("urlfooterimage");
       if (footertext !== null || attachmentfooterimage !== null || urlfooterimage !== null) embed.embeds[0].footer = {};
       if (footertext !== null) embed.embeds[0].footer.text = footertext;
       const footerimage = attachmentfooterimage ? attachmentfooterimage.url : urlfooterimage;
-      if (footerimage !== null && footerimage.startsWith("http")) embed.embeds[0].footer.icon_url = footerimage;
+      if (footerimage !== null && (footerimage.startsWith("http://") || footerimage.startsWith("https://"))) embed.embeds[0].footer.icon_url = footerimage;
       const rgbcolor = interaction.options.getInteger("color");
       const hexcolor = interaction.options.getString("hexcolor");
       if (rgbcolor !== null || hexcolor !== null) {
@@ -1540,7 +1540,7 @@ client.on("interactionCreate", async (interaction) => {
       try {
         (await (await interaction.guild.channels.fetch(channel.id)).send(embed));
       } catch (error) {
-        return await interaction.reply({ content: `権限的か開発者のミスで送信できませんでした。\n${error}`, ephemeral: true });
+        return await interaction.reply({ content: `権限的か開発者のミスかそういう仕様で送信できませんでした。\n${error}`, ephemeral: true });
       };
       await interaction.reply("送信できました！");
     };
@@ -1874,7 +1874,7 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.user.id !== "606093171151208448") {
       await client.users.cache.get("606093171151208448").send(`${interaction.guild ? `${interaction.guild.name}の${interaction.user.tag}` : interaction.user.tag}\nがデバッガーになってくれたお知らせ\n${e}`);
       const error = e;
-      const errormsg = `頑張って解読してね(管理者のコードミスの可能性の方が高いです)\n${error}`
+      const errormsg = `頑張って解読してね(管理者のコードミスの可能性の方が高いです)\n${error}`;
       await interaction.reply(errormsg).catch(async e => await interaction.channel.send(errormsg).catch(async e => await interaction.user.send(errormsg).catch(e => { return; })));
     } else {
       await interaction.user.send(`おめえエラー起こしてんじゃねえよ\n${e}`);
