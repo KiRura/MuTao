@@ -1477,67 +1477,69 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.commandName === "send") {
-      const description = interaction.options.getString("description");
-      if (!interaction.options.getBoolean("embed")) {
+      try {
+        const description = interaction.options.getString("description");
+        const channel = interaction.options.getChannel("channel");
+        if (!interaction.options.getBoolean("embed")) {
+          const attachmentimage = interaction.options.getAttachment("attachmentimage");
+          const urlimage = interaction.options.getString("urlimage");
+          const image = attachmentimage ? attachmentimage.url : urlimage;
+          let content = {};
+          content.content = description;
+          if (image !== null && image.startsWith("http")) {
+            content.files = [];
+            content.files.push(image);
+          };
+          return await (await interaction.guild.channels.fetch(channel.id)).send(content);
+        };
+        let embed = {
+          embeds: [
+            {
+              description: description
+            }
+          ]
+        };
+        const title = interaction.options.getString("title");
+        if (title !== null) embed.embeds[0].title = title;
+        const url = interaction.options.getString("url");
+        if (url !== null) embed.embeds[0].url = url;
         const attachmentimage = interaction.options.getAttachment("attachmentimage");
         const urlimage = interaction.options.getString("urlimage");
         const image = attachmentimage ? attachmentimage.url : urlimage;
-        let content = {};
-        content.content = description;
-        if (image !== null && image.startsWith("http")) {
-          content.files = [];
-          content.files.push(image);
+        if (image !== null && (image.startsWith("http://") || image.startsWith("https://"))) embed.embeds[0].image = { url: image };
+        const attachmentthumbnail = interaction.options.getAttachment("attachmentthumbnail");
+        const urlthumbnail = interaction.options.getString("urlthumbnail");
+        const thumbnail = attachmentthumbnail ? attachmentthumbnail.url : urlthumbnail;
+        if (thumbnail !== null && (thumbnail.startsWith("http://") || thumbnail.startsWith("https://"))) embed.embeds[0].thumbnail = { url: thumbnail };
+        const authortext = interaction.options.getString("authortext");
+        const authorurl = interaction.options.getString("authorurl");
+        const attachmentauthorimage = interaction.options.getAttachment("attachmentauthorimage");
+        const urlauthorimage = interaction.options.getString("urlauthorimage");
+        if (authortext !== null || authorurl !== null || attachmentauthorimage !== null || urlauthorimage !== null) embed.embeds[0].author = {};
+        if (authortext !== null) embed.embeds[0].author.name = authortext;
+        if (authorurl !== null) embed.embeds[0].author.url = authorurl;
+        const authorimage = attachmentauthorimage ? attachmentauthorimage.url : urlauthorimage;
+        if (authorimage !== null && (authorimage.startsWith("http://") || authorimage.startsWith("https://"))) embed.embeds[0].author.icon_url = authorimage;
+        const footertext = interaction.options.getString("footertext");
+        const attachmentfooterimage = interaction.options.getAttachment("attachmentfooterimage");
+        const urlfooterimage = interaction.options.getString("urlfooterimage");
+        if (footertext !== null || attachmentfooterimage !== null || urlfooterimage !== null) embed.embeds[0].footer = {};
+        if (footertext !== null) embed.embeds[0].footer.text = footertext;
+        const footerimage = attachmentfooterimage ? attachmentfooterimage.url : urlfooterimage;
+        if (footerimage !== null && (footerimage.startsWith("http://") || footerimage.startsWith("https://"))) embed.embeds[0].footer.icon_url = footerimage;
+        const rgbcolor = interaction.options.getInteger("color");
+        const hexcolor = interaction.options.getString("hexcolor");
+        if (rgbcolor !== null || hexcolor !== null) {
+          if (hexcolor === null || (hexcolor !== null && rgbcolor !== null)) embed.embeds[0].color = rgbcolor;
+          if (rgbcolor === null) {
+            const color = parseInt(hexcolor, 16);
+            if (!color) return await interaction.reply({ content: `カラーコード${hexcolor}は16進数である必要があります。`, ephemeral: true });
+            if (color > 16777215) return await interaction.reply({ content: `変換後のカラーコード(${color})が16777215を超えているため適応できません。`, ephemeral: true });
+            embed.embeds[0].color = color;
+          };
         };
-        return await interaction.reply(content);
-      };
-      let embed = {
-        embeds: [
-          {
-            description: description
-          }
-        ]
-      };
-      const title = interaction.options.getString("title");
-      if (title !== null) embed.embeds[0].title = title;
-      const url = interaction.options.getString("url");
-      if (url !== null) embed.embeds[0].url = url;
-      const attachmentimage = interaction.options.getAttachment("attachmentimage");
-      const urlimage = interaction.options.getString("urlimage");
-      const image = attachmentimage ? attachmentimage.url : urlimage;
-      if (image !== null && (image.startsWith("http://") || image.startsWith("https://"))) embed.embeds[0].image = { url: image };
-      const attachmentthumbnail = interaction.options.getAttachment("attachmentthumbnail");
-      const urlthumbnail = interaction.options.getString("urlthumbnail");
-      const thumbnail = attachmentthumbnail ? attachmentthumbnail.url : urlthumbnail;
-      if (thumbnail !== null && (thumbnail.startsWith("http://") || thumbnail.startsWith("https://"))) embed.embeds[0].thumbnail = { url: thumbnail };
-      const authortext = interaction.options.getString("authortext");
-      const authorurl = interaction.options.getString("authorurl");
-      const attachmentauthorimage = interaction.options.getAttachment("attachmentauthorimage");
-      const urlauthorimage = interaction.options.getString("urlauthorimage");
-      if (authortext !== null || authorurl !== null || attachmentauthorimage !== null || urlauthorimage !== null) embed.embeds[0].author = {};
-      if (authortext !== null) embed.embeds[0].author.name = authortext;
-      if (authorurl !== null) embed.embeds[0].author.url = authorurl;
-      const authorimage = attachmentauthorimage ? attachmentauthorimage.url : urlauthorimage;
-      if (authorimage !== null && (authorimage.startsWith("http://") || authorimage.startsWith("https://"))) embed.embeds[0].author.icon_url = authorimage;
-      const footertext = interaction.options.getString("footertext");
-      const attachmentfooterimage = interaction.options.getAttachment("attachmentfooterimage");
-      const urlfooterimage = interaction.options.getString("urlfooterimage");
-      if (footertext !== null || attachmentfooterimage !== null || urlfooterimage !== null) embed.embeds[0].footer = {};
-      if (footertext !== null) embed.embeds[0].footer.text = footertext;
-      const footerimage = attachmentfooterimage ? attachmentfooterimage.url : urlfooterimage;
-      if (footerimage !== null && (footerimage.startsWith("http://") || footerimage.startsWith("https://"))) embed.embeds[0].footer.icon_url = footerimage;
-      const rgbcolor = interaction.options.getInteger("color");
-      const hexcolor = interaction.options.getString("hexcolor");
-      if (rgbcolor !== null || hexcolor !== null) {
-        if (hexcolor === null || (hexcolor !== null && rgbcolor !== null)) embed.embeds[0].color = rgbcolor;
-        if (rgbcolor === null) {
-          const color = parseInt(hexcolor, 16);
-          if (!color) return await interaction.reply({ content: `カラーコード${hexcolor}は16進数である必要があります。`, ephemeral: true });
-          if (color > 16777215) return await interaction.reply({ content: `変換後のカラーコード(${color})が16777215を超えているため適応できません。`, ephemeral: true });
-          embed.embeds[0].color = color;
-        };
-      };
-      const channel = interaction.options.getChannel("channel");
-      try {
+        
+
         (await (await interaction.guild.channels.fetch(channel.id)).send(embed));
       } catch (error) {
         return await interaction.reply({ content: `権限的か開発者のミスかそういう仕様で送信できませんでした。\n${error}`, ephemeral: true });
@@ -1856,7 +1858,7 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "partyactivate") {
       try {
         const party = client.party.activate("Happy birthday");
-        await interaction.reply(party);  
+        await interaction.reply(party);
       } catch (error) {
         await interaction.reply(`${error}`);
       };
@@ -1865,7 +1867,7 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
       let text1 = interaction.options.getString("text1");
-      
+
       await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
