@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, ChannelType, ApplicationCommandOptionType } = require("discord.js");
+const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, ChannelType, ApplicationCommandOptionType, StageChannel } = require("discord.js");
 const translate = require("deepl");
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
@@ -18,37 +18,50 @@ const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require("node-cron");
+
+function writedefault(id) {
+  let json = JSON.parse(fs.readFileSync("guilds.json"));
+  json.push(
+    {
+      id: id,
+      send_count_channel: null,
+      countswitch: false,
+      count: 0
+    }
+  );
+  fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+};
+
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
     client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${client.guilds.cache.size} servers・${client.users.cache.size} users・${result.time}ms` });
   }, 60000);
 
-  // const guilds = JSON.parse(fs.readFileSync("guilds.json"));
-  // client.guilds.cache.map(g => {
-  //   if (!guilds.find(guild => guild === g)) guilds.
-  // })
-
-  cron.schedule("59 59 23 * * *", () => {
-    if (!client.guilds.cache.get("1074670271312711740")) return fs.writeFileSync("yutasaba.txt", "0");
-
-    const data = Number(fs.readFileSync("yutasaba.txt"));
+  cron.schedule("59 59 23 * * *", async () => {
     const dt = new Date();
     const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
-    client.guilds.cache.get("1074670271312711740").channels.cache.get("1078954468353249380").send({
-      embeds: [{
-        author: {
-          name: client.guilds.cache.get("610020293208965151").name,
-          icon_url: client.guilds.cache.get("610020293208965151").iconURL()
-        },
-        description: `メッセージ数: ${data}`,
-        color: 3066993,
-        footer: {
-          text: `日付: ${date}`
-        }
-      }]
+    let json = JSON.parse(fs.readFileSync("guilds.json"));
+    json.map(async guild => {
+      if (guild.countswitch) {
+        const result = await client.guilds.cache.get(guild.id).channels.cache.get(guild.send_count_channel).send({
+          embeds: [
+            {
+              author: {
+                name: client.guilds.cache.get(guild.id).name
+              },
+              description: `メッセージ数: ${guild.count}`,
+              color: 3066993,
+              footer: {
+                text: `日付: ${date}`
+              }
+            }
+          ]
+        });
+        json.find(jsonguild => jsonguild.id === guild.id).count = 0
+        fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+      };
     });
-    fs.writeFileSync("yutasaba.txt", "0");
   });
 
   const data = [
@@ -930,6 +943,23 @@ client.once("ready", async () => {
           required: true
         }
       ]
+    },
+    { // setchannel
+      name: "setchannel",
+      description: "1日のカウント数を日本時間0時に送信するチャンネルを設定する。(送信後はカウントがリセットされます)",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Channel,
+          name: "channel",
+          description: "チャンネル",
+          channelTypes: [ChannelType.GuildText],
+          required: true
+        }
+      ]
+    },
+    { // stopcount
+      name: "stopcount",
+      description: "メッセージ数のカウントを止める。(再有効化は/setchannelで)"
     }
   ];
   await client.application.commands.set(data);
@@ -1532,7 +1562,7 @@ client.on("interactionCreate", async (interaction) => {
             embed.embeds[0].color = color;
           };
         };
-        
+
         (await (await interaction.guild.channels.fetch(channel.id)).send(embed));
       } catch (error) {
         return await interaction.reply({ content: `権限的か開発者のミスかそういう仕様で送信できませんでした。\n${error}`, ephemeral: true });
@@ -1749,22 +1779,49 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.commandName === "messages") {
-      if (interaction.guild.id !== "1074670271312711740" && interaction.guild.id !== "610020293208965151") return await interaction.reply({ content: "ゆた鯖内でのみ実行できます\ndiscord.gg/cpSp6kRXM5", ephemeral: true });
-      const data = Number(fs.readFileSync("yutasaba.txt"));
-      const dt = new Date();
-      const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
-      await interaction.reply({
-        embeds: [{
-          description: `メッセージ数: ${data}`,
-          color: client.guilds.cache.get("610020293208965151").roles.cache.get("610481839978577931").color,
-          author: {
-            name: client.guilds.cache.get("610020293208965151").name,
-            icon_url: client.guilds.cache.get("610020293208965151").iconURL()
-          },
-          footer: {
-            text: date
+      // if (interaction.guild.id !== "1074670271312711740" && interaction.guild.id !== "610020293208965151") return await interaction.reply({ content: "ゆた鯖内でのみ実行できます\ndiscord.gg/cpSp6kRXM5", ephemeral: true });
+      // const data = Number(fs.readFileSync("yutasaba.txt"));
+      // const dt = new Date();
+      // const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
+      // await interaction.reply({
+      //   embeds: [{
+      //     description: `メッセージ数: ${data}`,
+      //     color: client.guilds.cache.get("610020293208965151").roles.cache.get("610481839978577931").color,
+      //     author: {
+      //       name: client.guilds.cache.get("610020293208965151").name,
+      //       icon_url: client.guilds.cache.get("610020293208965151").iconURL()
+      //     },
+      //     footer: {
+      //       text: date
+      //     }
+      //   }]
+      // });
+
+      const json = JSON.parse(fs.readFileSync("guilds.json"));
+      const guild = json.find(guild => guild.id === interaction.guild.id);
+      if (!guild) {
+        json.push(
+          {
+            id: interaction.guild.id,
+            send_count_channel: null,
+            countswitch: false,
+            count: 0
           }
-        }]
+        );
+        fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+        await interaction.reply({ content: "データが新規に作成されました。\nカウントを開始するには/setchannelをして下さい。", ephemeral: true });
+        return;
+      };
+      await interaction.reply({
+        embeds: [
+          {
+            author: {
+              name: interaction.guild.name
+            },
+            description: `メッセージ数: ${guild.count}${guild.countswitch ? "" : "\n現在カウントが停止されています。"}`,
+            color: 3066993
+          }
+        ]
       });
     };
 
@@ -1848,11 +1905,44 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
     };
 
+    if (interaction.commandName === "setchannel") {
+      await interaction.deferReply();
+      const channel = interaction.options.getChannel("channel");
+      let json = JSON.parse(fs.readFileSync("guilds.json"));
+      if (!json.find(guild => guild.id === interaction.guild.id)) {
+        json.push(
+          {
+            id: interaction.guild.id,
+            send_count_channel: channel.id,
+            countswitch: true,
+            count: 0
+          }
+        );
+        fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+        await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
+        return;
+      };
+      json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
+      json.find(guild => guild.id === interaction.guild.id).countswitch = true;
+      fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+      await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
+    };
+
+    if (interaction.commandName === "stopcount") {
+      let json = JSON.parse(fs.readFileSync("guilds.json"));
+      const guild = json.find(guild => guild.id === interaction.guild.id);
+      if (!guild) {
+        writedefault(interaction.guild.id);
+        await interaction.reply({ content: "データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
+        return;
+      };
+      json.find(guild => guild.id === interaction.guild.id).countswitch = false
+      fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+      await interaction.reply("カウントをストップしました。");
+    };
+
     if (interaction.commandName === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
-      let text1 = interaction.options.getString("text1");
-
-      await interaction.user.send("てすとこんぷりーてっど！");
     };
   } catch (e) {
     if (e == DiscordAPIError[10008]) return;
@@ -1870,12 +1960,17 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot || message.system || !message.guild) return;
-
   try {
-    if (message.guild.id === "610020293208965151") {
-      const data = Number(fs.readFileSync("yutasaba.txt"));
-      const num = (data + 1);
-      fs.writeFileSync("yutasaba.txt", String(num));
+    let json = JSON.parse((fs.readFileSync("guilds.json")));
+    let guild = json.find(guild => guild.id === message.guild.id);
+    if (!guild) {
+      writedefault(message.guild.id);
+      return;
+    };
+
+    if (guild.countswitch) {
+      json.find(guild => guild.id === message.guild.id).count = + 1;
+      fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
     };
   } catch (e) {
     console.log(e);
