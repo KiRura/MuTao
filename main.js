@@ -30,6 +30,8 @@ client.once("ready", async () => {
   // })
 
   cron.schedule("59 59 23 * * *", () => {
+    if (!client.guilds.cache.get("1074670271312711740")) return fs.writeFileSync("yutasaba.txt", "0");
+
     const data = Number(fs.readFileSync("yutasaba.txt"));
     const dt = new Date();
     const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
@@ -766,10 +768,6 @@ client.once("ready", async () => {
       name: "messages",
       description: "0:00から今までにサーバー内で送信されたメッセの総数"
     },
-    { // join
-      name: "join",
-      description: "読み上げを開始する"
-    },
     { // banner
       name: "banner",
       description: "バナーを保存する",
@@ -932,10 +930,6 @@ client.once("ready", async () => {
           required: true
         }
       ]
-    },
-    { // partyactivate
-      name: "partyactivate",
-      description: "HAPPY BIRTHDAY"
     }
   ];
   await client.application.commands.set(data);
@@ -1539,7 +1533,6 @@ client.on("interactionCreate", async (interaction) => {
           };
         };
         
-
         (await (await interaction.guild.channels.fetch(channel.id)).send(embed));
       } catch (error) {
         return await interaction.reply({ content: `権限的か開発者のミスかそういう仕様で送信できませんでした。\n${error}`, ephemeral: true });
@@ -1853,15 +1846,6 @@ client.on("interactionCreate", async (interaction) => {
         return await interaction.followUp("権限的に無理でした。");
       };
       await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
-    };
-
-    if (interaction.commandName === "partyactivate") {
-      try {
-        const party = client.party.activate("Happy birthday");
-        await interaction.reply(party);
-      } catch (error) {
-        await interaction.reply(`${error}`);
-      };
     };
 
     if (interaction.commandName === "test") {
