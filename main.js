@@ -1946,7 +1946,7 @@ client.on("interactionCreate", async (interaction) => {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
     };
   } catch (e) {
-    if (e == DiscordAPIError[10008]) return;
+    if (e.rawError.code === 10008) return;
     console.log(e);
     if (interaction.user.id !== "606093171151208448") {
       await client.users.cache.get("606093171151208448").send(`${interaction.guild ? `${interaction.guild.name}の${interaction.user.tag}` : interaction.user.tag}\nがデバッガーになってくれたお知らせ\n${e}`);
