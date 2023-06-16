@@ -58,7 +58,7 @@ client.once("ready", async () => {
             }
           ]
         });
-        json.find(jsonguild => jsonguild.id === guild.id).count = 0
+        json.find(jsonguild => jsonguild.id === guild.id).count = 0;
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
       };
     }));
@@ -972,14 +972,14 @@ client.on("interactionCreate", async (interaction) => {
       return;
     };
 
-    const adminicon = client.users.fetch("606093171151208448").then(user => `${user.avatarURL()}?size=4096`);
-    const adminname = client.users.fetch("606093171151208448").then(user => user.tag);
+    const adminicon = `${(await client.users.fetch("606093171151208448")).avatarURL()}?size=4096`;
+    const adminname = (await client.users.fetch("606093171151208448")).username;
 
     if (interaction.commandName === "help") {
       const result = await ping.promise.probe("8.8.8.8");
       await interaction.reply({
         embeds: [{
-          description: "サポート鯖: https://discord.gg/ky97Uqu3YY\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
+          description: "サポート鯖: https://discord.gg/ky97Uqu3YY\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
           color: 16748800,
           footer: {
             icon_url: `${adminicon}`,
@@ -1140,7 +1140,7 @@ client.on("interactionCreate", async (interaction) => {
 
       let page = interaction.options.getInteger("page");
       if (page === null) { page = 1; };
-      const maxpages = (Math.floor(queue.tracks.size / 10)) + 1;
+      const maxpages = (Math.floor(queue.getSize() / 10)) + 1;
       if (page > maxpages) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true }); // あたおかな数字入れられたらエラー吐くかもしれないので念のため
 
       await interaction.deferReply(); // タイムアウト防止
@@ -1182,7 +1182,7 @@ client.on("interactionCreate", async (interaction) => {
       return await interaction.followUp({
         embeds: [{
           title: queuelength,
-          description: `**再生中:** (${streamtime}) [${queue.currentTrack.title.length <= 20 ? queue.currentTrack.title : `${queue.currentTrack.title.substring(0, 20)}...`}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.tracks.data.length > pageEnd ? `\n**...**\n**他:** ${queue.tracks.data.length - pageEnd}曲` : ``}`, // 表示したキューの後にいくつかの曲があったらその曲数を表示
+          description: `**再生中:** (${streamtime}) [${queue.currentTrack.title.length <= 20 ? queue.currentTrack.title : `${queue.currentTrack.title.substring(0, 20)}...`}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.getSize() > pageEnd ? `\n**...**\n**他:** ${queue.getSize() - pageEnd}曲` : ``}`, // 表示したキューの後にいくつかの曲があったらその曲数を表示
           thumbnail: {
             url: queue.currentTrack.thumbnail
           },
@@ -1201,16 +1201,16 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let number = interaction.options.getInteger("number");
-      if (number !== null && number < 1 || number > queue.tracks.data.length) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
+      if (number !== null && number < 1 || number > queue.getSize()) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
       await interaction.deferReply();
 
       let t;
-      if (queue.repeatMode === 3 && !queue.tracks.data[0]) {
+      if (queue.repeatMode === 3 && !queue.tracks.toArray()[0]) {
         queue.node.skip();
         await wait(5);
 
         t = queue.currentTrack;
-      } else if (!queue.tracks.data[0]) {
+      } else if (!queue.tracks.toArray()[0]) {
         await interaction.followUp("キューが空になったよ！またね！");
         await wait(1); // そういう演出
         queue.delete();
@@ -1219,23 +1219,23 @@ client.on("interactionCreate", async (interaction) => {
         return;
       } else if (number !== null) {
         number = number - 1;
-        t = queue.tracks.data[number];
+        t = queue.tracks.toArray()[number];
         queue.node.skipTo(t);
       } else {
-        t = queue.tracks.data[0];
+        t = queue.tracks.toArray()[0];
         queue.node.skip();
       };
 
       let embed = {
         embeds: [
           {
-            description: `**再生開始:** [${t.title.substring(0, 20)}${t.title.length > 20 ? "..." : ""}](${t.url}) (${t.duration === "0:00" ? "ライブ" : t.duration})`,
+            description: `**再生開始:**\n[${t.title}](${t.url})\n**投稿者:** ${t.author}\n**長さ:** ${t.duration === "0:00" ? "ライブ" : t.duration}`,
             color: 16748800,
             thumbnail: { url: t.thumbnail }
           }
         ]
       };
-      if (queue.tracks.data.length !== 0) embed.embeds[0].title = `**残り:** ${queue.durationFormatted === "0:00" ? "ライブのみ" : queue.durationFormatted} / ${queue.tracks.data.length}曲`;
+      if (queue.getSize() !== 0) embed.embeds[0].title = `**残り:** ${queue.durationFormatted === "0:00" ? "ライブのみ" : queue.durationFormatted} / ${queue.getSize()}曲`;
       if (number !== null) embed.embeds[0].description = `${embed.embeds[0].description}\n${number + 1}曲スキップしました。`;
       await interaction.followUp(embed);
     };
@@ -1247,7 +1247,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let num = interaction.options.getInteger("number");
-      if (num < 0 || num > queue.tracks.data.length) return await interaction.reply({ content: "数字があたおか", ephemeral: true });
+      if (num < 0 || num > queue.getSize()) return await interaction.reply({ content: "数字があたおか", ephemeral: true });
       const vol = queue.node.volume;
 
       let t; let time;
@@ -1261,7 +1261,7 @@ client.on("interactionCreate", async (interaction) => {
         };
       } else {
         num = num - 1;
-        t = queue.tracks.data[num];
+        t = queue.tracks.toArray()[num];
         time = `\n**長さ:** ${t.duration}`;
       };
 
@@ -1296,9 +1296,9 @@ client.on("interactionCreate", async (interaction) => {
       } else if (mode.value === QueueRepeatMode.QUEUE) {
         sendmode = "リピート対象を**キュー**に変えたよ！";
       } else if (mode.value === QueueRepeatMode.AUTOPLAY) {
-        sendmode = "リピートをautoplayに設定したよ！";
+        sendmode = "リピートを**autoplay**に設定したよ！";
       } else if (mode.value === QueueRepeatMode.OFF) {
-        sendmode = "リピートを解除したよ！";
+        sendmode = "リピートを**解除**したよ！";
       };
       await interaction.reply(sendmode);
     };
@@ -1309,13 +1309,14 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
-      const number = (interaction.options.getInteger("number"));
+      const number = interaction.options.getInteger("number");
+      const track = queue.tracks.toArray()[number - 1];
 
-      if (number <= 0 || number > queue.tracks.data.length) return await interaction.reply({ content: "指定した番号の曲は存在しません。", ephemeral: true });
+      if (number <= 0 || number > queue.getSize()) return await interaction.reply({ content: "指定した番号の曲は存在しません。", ephemeral: true });
 
       await interaction.deferReply();
-      await interaction.followUp(`**${number}.** ${queue.tracks.data[number - 1].title}を削除したよ！`);
-      queue.tracks.removeOne(queue.tracks.data[number - 1]);
+      await interaction.followUp(`**${number}.** ${track.title}を削除したよ！`);
+      queue.node.remove(track);
     };
 
     if (interaction.commandName === "songhistory") {
@@ -1326,21 +1327,21 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
       let page = interaction.options.getInteger("page");
       if (page === null) { page = 1 };
-      if (page < 1 || page > ((Math.floor(queue.history.tracks.data.length / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
-      if (queue.history.tracks.data.length === 0) return await interaction.reply({ content: "履歴はまだ保存されていません", ephemeral: true });
+      if (page < 1 || page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
+      if (queue.history.getSize() === 0) return await interaction.reply({ content: "履歴はまだ保存されていません", ephemeral: true });
 
       await interaction.deferReply();
       const pageEnd = (-10 * (page - 1)) - 1;
       const pageStart = (pageEnd - 10);
-      const tracks = queue.history.tracks.data.slice(pageStart, pageEnd).reverse().map((m, i) => {
+      const tracks = queue.history.tracks.toArray().slice(pageStart, pageEnd).reverse().map((m, i) => {
         return `**${i + (pageEnd * -1)}.** (${m.duration === "0:00" ? "ライブ" : m.duration}) [${m.title.substring(0, 20)}${m.title.length > 20 ? "..." : ""}](${m.url})`;
       });
 
       let trackslength
-      if (queue.history.tracks.data.length === 1) {
+      if (queue.history.getSize() === 1) {
         trackslength = queue.node.streamTime;
       } else {
-        const length = queue.history.tracks.data.slice(0, queue.history.tracks.data.length - 1).map((m) => {
+        const length = queue.history.tracks.toArray().slice(0, queue.history.tracks.data.length - 1).map((m) => {
           return m.durationMS;
         });
         const reducer = (sum, currentValue) => sum + currentValue;
@@ -1366,13 +1367,13 @@ client.on("interactionCreate", async (interaction) => {
         embeds: [
           {
             title: `今までに${trackslength} / ${queue.history.getSize()}曲再生したよ！`,
-            description: `**再生中:** (${queue.node.getTimestamp().progress === Infinity ? "ライブ" : `${queue.node.getTimestamp().current.label}/${queue.currentTrack.duration}`}) [${queue.currentTrack.title.substring(0, 20)}${queue.currentTrack.title.length > 20 ? "..." : ""}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.tracks.data.length > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.tracks.data.length + pageStart}曲` : ""}`,
+            description: `**再生中:** (${queue.node.getTimestamp().progress === Infinity ? "ライブ" : `${queue.node.getTimestamp().current.label}/${queue.currentTrack.duration}`}) [${queue.currentTrack.title.substring(0, 20)}${queue.currentTrack.title.length > 20 ? "..." : ""}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.getSize() > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.getSize() + pageStart}曲` : ""}`,
             color: 16748800,
             thumbnail: {
               url: queue.currentTrack.thumbnail
             },
             footer: {
-              text: `ページ: ${page}/${(Math.floor(queue.history.tracks.data.length / 10)) + 1}`
+              text: `ページ: ${page}/${(Math.floor(queue.history.getSize() / 10)) + 1}`
             }
           }
         ]
@@ -1385,7 +1386,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
       if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
       if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
-      if (queue.tracks.data.length === 1) return await interaction.reply({ content: "キュー内は1曲しか無いよ！", ephemeral: true });
+      if (queue.getSize() === 1) return await interaction.reply({ content: "キュー内は1曲しか無いよ！", ephemeral: true });
 
       await interaction.deferReply();
       queue.tracks.shuffle();
@@ -1858,7 +1859,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!result.banner && !result.banner_color) return await interaction.reply({ content: "バナー画像も色も取得できませんでした。", ephemeral: true });
       const url = result.banner ? `https://cdn.discordapp.com/banners/${id}/${result.banner}.${type}?size=4096` : null;
       const description = result.banner ? `[バナーの画像URL](${url})` : `バナーの色コード: ${result.banner_color}`;
-      const color = result.banner_color ? result.accent_color : 000000;
+      const color = result.banner_color ? result.accent_color : 0;
       await interaction.reply({
         embeds: [
           {
@@ -1881,7 +1882,7 @@ client.on("interactionCreate", async (interaction) => {
           {
             description: `[アイコンの画像URL](${url})`,
             image: { url: url },
-            color: role.color ? role.color : 000000
+            color: role.color ? role.color : 0
           }
         ]
       });
