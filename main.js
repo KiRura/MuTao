@@ -1229,7 +1229,7 @@ client.on("interactionCreate", async (interaction) => {
       let embed = {
         embeds: [
           {
-            description: `**再生開始:**\n[${t.title}](${t.url})\n**投稿者:** ${t.author}\n**長さ:** ${t.duration === "0:00" ? "ライブ" : t.duration}`,
+            description: `**再生開始:**\n[${t.title}](${t.url})\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.duration === "0:00" ? "ライブ" : t.duration}`,
             color: 16748800,
             thumbnail: { url: t.thumbnail }
           }
