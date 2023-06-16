@@ -42,7 +42,7 @@ client.once("ready", async () => {
     const dt = new Date();
     const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
     let json = JSON.parse(fs.readFileSync("guilds.json"));
-    json.map(async guild => {
+    await Promise.all(json.map(async guild => {
       if (guild.countswitch) {
         const result = await client.guilds.cache.get(guild.id).channels.cache.get(guild.send_count_channel).send({
           embeds: [
@@ -61,7 +61,7 @@ client.once("ready", async () => {
         json.find(jsonguild => jsonguild.id === guild.id).count = 0
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
       };
-    });
+    }));
   });
 
   const data = [
