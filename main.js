@@ -1440,17 +1440,21 @@ client.on("interactionCreate", async (interaction) => {
       if (interaction.options.getSubcommandGroup() === "user") {
         if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
           if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
-          if (interaction.options.getSubcommand() === "add") {
-            targetuser.roles.add(targetrole.role).catch(async e => { return await interaction.reply({ content: "順位的に操作できませんでした。", ephemeral: true }) });
-            await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
-          };
-
-          if (interaction.options.getSubcommand() === "remove") {
-            targetuser.roles.remove(targetrole.role).catch(async e => { return await interaction.reply({ content: "順位的に操作できませんでした。", ephemeral: true }) });
-            await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
+          try {
+            if (interaction.options.getSubcommand() === "add") {
+              await targetuser.roles.add(targetrole.role);
+              await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
+            };
+  
+            if (interaction.options.getSubcommand() === "remove") {
+              await targetuser.roles.remove(targetrole.role);
+              await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
+            };
+          } catch (error) {
+            return await interaction.reply({ content: "順位的に操作できませんでした。", ephemeral: true });
           };
         } else {
-          return interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
+          return await interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
         };
 
         if (interaction.options.getSubcommand() === "list") {
@@ -1490,13 +1494,13 @@ client.on("interactionCreate", async (interaction) => {
 
           if (interaction.options.getSubcommand() === "remove") {
             const guildmembers = await interaction.guild.members.fetch();
-            interaction.reply(`${targetrole.role.name}を${interaction.guild.memberCount}人から奪取中`);
+            await interaction.reply(`${targetrole.role.name}を${interaction.guild.memberCount}人から奪取中`);
             await Promise.all(guildmembers.map(member => member.roles.remove(targetrole.role))).catch(async e => await interaction.editReply("権限が変更されました。").catch(async e => await interaction.channel.send("権限が変更されました。").catch(async e => await interaction.user.send("権限が変更されました。").catch(e => { return; }))));
             await interaction.editReply(`${targetrole.role.name}を${interaction.guild.memberCount}人から奪取したよ！`).catch(async e => await interaction.channel.send(`${targetrole.role.name}を${interaction.guild.memberCount}人から奪取したよ！`).catch(e => { return; }));
             await interaction.user.send(`ロールの剥奪が完了しました。`).catch(e => { return; });;
           };
         } else {
-          return interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
+          return await interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
         };
       };
     };
@@ -1946,7 +1950,6 @@ client.on("interactionCreate", async (interaction) => {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
     };
   } catch (e) {
-    if (e.rawError.code === 10008) return;
     console.log(e);
     if (interaction.user.id !== "606093171151208448") {
       await client.users.cache.get("606093171151208448").send(`${interaction.guild ? `${interaction.guild.name}の${interaction.user.tag}` : interaction.user.tag}\nがデバッガーになってくれたお知らせ\n${e}`);
