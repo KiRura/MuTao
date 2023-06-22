@@ -1492,6 +1492,8 @@ client.on("interactionCreate", async (interaction) => {
       };
 
       if (interaction.options.getSubcommandGroup() === "all") {
+        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
+        if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply("管理者権限所持者のみ実行可能です。");
         const ignore = interaction.options.getBoolean("ignorebot");
         let members;
         if (ignore) {
@@ -1503,8 +1505,6 @@ client.on("interactionCreate", async (interaction) => {
         } else {
           members = interaction.guild.memberCount;
         };
-        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
-        if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply("管理者権限所持者のみ実行可能です。");
         try {
           const add = interaction.options.getSubcommand() === "add";
           await interaction.reply(add ? `${targetrole.role.name}を${members}人に付与中` : `${targetrole.role.name}を${members}人から奪取中`);
