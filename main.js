@@ -1684,36 +1684,6 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(`${y}年(${wareki})${("00" + (m + 1)).slice(-2)}月${("00" + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`);
     };
 
-    if (interaction.commandName === "riseki") {
-      if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
-      if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageNicknames) || !interaction.guild.members.me.permissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("ニックネームを管理できる権限が無いよ！");
-      let word = await interaction.options.getString("word");
-      if (!word) { word = "離席"; };
-      try {
-        await interaction.member.setNickname(`${interaction.member.displayName} (${word})`);
-        await interaction.reply({ content: `${word}に設定しました`, ephemeral: true });
-      } catch (e) {
-        await interaction.reply({ content: "君の権限高すぎるよ！", ephemeral: true });
-      };
-    };
-
-    if (interaction.commandName === "memberinfo") {
-      const member = interaction.options.getMember("member");
-      if (!member) return await interaction.reply({ content: "例外のエラーが発生しました。", ephemeral: true });
-      const createdat = `${member.user.createdAt.getFullYear()}年${member.user.createdAt.getMonth()}月${member.user.createdAt.getDate()}日${member.user.createdAt.getHours()}時${member.user.createdAt.getMinutes()}分${member.user.createdAt.getSeconds()}秒`;
-      const joinedat = `${member.joinedAt.getFullYear()}年${member.joinedAt.getMonth()}月${member.joinedAt.getDate()}日${member.joinedAt.getHours()}時${member.joinedAt.getMinutes()}分${member.joinedAt.getSeconds()}秒`
-      const avatar = member.user.avatarURL() ? member.user.avatarURL() : member.user.defaultAvatarURL;
-
-      await interaction.reply({
-        embeds: [{
-          title: member.user.tag,
-          description: `**アイコン:** ${avatar}?size=4096\n**アカウント作成:** ${createdat}\n**サーバー参加:** ${joinedat}\n`,
-          color: 16748800,
-          thumbnail: { url: `${avatar}?size=4096` },
-        }]
-      })
-    };
-
     if (interaction.commandName === "searchimage") {
       const image = interaction.options.getAttachment("image");
       const url = await interaction.options.getString("url");
@@ -1803,24 +1773,6 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.commandName === "messages") {
-      // if (interaction.guild.id !== "1074670271312711740" && interaction.guild.id !== "610020293208965151") return await interaction.reply({ content: "ゆた鯖内でのみ実行できます\ndiscord.gg/cpSp6kRXM5", ephemeral: true });
-      // const data = Number(fs.readFileSync("yutasaba.txt"));
-      // const dt = new Date();
-      // const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
-      // await interaction.reply({
-      //   embeds: [{
-      //     description: `メッセージ数: ${data}`,
-      //     color: client.guilds.cache.get("610020293208965151").roles.cache.get("610481839978577931").color,
-      //     author: {
-      //       name: client.guilds.cache.get("610020293208965151").name,
-      //       icon_url: client.guilds.cache.get("610020293208965151").iconURL()
-      //     },
-      //     footer: {
-      //       text: date
-      //     }
-      //   }]
-      // });
-
       const json = JSON.parse(fs.readFileSync("guilds.json"));
       const guild = json.find(guild => guild.id === interaction.guild.id);
       if (!guild) {
