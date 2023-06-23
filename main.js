@@ -635,17 +635,6 @@ client.once("ready", async () => {
         }
       ]
     },
-    { // memberinfo
-      name: "memberinfo",
-      description: "サーバー内のメンバーの情報を取得する",
-      options: [
-        {
-          type: ApplicationCommandOptionType.User,
-          name: "member",
-          description: "メンバー"
-        }
-      ]
-    },
     { // searchimage
       name: "searchimage",
       description: "画像検索",
