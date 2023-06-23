@@ -1944,7 +1944,8 @@ client.on("messageCreate", async (message) => {
     };
 
     if (guild.countswitch) {
-      json.find(guild => guild.id === message.guild.id).count = + 1;
+      const count = json.find(guild => guild.id === message.guild.id).count;
+      json.find(guild => guild.id === message.guild.id).count = count + 1;
       fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
     };
   } catch (e) {
