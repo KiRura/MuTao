@@ -959,6 +959,27 @@ client.once("ready", async () => {
     { // stopcount
       name: "stopcount",
       description: "メッセージ数のカウントを止める。(再有効化は/setchannelで)"
+    },
+    { // delmessages
+      name: "delmessages",
+      description: "直前の指定した数のメッセージを全て削除する。",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Channel,
+          name: "channel",
+          description: "削除するメッセージ達のチャンネル",
+          required: true,
+          channelTypes: [ChannelType.GuildText]
+        },
+        {
+          type: ApplicationCommandOptionType.Integer,
+          name: "number",
+          description: "削除するメッセージ数(1~100)",
+          required: true,
+          minValue: 1,
+          maxValue: 100
+        }
+      ]
     }
   ];
   await client.application.commands.set(data);
@@ -974,7 +995,7 @@ client.on("interactionCreate", async (interaction) => {
     const adminicon = `${(await client.users.fetch("606093171151208448")).avatarURL()}?size=4096`;
     const adminname = (await client.users.fetch("606093171151208448")).username;
 
-    if (interaction.commandName === "help") {
+    if (interaction.command.name === "help") {
       const result = await ping.promise.probe("8.8.8.8");
       await interaction.reply({
         embeds: [{
@@ -988,7 +1009,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "ping") {
+    if (interaction.command.name === "ping") {
       const result = await ping.promise.probe("8.8.8.8");
       let message = `**Websocket:** ${client.ws.ping}ms\n**API Endpoint:** please wait...\n**ping 8.8.8.8:** ${result.time}ms`
       await interaction.reply(message);
@@ -997,7 +1018,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.editReply(message);
     };
 
-    if (interaction.commandName === "play") {
+    if (interaction.command.name === "play") {
       if (interaction.guild === null) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
       if (interaction.guild.members.me.voice.channel === null && interaction.member.voice.channel === null) return await interaction.reply({ content: "playコマンド\nvcに入れ", ephemeral: true });
       if (interaction.guild.members.me.voice.channel === null) { // undefined回避
@@ -1078,7 +1099,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "leave") {
+    if (interaction.command.name === "leave") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1091,7 +1112,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.deleteReply();
     };
 
-    if (interaction.commandName === "pause") {
+    if (interaction.command.name === "pause") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1102,7 +1123,7 @@ client.on("interactionCreate", async (interaction) => {
       paused ? await interaction.reply("一時停止したよ") : await interaction.reply({ content: "既に一時停止中だよ！", ephemeral: true }); // deferReply/followUpをするとephemeralが使えないらしい
     };
 
-    if (interaction.commandName === "unpause") {
+    if (interaction.command.name === "unpause") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1113,7 +1134,7 @@ client.on("interactionCreate", async (interaction) => {
       paused ? await interaction.reply("一時停止を解除したよ") : await interaction.reply({ content: "一時停止がされてなかったよ", ephemeral: true });
     };
 
-    if (interaction.commandName === "clear") {
+    if (interaction.command.name === "clear") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1130,7 +1151,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(`${losttracks}曲がダイソンの手によってまっさらになったよ`);
     };
 
-    if (interaction.commandName === "queue") {
+    if (interaction.command.name === "queue") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1193,7 +1214,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "skip") {
+    if (interaction.command.name === "skip") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1239,7 +1260,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(embed);
     };
 
-    if (interaction.commandName === "nowp" || interaction.commandName === "songinfo") {
+    if (interaction.command.name === "nowp" || interaction.command.name === "songinfo") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1250,7 +1271,7 @@ client.on("interactionCreate", async (interaction) => {
       const vol = queue.node.volume;
 
       let t; let time;
-      if (interaction.commandName === "nowp" || num === 0 || num === null) {
+      if (interaction.command.name === "nowp" || num === 0 || num === null) {
         t = queue.currentTrack;
         const progress = queue.node.createProgressBar(); // 埋め込み作り(discordplayer神)
         if (queue.node.getTimestamp().progress === Infinity) {
@@ -1278,7 +1299,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "loop") {
+    if (interaction.command.name === "loop") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1302,7 +1323,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(sendmode);
     };
 
-    if (interaction.commandName === "remove") {
+    if (interaction.command.name === "remove") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1318,7 +1339,7 @@ client.on("interactionCreate", async (interaction) => {
       queue.node.remove(track);
     };
 
-    if (interaction.commandName === "songhistory") {
+    if (interaction.command.name === "songhistory") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1379,7 +1400,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "shuffle") {
+    if (interaction.command.name === "shuffle") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1392,7 +1413,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(`${queue.tracks.data.length}曲をぐしゃぐしゃにしたよ！`);
     };
 
-    if (interaction.commandName === "setvolume") {
+    if (interaction.command.name === "setvolume") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1405,7 +1426,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : "なんかセットできませんでした。"}`);
     };
 
-    if (interaction.commandName === "seek") {
+    if (interaction.command.name === "seek") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const queue = useQueue(interaction.guild.id);
       if (!queue && interaction.guild.members.me.voice.channel !== null) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
@@ -1416,7 +1437,7 @@ client.on("interactionCreate", async (interaction) => {
       await queue.node.seek(duration * 1000) ? await interaction.reply(`${duration}秒に移動したよ！`) : await interaction.reply({ content: "数字があたおかだったかも", ephemeral: true });
     };
 
-    if (interaction.commandName === "userinfo") {
+    if (interaction.command.name === "userinfo") {
       const id = await interaction.options.getString("id");
       const userinfo = await client.users.fetch(id).catch(async e => await interaction.reply({ content: "指定したIDはユーザーではありません。", ephemeral: true }));
       if (userinfo.interaction) return;
@@ -1432,7 +1453,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "role") {
+    if (interaction.command.name === "role") {
       if (interaction.guild === null) return await interaction.reply("サーバー内でないと実行できません！");
       const targetuser = interaction.options.getMember("user");
       const targetrole = interaction.options.get("role");
@@ -1513,7 +1534,7 @@ client.on("interactionCreate", async (interaction) => {
       };
     };
 
-    if (interaction.commandName === "send") {
+    if (interaction.command.name === "send") {
       try {
         const description = interaction.options.getString("description");
         const channel = interaction.options.getChannel("channel");
@@ -1583,26 +1604,26 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply("送信できました！");
     };
 
-    if (interaction.commandName === "siranami") {
+    if (interaction.command.name === "siranami") {
       await interaction.reply("https://www.youtube.com/@ShiranamIroriCH");
     };
 
-    if (interaction.commandName === "yutamaruattack") {
+    if (interaction.command.name === "yutamaruattack") {
       if (interaction.guildId !== "610020293208965151") return await interaction.reply("ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5");
       await interaction.reply("多分できた");
       client.channels.cache.get("822410173850320916").send(`<@610018861319716866> Hey! ${interaction.member.displayName}がアタックしたよ！`);
     };
 
-    if (interaction.commandName === "yutashistory") {
+    if (interaction.command.name === "yutashistory") {
       if (interaction.guildId !== "610020293208965151") return await interaction.reply("ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5");
       await interaction.reply("http://simp.ly/p/jNclcr")
     };
 
-    if (interaction.commandName === "ggrks") {
+    if (interaction.command.name === "ggrks") {
       await interaction.reply("https://google.com");
     };
 
-    if (interaction.commandName === "getthumbnail") {
+    if (interaction.command.name === "getthumbnail") {
       const url = interaction.options.getString("url");
       const track = await discordplayer.search(url, {
         searchEngine: QueryType.AUTO
@@ -1624,7 +1645,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "trans") {
+    if (interaction.command.name === "trans") {
       await interaction.deferReply();
       let outtext;
       const sourcetext = interaction.options.getString("sourcetext");
@@ -1652,7 +1673,7 @@ client.on("interactionCreate", async (interaction) => {
         });
     };
 
-    if (interaction.commandName === "today") {
+    if (interaction.command.name === "today") {
       const dt = new Date();
       const y = dt.getFullYear();
       const m = dt.getMonth();
@@ -1673,7 +1694,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(`${y}年(${wareki})${("00" + (m + 1)).slice(-2)}月${("00" + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`);
     };
 
-    if (interaction.commandName === "searchimage") {
+    if (interaction.command.name === "searchimage") {
       const image = interaction.options.getAttachment("image");
       const url = await interaction.options.getString("url");
       if (!image && !url) return await interaction.reply({ content: "画像かURLを指定して下さい。", ephemeral: true });
@@ -1706,7 +1727,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "avatar") {
+    if (interaction.command.name === "avatar") {
       const id = interaction.options.getString("id");
       const member = interaction.options.getUser("member");
       if (!id && !member) return await interaction.reply({ content: "どちらかを指定してね", ephemeral: true });
@@ -1729,7 +1750,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "startactivity") {
+    if (interaction.command.name === "startactivity") {
       if (!interaction.guild) return await interaction.reply("サーバー内で実行して下さい");
       if (!interaction.member.voice.channel) return await interaction.reply({ content: "VCに入ってから実行して下さい", ephemeral: true });
       const game = interaction.options.getString("activity");
@@ -1740,7 +1761,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "saveemoji") {
+    if (interaction.command.name === "saveemoji") {
       let emoji = interaction.options.getString("emojiid");
       let type = interaction.options.get("type");
       if (!Number(emoji)) return await interaction.reply(String(emoji).replace("<", "").replace(">", "").replace(":", ""));
@@ -1761,7 +1782,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "messages") {
+    if (interaction.command.name === "messages") {
       const json = JSON.parse(fs.readFileSync("guilds.json"));
       const guild = json.find(guild => guild.id === interaction.guild.id);
       if (!guild) {
@@ -1790,7 +1811,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "disconall") {
+    if (interaction.command.name === "disconall") {
       if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
       const vc = interaction.options.getChannel("vc");
       if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: "VCを指定するかVCに入室して下さい。", ephemeral: true });
@@ -1806,7 +1827,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(`${memberssize}人を切断しました。`);
     };
 
-    if (interaction.commandName === "banner") {
+    if (interaction.command.name === "banner") {
       const type = interaction.options.getBoolean("gif") ? "gif" : "png";
       let id = interaction.options.getString("id");
       const member = interaction.options.getUser("member");
@@ -1837,7 +1858,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "getroleicon") {
+    if (interaction.command.name === "getroleicon") {
       const role = interaction.options.getRole("role");
       if (!role.iconURL()) return await interaction.reply({ content: "指定されたロールにアイコンはありませんでした。", ephemeral: true });
       const url = `https://cdn.discordapp.com/role-icons/${role.id}/${role.icon}.png?size=4096`;
@@ -1852,7 +1873,7 @@ client.on("interactionCreate", async (interaction) => {
       });
     };
 
-    if (interaction.commandName === "deafall") {
+    if (interaction.command.name === "deafall") {
       if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
       let vc = interaction.options.getChannel("vc");
       vc = vc ? vc : interaction.member.voice.channel;
@@ -1870,7 +1891,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
     };
 
-    if (interaction.commandName === "setchannel") {
+    if (interaction.command.name === "setchannel") {
       await interaction.deferReply();
       const channel = interaction.options.getChannel("channel");
       let json = JSON.parse(fs.readFileSync("guilds.json"));
@@ -1893,7 +1914,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
     };
 
-    if (interaction.commandName === "stopcount") {
+    if (interaction.command.name === "stopcount") {
       let json = JSON.parse(fs.readFileSync("guilds.json"));
       const guild = json.find(guild => guild.id === interaction.guild.id);
       if (!guild) {
@@ -1906,7 +1927,30 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply("カウントをストップしました。");
     };
 
-    if (interaction.commandName === "test") {
+    if (interaction.command.name === "delmessages") {
+      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でしか実行できません！", ephemeral: true });
+      if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
+
+      const channel = interaction.options.getChannel("channel");
+
+      const me = interaction.guild.members.me;
+      if (!me.permissions.has(PermissionFlagsBits.ManageMessages) || !me.permissionsIn(channel.id).has(PermissionFlagsBits.ManageMessages)) return await interaction.reply({ content: "メッセージを管理する権限がありません！", ephemeral: true });
+
+      const num = interaction.options.getInteger("number");
+
+      const mymessage = (await interaction.reply(`<#${channel.id}>内の${num}個のメッセージを削除しています...。`));
+
+      await Promise.all((await channel.messages.fetch({ limit: num })).map(async message => {
+        if (mymessage.id === message.id) return;
+        await message.delete();
+      })).catch(async e => { return await interaction.channel.send("権限が変更されました。").catch(async e => { return await interaction.user.send("権限が変更されたか、チャンネルが削除されました。").catch(async e => { return; }); }); });
+
+      const finish = `<#${channel.id}>内の${num}個のメッセージを削除しました。`;
+      await interaction.channel.send(finish).catch(async e => { return; });
+      await interaction.user.send(finish).catch(async e => { return; });
+    };
+
+    if (interaction.command.name === "test") {
       if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
     };
   } catch (e) {
