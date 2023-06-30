@@ -18,6 +18,7 @@ const { DiscordTogether } = require("discord-together");
 const discordTogether = new DiscordTogether(client);
 const fs = require("fs");
 const cron = require("node-cron");
+const request = require("request");
 
 function writedefault(id) {
   let json = JSON.parse(fs.readFileSync("guilds.json"));
@@ -1519,7 +1520,7 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "send") {
-      if (!interaction.guild) return await interaction.reply({content: "サーバー内でしか実行できません！", ephemeral: true});
+      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でしか実行できません！", ephemeral: true });
       try {
         const description = interaction.options.getString("description");
         const channel = interaction.options.getChannel("channel");
@@ -1933,14 +1934,18 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "deeplusage") {
-      await interaction.reply("なんかできないので、正式実装をお待ち下さい。");
-      // const result = await (await fetch.fetch({
-      //   url: "https://api-free.deepl.com/v2/usage",
-      //   method: "GET",
-      //   headers: {
-      //     "Authorization": `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`
-      //   }
-      // })).json();
+      const result = await (await fetch.fetch("https://api-free.deepl.com/v2/usage", {
+        method: "GET",
+        headers: {
+          "Authorization": `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`
+        }
+      })).json();
+      await interaction.reply({embeds: [
+        {
+          description: `**今月の翻訳文字数:** ${result.character_count}文字\n**残り:** ${result.character_limit - result.character_count}文字`,
+          color: 16748800
+        }
+      ]});
     };
 
     if (interaction.command.name === "test") {
