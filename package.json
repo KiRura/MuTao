@@ -3,6 +3,7 @@
     "@discord-player/extractor": "^4.3.1",
     "@discordjs/collection": "^1.5.1",
     "@distube/ytdl": "^2.0.6",
+    "@google-cloud/vision": "^3.1.4",
     "axios": "^1.4.0",
     "chatgpt": "^5.2.5",
     "deepl": "^1.0.13",
