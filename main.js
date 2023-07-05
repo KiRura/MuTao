@@ -265,14 +265,6 @@ client.once("ready", async () => {
       name: "siranami",
       description: "シラナミのチャンネルを表示"
     },
-    { // yutamaruattack
-      name: "yutamaruattack",
-      description: "アタックゆた"
-    },
-    { // yutahistory
-      name: "yutashistory",
-      description: "歴史"
-    },
     { // ggrks
       name: "ggrks",
       description: "ggrks"
@@ -1622,17 +1614,6 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.command.name === "siranami") {
       await interaction.reply("https://www.youtube.com/@ShiranamIroriCH");
-    };
-
-    if (interaction.command.name === "yutamaruattack") {
-      if (interaction.guild.id !== "610020293208965151") return await interaction.reply("ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5");
-      await interaction.reply("多分できた");
-      await (await client.channels.fetch("822410173850320916")).send(`<@610018861319716866> Hey! ${interaction.member.displayName}(${interaction.user.id})がアタックしたよ！`);
-    };
-
-    if (interaction.command.name === "yutashistory") {
-      if (interaction.guild.id !== "610020293208965151") return await interaction.reply("ゆた鯖でのみ実行可能です\ndiscord.gg/cpSp6kRXM5");
-      await interaction.reply("http://simp.ly/p/jNclcr")
     };
 
     if (interaction.command.name === "ggrks") {
