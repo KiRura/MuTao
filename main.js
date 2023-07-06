@@ -35,7 +35,7 @@ function writedefault(id) {
 };
 function avatar_to_URL(user) {
   if (!user.id) return null;
-  return user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=4096` : `${user.defaultAvatarURL}?size=4096`;
+  return user.avatarURL() ? user.avatarURL({ extension: "png", size: 4096 }) : `${user.defaultAvatarURL}?size=4096`;
 };
 
 client.once("ready", async () => {
@@ -1050,7 +1050,7 @@ client.on("interactionCreate", async (interaction) => {
   try {
     if (!interaction.isCommand()) return;
 
-    const adminicon = `${(await client.users.fetch("606093171151208448")).avatarURL()}?size=4096`;
+    const adminicon = (await client.users.fetch("606093171151208448")).avatarURL({ extension: "png", size: 4096 });
     const adminname = (await client.users.fetch("606093171151208448")).username;
     const mutaocolor = 16760703;
     const redcolor = 16744319;
