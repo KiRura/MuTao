@@ -233,6 +233,39 @@ client.once("ready", async () => {
               ]
             }
           ]
+        },
+        {
+          type: ApplicationCommandOptionType.SubcommandGroup,
+          name: "allbot",
+          description: "全てのbotのロールを管理",
+          options: [
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "add",
+              description: "追加",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Role,
+                  name: "role",
+                  description: "ロール",
+                  required: true
+                }
+              ]
+            },
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "remove",
+              description: "削除",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Role,
+                  name: "role",
+                  description: "ロール",
+                  required: true
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1538,6 +1571,34 @@ client.on("interactionCreate", async (interaction) => {
           await interaction.reply(`エラー\n${error}`).catch(async e => await interaction.channel.send(`エラー\n${error}`));
           console.log(error);
         };
+      };
+
+      if (interaction.options.getSubcommandGroup() === "allbot") {
+        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: "ロールを管理できる権限が無いよ！", ephemeral: true });
+        if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply("管理者権限所持者のみ実行可能です。");
+
+        let i = 0;
+        (await interaction.guild.members.fetch()).map(async member => {
+          if (member.user.bot) i += 1;
+        });
+        members = i;
+
+        try {
+          const add = interaction.options.getSubcommand() === "add";
+          await interaction.reply(add ? `${targetrole.role.name}を${members}人に付与中` : `${targetrole.role.name}を${members}人から奪取中`);
+          await Promise.all((await interaction.guild.members.fetch()).map(async member => {
+            if (!member.user.bot) return;
+            const has = member.roles.cache.get(targetrole.role.id);
+            if ((add && has) || (!add && !has)) return;
+            add ? await member.roles.add(targetrole.role) : await member.roles.remove(targetrole.role);
+          }));
+          const content = add ? `${targetrole.role.name}を${members}人に付与したよ！` : `${targetrole.role.name}を${members}人から奪取したよ！`;
+          await interaction.editReply(content).catch(async e => await interaction.channel.send(content).catch(e => { return; }));
+          await interaction.user.send(add ? `ロールの付与が完了しました。` : `ロールの剥奪が完了しました。`).catch(e => { return; });
+        } catch (error) {
+          await interaction.reply(`エラー\n${error}`).catch(async e => await interaction.channel.send(`エラー\n${error}`));
+          console.log(error);
+        }
       };
     };
 
