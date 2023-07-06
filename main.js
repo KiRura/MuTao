@@ -50,11 +50,20 @@ client.once("ready", async () => {
     let json = JSON.parse(fs.readFileSync("guilds.json"));
     await Promise.all(json.map(async guild => {
       if (guild.countswitch) {
-        const result = await client.guilds.cache.get(guild.id).channels.cache.get(guild.send_count_channel).send({
+        let fetchguild;
+        let fetchchannel;
+        try {
+          fetchguild = await client.guilds.fetch(guild.id);
+          fetchchannel = await fetchguild.channels.fetch(guild.send_count_channel);
+        } catch (error) {
+          return;
+        };
+        const result = await fetchchannel.send({
           embeds: [
             {
               author: {
-                name: client.guilds.cache.get(guild.id).name
+                name: fetchguild.name,
+                icon_url: fetchguild.iconURL({extension: "png", size: 4096})
               },
               description: `メッセージ数: ${guild.count}`,
               color: 3066993,
@@ -1857,11 +1866,13 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.reply({ content: "データが新規に作成されました。\nカウントを開始するには/setchannelをして下さい。", ephemeral: true });
         return;
       };
+
       await interaction.reply({
         embeds: [
           {
             author: {
-              name: interaction.guild.name
+              name: interaction.guild.name,
+              icon_url: interaction.guild.iconURL({extension: "png", size: 4096})
             },
             description: `メッセージ数: ${guild.count}${guild.countswitch ? "" : "\n現在カウントが停止されています。"}`,
             color: 3066993
