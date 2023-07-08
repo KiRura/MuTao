@@ -35,13 +35,14 @@ function writedefault(id) {
 };
 function avatar_to_URL(user) {
   if (!user.id) return null;
-  return user.avatarURL() ? user.avatarURL({ extension: "png", size: 4096 }) : `${user.defaultAvatarURL}?size=4096`;
+  const avatar = user.avatarURL({ extension: "png", size: 4096 });
+  return avatar ? avatar : `${user.defaultAvatarURL}?size=4096`;
 };
 
 client.once("ready", async () => {
   setInterval(async () => {
     const result = await ping.promise.probe("8.8.8.8");
-    client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${client.guilds.cache.size} servers・${client.users.cache.size} users・${result.time}ms` });
+    client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${(await client.guilds.fetch()).size} servers・${client.users.cache.size} users・${result.time}ms` });
   }, 60000);
 
   cron.schedule("59 59 23 * * *", async () => {
@@ -1080,7 +1081,6 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.command.name === "play") {
       if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      if (!interaction.guild.members.me.voice.channel && !interaction.member.voice.channel) return await interaction.reply({ content: "playコマンド\nvcに入れ", ephemeral: true });
       if (!interaction.guild.members.me.voice.channel) { // undefined回避
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionFlagsBits.Connect)) return await interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
       };
@@ -1089,6 +1089,8 @@ client.on("interactionCreate", async (interaction) => {
       const url = await interaction.options.getString("url");
       let vc = await interaction.options.getChannel("vc");
       vc = vc ? vc : interaction.member.voice.channel;
+      vc = vc ? vc : interaction.guild.members.me.voice.channel;
+      if (!vc) return await interaction.followUp("playコマンド\nVCに入るか\nVC指定するか");
       const volume = await interaction.options.getInteger("vol");
       let vol = volume ? volume : 30;
       if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50;
