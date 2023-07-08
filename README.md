@@ -6,6 +6,6 @@
 
 すぐに修正するようにはしていますが、諸事情により修正できずやむを得ず機能自体を停止したり放置したりする場合もあります(例: /searchimageのエラーなど)。
 
-導入: https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275300797504&scope=bot%20applications.commands
+導入: https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275347008576&scope=applications.commands%20bot
 
 サポート鯖: https://discord.gg/ky97Uqu3YY
