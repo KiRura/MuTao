@@ -1085,16 +1085,16 @@ client.on("interactionCreate", async (interaction) => {
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionFlagsBits.Connect)) return await interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
       };
 
-      await interaction.deferReply(); // タイムアウト防止
       const url = await interaction.options.getString("url");
       let vc = await interaction.options.getChannel("vc");
       vc = vc ? vc : interaction.member.voice.channel;
       vc = vc ? vc : interaction.guild.members.me.voice.channel;
-      if (!vc) return await interaction.followUp("playコマンド\nVCに入るか\nVC指定するか");
+      if (!vc) return await interaction.reply({ content: "playコマンド\nVCに入るか\nVC指定するか", ephemeral: true });
       const volume = await interaction.options.getInteger("vol");
       let vol = volume ? volume : 30;
       if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50;
 
+      await interaction.deferReply();
       const track = await discordplayer.search(url, {
         requestedBy: interaction.user,
         searchEngine: QueryType.AUTO
@@ -1102,7 +1102,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!track.hasTracks()) return await interaction.followUp("何かしらの原因により処理できません。");
 
       const getqueue = useQueue(interaction.guild.id);
-      const urlboolean = (url.match("http://") || url.match("https://"));
+      const urlboolean = (url.startsWith("http://") || url.startsWith("https://"));
       const queuesize = urlboolean ? (getqueue ? getqueue.getSize() : 0) + track.tracks.length : (getqueue ? getqueue.getSize() : 0) + 1;
       const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${queuesize}曲` : "再生開始";
 
