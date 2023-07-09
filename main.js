@@ -38,6 +38,14 @@ function avatar_to_URL(user) {
   const avatar = user.avatarURL({ extension: "png", size: 4096 });
   return avatar ? avatar : `${user.defaultAvatarURL}?size=4096`;
 };
+function return_music(interaction) {
+  if (!interaction.guild) return "サーバー内でしか実行できません！";
+  const queue = useQueue(interaction.guild.id);
+  if (!queue && interaction.guild.members.me.voice.channel) return "多分再起動したのでplayをするかvcから蹴るかして下さいな。";
+  if (!queue) return "VCに入ってないよ！";
+  if (!queue.currentTrack) return "再生中の曲が無いよ！";
+  return false;
+};
 
 client.once("ready", async () => {
   setInterval(async () => {
@@ -1148,31 +1156,22 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "pause") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
 
       queue.node.pause() ? await interaction.reply("一時停止したよ") : await interaction.reply({ content: "既に一時停止中だよ！", ephemeral: true }); // deferReply/followUpをするとephemeralが使えないらしい
     };
 
     if (interaction.command.name === "unpause") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
 
       queue.node.resume() ? await interaction.reply("一時停止を解除したよ") : await interaction.reply({ content: "一時停止がされてなかったよ", ephemeral: true });
     };
 
     if (interaction.command.name === "clear") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       if (queue.getSize() === 0) return await interaction.reply({ content: "キューの中は既に再生中の曲だけだよ！", ephemeral: true });
       const losttracks = queue.getSize() - 1;
 
@@ -1182,11 +1181,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "queue") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
 
       let page = interaction.options.getInteger("page");
       if (page === null) page = 1;
@@ -1245,11 +1241,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "skip") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       let number = interaction.options.getInteger("number");
       if (number && (number < 1 || number > queue.getSize())) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
       await interaction.deferReply();
@@ -1291,11 +1284,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "nowp" || interaction.command.name === "songinfo") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       let num = interaction.options.getInteger("number");
       if (num < 0 || num > queue.getSize()) return await interaction.reply({ content: "数字があたおか", ephemeral: true });
       const vol = queue.node.volume;
@@ -1326,11 +1316,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "loop") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
 
       const mode = interaction.options.get("mode");
       if (queue.repeatMode === mode.value) return await interaction.reply({ content: "既にそのモードです！", ephemeral: true });
@@ -1350,11 +1337,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "remove") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       const number = interaction.options.getInteger("number");
       const track = queue.tracks.toArray()[number - 1];
 
@@ -1366,11 +1350,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "songhistory") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       let page = interaction.options.getInteger("page");
       if (page === null) page = 1;
       if (page < 1 || page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
@@ -1427,11 +1408,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "shuffle") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       if (queue.getSize() === 1) return await interaction.reply({ content: "キュー内は1曲しか無いよ！", ephemeral: true });
 
       await interaction.deferReply();
@@ -1440,11 +1418,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "setvolume") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       let vol = interaction.options.getInteger("vol");
       if (vol > 50 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 50;
 
@@ -1453,11 +1428,8 @@ client.on("interactionCreate", async (interaction) => {
     };
 
     if (interaction.command.name === "seek") {
-      if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
-      const queue = useQueue(interaction.guild.id);
-      if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
-      if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
-      if (!queue.currentTrack) return await interaction.reply({ content: "再生中の曲が無いよ！", ephemeral: true });
+      const returnmusic = return_music(interaction);
+      if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
       const duration = interaction.options.getNumber("duration");
 
       await queue.node.seek(duration * 1000) ? await interaction.reply(`${duration}秒に移動したよ！`) : await interaction.reply({ content: "数字があたおかだったかも", ephemeral: true });
