@@ -64,7 +64,7 @@ client.once("ready", async () => {
             {
               author: {
                 name: fetchguild.name,
-                icon_url: fetchguild.iconURL({extension: "png", size: 4096})
+                icon_url: fetchguild.iconURL({ extension: "png", size: 4096 })
               },
               description: `メッセージ数: ${guild.count}`,
               color: 3066993,
@@ -1858,7 +1858,7 @@ client.on("interactionCreate", async (interaction) => {
           {
             author: {
               name: interaction.guild.name,
-              icon_url: interaction.guild.iconURL({extension: "png", size: 4096})
+              icon_url: interaction.guild.iconURL({ extension: "png", size: 4096 })
             },
             description: `メッセージ数: ${guild.count}${guild.countswitch ? "" : "\n現在カウントが停止されています。"}`,
             color: 3066993
@@ -1961,8 +1961,7 @@ client.on("interactionCreate", async (interaction) => {
           }
         );
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
-        await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
-        return;
+        return await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
       };
       json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
       json.find(guild => guild.id === interaction.guild.id).countswitch = true;
@@ -1975,8 +1974,7 @@ client.on("interactionCreate", async (interaction) => {
       const guild = json.find(guild => guild.id === interaction.guild.id);
       if (!guild) {
         writedefault(interaction.guild.id);
-        await interaction.reply({ content: "データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
-        return;
+        return await interaction.reply({ content: "データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
       };
       json.find(guild => guild.id === interaction.guild.id).countswitch = false
       fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
@@ -1997,14 +1995,22 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply(`<#${channel.id}>内の${num}個のメッセージを削除しています...。`);
       const fetchreply = await interaction.fetchReply();
 
-      await Promise.all((await channel.messages.fetch({ limit: num })).map(async message => {
-        if (fetchreply.id === message.id) return;
-        await message.delete();
-      })).catch(async e => { return await interaction.channel.send("権限が変更されました。").catch(async e => { return await interaction.user.send("権限が変更されたか、チャンネルが削除されました。").catch(async e => { return; }); }); });
+      try {
+        await Promise.all((await channel.messages.fetch({ limit: num })).map(async message => {
+          if (fetchreply.id === message.id) return;
+          await message.delete();
+        }));
+      } catch (error) {
+        return interaction.editReply("権限が変更されました。").catch(e => {
+          return interaction.channel.send("権限が変更されたか、チャンネルが削除されました。").catch(e => {
+            return;
+          });
+        });
+      };
 
       const finish = `<#${channel.id}>内の${num}個のメッセージを削除しました。`;
-      interaction.editReply(finish).catch(async e => interaction.channel.send(finish).catch(async e => { return; }));
-      interaction.user.send(finish).catch(async e => { return; });
+      interaction.editReply(finish).catch(e => interaction.channel.send(finish).catch(e => { true; }));
+      interaction.user.send(finish).catch(e => { true; });
     };
 
     if (interaction.command.name === "deeplusage") {
@@ -2014,12 +2020,14 @@ client.on("interactionCreate", async (interaction) => {
           "Authorization": `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`
         }
       })).json();
-      await interaction.reply({embeds: [
-        {
-          description: `**今月の翻訳文字数:** ${result.character_count}文字\n**残り:** ${result.character_limit - result.character_count}文字`,
-          color: mutaocolor
-        }
-      ]});
+      await interaction.reply({
+        embeds: [
+          {
+            description: `**今月の翻訳文字数:** ${result.character_count}文字\n**残り:** ${result.character_limit - result.character_count}文字`,
+            color: mutaocolor
+          }
+        ]
+      });
     };
 
     if (interaction.command.name === "test") {
