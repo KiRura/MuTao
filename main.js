@@ -1025,22 +1025,6 @@ client.once("ready", async () => {
     { // deeplusage
       name: "deeplusage",
       description: "このBotのDeepLの使用状況を取得する。"
-    },
-    { // scantext
-      name: "scantext",
-      description: "画像から文字を取り出す",
-      options: [
-        {
-          type: ApplicationCommandOptionType.Attachment,
-          name: "attachment",
-          description: "直接アップロード"
-        },
-        {
-          type: ApplicationCommandOptionType.String,
-          name: "url",
-          description: "URL"
-        }
-      ]
     }
   ];
   await client.application.commands.set(data);
@@ -2036,18 +2020,6 @@ client.on("interactionCreate", async (interaction) => {
           color: mutaocolor
         }
       ]});
-    };
-
-    if (interaction.command.name === "scantext") {
-      return await interaction.reply("実装中です。");
-      const attachment = interaction.options.getAttachment("attachment");
-      const optionurl = interaction.options.getString("url");
-      if (attachment !== null && optionurl !== null) return await interaction.reply({ content: "1つだけ選んで下さい！", ephemeral: true });
-      if (attachment === null && optionurl === null) return await interaction.reply({ content: "1つは選んで下さい！", ephemeral: true });
-      const url = attachment ? attachment.url : optionurl;
-
-      const [result] = await vision.textDetection(url);
-      console.log(result.textAnnotations);
     };
 
     if (interaction.command.name === "test") {
