@@ -5,12 +5,13 @@ const client = new Client({ intents: Object.values(GatewayIntentBits) });
 const API_KEY = process.env.DEEPL_API_KEY;
 const { QueryType, Player, QueueRepeatMode, useQueue } = require("discord-player");
 const discordplayer = Player.singleton(client);
-discordplayer.extractors.loadDefault();
-const wait = (sec) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, sec * 1000);
-  });
-};
+discordplayer.extractors.loadDefault().then(result => {
+  if (result.success) {
+    console.log(`loaded discord-player extractors`);
+  } else {
+    return console.log(`${result.error.name}\n${result.error.message}\n${result.error.stack}`);
+  };
+});
 const fetch = require("undici");
 const { stream } = require("play-dl");
 const ping = require("ping");
@@ -21,6 +22,13 @@ const cron = require("node-cron");
 const Vision = require("@google-cloud/vision");
 const vision = new Vision.ImageAnnotatorClient();
 
+console.log("loaded modules");
+
+const wait = (sec) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, sec * 1000);
+  });
+};
 function writedefault(id) {
   let json = JSON.parse(fs.readFileSync("guilds.json"));
   json.push(
@@ -88,6 +96,7 @@ client.once("ready", async () => {
     }));
   });
 
+  console.log("setting slash commands...");
   const data = [
     { // help
       name: "help",
@@ -1036,7 +1045,7 @@ client.once("ready", async () => {
     }
   ];
   await client.application.commands.set(data);
-  console.log(`${client.user.tag} 準備完了`);
+  console.log(`${client.user.tag} all ready`);
 });
 
 client.on("interactionCreate", async (interaction) => {
