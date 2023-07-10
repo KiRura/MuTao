@@ -1058,6 +1058,10 @@ try {
       { // deeplusage
         name: "deeplusage",
         description: "このBotのDeepLの使用状況を取得する。"
+      },
+      { // clearcount
+        name: "clearcount",
+        description: "メッセージカウントを無かったこと(ゼロ)にする。"
       }
     ];
     await client.application.commands.set(data);
@@ -1846,6 +1850,7 @@ try {
       };
 
       if (interaction.command.name === "messages") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         const json = JSON.parse(fs.readFileSync("guilds.json"));
         const guild = json.find(guild => guild.id === interaction.guild.id);
         if (!guild) {
@@ -1877,6 +1882,7 @@ try {
       };
 
       if (interaction.command.name === "disconall") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         const vc = interaction.options.getChannel("vc");
         if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: "VCを指定するかVCに入室して下さい。", ephemeral: true });
@@ -1939,6 +1945,7 @@ try {
       };
 
       if (interaction.command.name === "deafall") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
         let vc = interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
@@ -1957,6 +1964,8 @@ try {
       };
 
       if (interaction.command.name === "setchannel") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         await interaction.deferReply();
         const channel = interaction.options.getChannel("channel");
         let json = JSON.parse(fs.readFileSync("guilds.json"));
@@ -1979,6 +1988,8 @@ try {
       };
 
       if (interaction.command.name === "stopcount") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         let json = JSON.parse(fs.readFileSync("guilds.json"));
         const guild = json.find(guild => guild.id === interaction.guild.id);
         if (!guild) {
