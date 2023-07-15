@@ -2061,9 +2061,9 @@ try {
       console.log("interaction エラー");
       console.log(e);
       if (interaction.user.id !== "606093171151208448") {
-        await client.users.cache.get("606093171151208448").send(`${interaction.guild ? `${interaction.guild.name}の${interaction.user.tag}` : interaction.user.tag}\nがデバッガーになってくれたお知らせ\n${e}`);
+        await client.users.cache.get("606093171151208448").send(`${interaction.guild ? `${interaction.guild.name}(${interaction.guild.id})の${interaction.user.tag}` : interaction.user.tag}\nがデバッガーになってくれたお知らせ\n${e}`);
         const error = e;
-        const errormsg = `頑張って解読してね(管理者のコードミスの可能性の方が高いです)\n${error}`;
+        const errormsg = `エラーが発生したため、確認次第修正に取り掛かります。ご協力お願い致します。\n${error}`;
         await interaction.reply(errormsg).catch(async e => await interaction.channel.send(errormsg).catch(async e => await interaction.user.send(errormsg).catch(e => { return; })));
       } else {
         await interaction.user.send(`おめえエラー起こしてんじゃねえよ\n${e}`);
