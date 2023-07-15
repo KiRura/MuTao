@@ -1488,7 +1488,7 @@ try {
         await interaction.reply({
           embeds: [{
             title: `${userinfo.tag}`,
-            description: `**アイコン:** ${avatar}\n**プロフ:** <@${userinfo.id}>`,
+            description: `**アイコン:** ${avatar_to_URL(userinfo)}\n**プロフ:** <@${userinfo.id}>`,
             color: mutaocolor,
             thumbnail: { url: avatar_to_URL(userinfo) }
           }]
