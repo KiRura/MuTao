@@ -71,6 +71,19 @@ try {
     return false;
   };
 
+  function times(length) {
+    const hours = ("00" + Math.floor(length / 3600)).slice(-2)
+    const minutes = ("00" + Math.floor((length % 3600) / 60)).slice(-2)
+    const seconds = ("00" + Math.floor((length % 3600) % 60)).slice(-2)
+    if (hours !== "00") {
+      return `${hours}:${minutes}:${seconds}`;
+    } else if (minutes !== "00") {
+      return `${minutes}:${seconds}`;
+    } else {
+      return `00:${seconds}`;
+    };
+  };
+
   client.once("ready", async () => {
     setInterval(async () => {
       const result = await ping.promise.probe("8.8.8.8");
@@ -1081,7 +1094,7 @@ try {
         const result = await ping.promise.probe("8.8.8.8");
         await interaction.reply({
           embeds: [{
-            description: "サポート鯖: https://discord.gg/ky97Uqu3YY\n\n**注意点**\n・/playで「何かしらの原因により処理できません。」とエラーが出た場合は、URLの末尾の「&feature=share」を消して再度お試し下さい。\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
+            description: "サポート鯖: https://discord.gg/ky97Uqu3YY\n\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。",
             color: mutaocolor,
             footer: {
               icon_url: `${adminicon}`,
@@ -1106,7 +1119,7 @@ try {
           if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionFlagsBits.Connect)) return await interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
         };
 
-        const url = await interaction.options.getString("url");
+        const url = await interaction.options.getString("url").replace("&feature=share", "");
         let vc = await interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
         vc = vc ? vc : interaction.guild.members.me.voice.channel;
@@ -1230,33 +1243,10 @@ try {
           return `**${i + pageStart + 1}.** (${m.duration === "0:00" ? "ライブ" : m.duration}) [${m.title.length <= 20 ? m.title : `${m.title.substring(0, 20)}...`}](${m.url})`
         });
 
-        let queuelength;
         const length = (queue.estimatedDuration + (queue.currentTrack.durationMS - queue.node.streamTime)) / 1000; // 再生中の曲の長さが含まれてないから足す
-        if (queue.estimatedDuration + queue.currentTrack.durationMS === 0) {
-          queuelength = "ライブ配信のみ";
-        } else {
-          const hours = ("00" + Math.floor(length / 3600)).slice(-2)
-          const minutes = ("00" + Math.floor((length % 3600) / 60)).slice(-2)
-          const seconds = ("00" + Math.floor((length % 3600) % 60)).slice(-2)
-          if (hours !== "00") {
-            queuelength = `キュー内合計: ${hours}:${minutes}:${seconds}`;
-          } else if (minutes !== "00") {
-            queuelength = `キュー内合計: ${minutes}:${seconds}`;
-          } else {
-            queuelength = `キュー内合計: 00:${seconds}`;
-          };
-        };
+        const queuelength = (queue.estimatedDuration + queue.currentTrack.durationMS === 0) ? "ライブ配信のみ" : `キュー内合計: ${times(length)}`;
 
-        let streamtime; // 埋め込みの文章
-        if (queue.currentTrack.durationMS === 0) {
-          streamtime = "ライブ";
-        } else {
-          const length = (queue.node.streamTime / 1000);
-          const minutes = Math.floor(length / 60);
-          let seconds = Math.floor(length % 60);
-          if (seconds.toString().length === 1) seconds = `0${seconds}`;
-          streamtime = `${minutes}:${seconds}/${queue.currentTrack.duration}`;
-        };
+        const streamtime = queue.currentTrack.durationMS === 0 ? "ライブ" : `${queue.node.getTimestamp().current.label} / ${queue.currentTrack.duration}`;
 
         return await interaction.followUp({
           embeds: [{
@@ -1329,7 +1319,7 @@ try {
         if (interaction.command.name === "nowp" || !num) {
           t = queue.currentTrack;
           const progress = queue.node.createProgressBar(); // 埋め込み作り(discordplayer神)
-          time = queue.node.getTimestamp().progress === Infinity ? "**ライブ配信**" : `\n\n**${progress}**`;
+          time = queue.node.getTimestamp().progress === Infinity ? "**ライブ配信**" : `\n**残り:** ${times((queue.currentTrack.durationMS - queue.node.getTimestamp().current.value) / 1000)}\n\n**${progress}**`;
         } else {
           num = num - 1;
           t = queue.tracks.toArray()[num];
@@ -1412,27 +1402,14 @@ try {
           const reducer = (sum, currentValue) => sum + currentValue;
           trackslength = length.reduce(reducer) + queue.node.streamTime;
         };
-        trackslength = trackslength / 1000;
 
-        const hours = ("00" + Math.floor(trackslength / 3600)).slice(-2);
-        const minutes = ("00" + Math.floor((trackslength % 3600) / 60)).slice(-2);
-        const seconds = ("00" + Math.floor((trackslength % 3600) % 60)).slice(-2);
-        if (hours !== "00") {
-          trackslength = `${hours}:${minutes}:${seconds}`
-        } else if (minutes !== "00") {
-          trackslength = `${minutes}:${seconds}`
-        } else {
-          trackslength = `00:${seconds}`
-        };
-        if (trackslength === "00:00") {
-          trackslength = "ライブ";
-        };
+        trackslength = trackslength === 0 ? "ライブ" : times(trackslength / 1000);
 
         await interaction.followUp({
           embeds: [
             {
               title: `今までに${trackslength} / ${queue.history.getSize()}曲再生したよ！`,
-              description: `**再生中:** (${queue.node.getTimestamp().progress === Infinity ? "ライブ" : `${queue.node.getTimestamp().current.label}/${queue.currentTrack.duration}`}) [${queue.currentTrack.title.substring(0, 20)}${queue.currentTrack.title.length > 20 ? "..." : ""}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.getSize() > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.getSize() + pageStart}曲` : ""}`,
+              description: `**再生中:** (${queue.node.getTimestamp().progress === Infinity ? "ライブ" : `${queue.node.getTimestamp().current.label} / ${queue.currentTrack.duration}`}) [${queue.currentTrack.title.substring(0, 20)}${queue.currentTrack.title.length > 20 ? "..." : ""}](${queue.currentTrack.url})\n\n${tracks.join("\n")}${queue.history.getSize() > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.getSize() + pageStart}曲` : ""}`,
               color: mutaocolor,
               thumbnail: {
                 url: queue.currentTrack.thumbnail
@@ -2045,9 +2022,8 @@ try {
 
       if (interaction.command.name === "test") {
         if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
-
-        const trash = await ping.promise.probe("存在しないIPなのさ、HAHA！");
-        console.log(trash);
+        const queue = useQueue(interaction.guild.id);
+        console.log(queue.node.getTimestamp());
       };
     } catch (e) {
       console.log(today(new Date()));
@@ -2069,10 +2045,7 @@ try {
     try {
       let json = JSON.parse((fs.readFileSync("guilds.json")));
       let guild = json.find(guild => guild.id === message.guild.id);
-      if (!guild) {
-        writedefault(message.guild.id);
-        return;
-      };
+      if (!guild) return writedefault(message.guild.id);
 
       if (guild.countswitch) {
         const count = json.find(guild => guild.id === message.guild.id).count;
