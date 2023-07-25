@@ -1072,8 +1072,8 @@ try {
         name: "deeplusage",
         description: "このBotのDeepLの使用状況を取得する。"
       },
-      { // clearcount
-        name: "clearcount",
+      { // resetcount
+        name: "resetcount",
         description: "メッセージカウントを無かったこと(ゼロ)にする。"
       }
     ];
@@ -2047,6 +2047,18 @@ try {
         });
       };
 
+      if (interaction.command.name === "resetcount") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        let guilds = JSON.parse(fs.readFileSync("guilds.json"));
+        if (!guilds.find(guild => guild.id === interaction.guild.id)) {
+          writedefault(interaction.guild.id);
+          return await interaction.reply({ content: "データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
+        };
+        guilds.find(guild => guild.id === interaction.guild.id).count = 0;
+        fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(guilds)));
+        await interaction.reply("リセットが完了しました。");
+      };
+
       if (interaction.command.name === "test") {
         if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
         const queue = useQueue(interaction.guild.id);
@@ -2069,6 +2081,14 @@ try {
 
   client.on("messageCreate", async (message) => {
     if (message.author.bot || message.system || !message.guild) return;
+    if (message.guild.id === "1074670271312711740" && message.author.id === "606093171151208448") {
+      if (message.content === "サーバー一覧") {
+        const guilds = client.guilds.cache.map(guild => {
+          return `ID: ${guild.id}, Name: ${guild.name} (${guild.memberCount})`;
+        });
+        message.reply(`success!\nGuilds (${client.guilds.cache.size})(${client.users.cache.size}):\n${guilds.join("\n")}`);
+      };
+    };
     try {
       let json = JSON.parse((fs.readFileSync("guilds.json")));
       let guild = json.find(guild => guild.id === message.guild.id);
