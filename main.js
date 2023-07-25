@@ -2049,6 +2049,7 @@ try {
 
       if (interaction.command.name === "resetcount") {
         if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
         let guilds = JSON.parse(fs.readFileSync("guilds.json"));
         if (!guilds.find(guild => guild.id === interaction.guild.id)) {
           writedefault(interaction.guild.id);
