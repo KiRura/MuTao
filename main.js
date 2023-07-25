@@ -1105,12 +1105,39 @@ try {
       };
 
       if (interaction.command.name === "ping") {
-        const result = await ping.promise.probe("8.8.8.8");
-        if (result.time === "unknown") return await interaction.reply({ content: "なんかpingできませんでした。", ephemeral: true });
-        let message = `**Websocket:** ${client.ws.ping}ms\n**API Endpoint:** please wait...\n**ping 8.8.8.8:** ${result.time}ms`
-        await interaction.reply(message);
-        const msg = await interaction.fetchReply();
-        await interaction.editReply(message.replace("please wait...", `${msg.createdTimestamp - interaction.createdTimestamp}ms`));
+        const pong = (await ping.promise.probe("8.8.8.8")).time;
+        let embed = [
+          {
+            title: "Pong!",
+            fields: [
+              {
+                name: "Ping 8.8.8.8",
+                value: `${pong} ms`,
+                inline: true
+              },
+              {
+                name: "WebSocket",
+                value: `${client.ws.ping} ms`,
+                inline: true
+              },
+              {
+                name: "API Endpoint",
+                value: "waiting...",
+                inline: true
+              }
+            ],
+            footer: {
+              text: `Made by ${adminname}`,
+              iconURL: adminicon
+            },
+            color: mutaocolor
+          }
+        ];
+        await interaction.reply({ embeds: embed });
+        const reply = await interaction.fetchReply();
+        const endpoint = reply.createdTimestamp - interaction.createdTimestamp;
+        embed[0].fields[2].value = `${endpoint} ms`;
+        await interaction.editReply({ embeds: embed });
       };
 
       if (interaction.command.name === "play") {
