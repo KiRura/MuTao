@@ -12,6 +12,8 @@ function today(dt) {
 
   return `${y}年(${wareki})${("00" + (m + 1)).slice(-2)}月${("00" + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`;
 };
+const mutaocolor = 16760703;
+const redcolor = 16744319;
 
 try {
   require("dotenv").config();
@@ -116,7 +118,7 @@ try {
                   icon_url: fetchguild.iconURL({ extension: "png", size: 4096 })
                 },
                 description: `メッセージ数: ${guild.count}`,
-                color: 3066993,
+                color: mutaocolor,
                 footer: {
                   text: `日付: ${date}`
                 }
@@ -1050,7 +1052,7 @@ try {
         ]
       },
       { // stopsendcount
-        name: "stopcount",
+        name: "stopsendcount",
         description: "メッセージ数の定期送信を止める。(再有効化は/setchannelで)"
       },
       { // delmessages
@@ -1109,8 +1111,6 @@ try {
       const admin = await client.users.fetch("606093171151208448");
       const adminicon = avatar_to_URL(admin);
       const adminname = admin.username;
-      const mutaocolor = 16760703;
-      const redcolor = 16744319;
 
       if (interaction.command.name === "help") {
         const result = await ping.promise.probe("8.8.8.8");
@@ -1885,7 +1885,7 @@ try {
                 name: interaction.guild.name,
                 icon_url: interaction.guild.iconURL({ extension: "png", size: 4096 })
               },
-              description: `メッセージ数: ${guild.count}${guild.send_count_channel ? "" : "\n現在定期送信が停止されています。"}`,
+              description: `メッセージ数: ${guild.count}${guild.send_count_channel !== null ? "" : "\n現在定期送信が停止されています。"}`,
               color: mutaocolor
             }
           ]
