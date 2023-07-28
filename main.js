@@ -126,7 +126,7 @@ try {
     });
 
     console.log("setting slash commands...");
-    const data = [
+    await client.application.commands.set([
       { // help
         name: "help",
         description: "注意書き等"
@@ -1075,9 +1075,24 @@ try {
       { // resetcount
         name: "resetcount",
         description: "メッセージカウントを無かったこと(ゼロ)にする。"
+      },
+      { // guildinfo
+        name: "guildinfo",
+        description: "サーバーの情報を取得する",
+        options: [
+          {
+            type: ApplicationCommandOptionType.Boolean,
+            name: "icon",
+            description: "アイコンを取得する"
+          },
+          {
+            type: ApplicationCommandOptionType.Boolean,
+            name: "gif",
+            description: "gifか否か"
+          }
+        ]
       }
-    ];
-    await client.application.commands.set(data);
+    ]);
     console.log(`${client.user.tag} all ready`);
   });
 
@@ -1085,8 +1100,9 @@ try {
     try {
       if (!interaction.isCommand()) return;
 
-      const adminicon = (await client.users.fetch("606093171151208448")).avatarURL({ extension: "png", size: 4096 });
-      const adminname = (await client.users.fetch("606093171151208448")).username;
+      const admin = await client.users.fetch("606093171151208448");
+      const adminicon = avatar_to_URL(admin);
+      const adminname = admin.username;
       const mutaocolor = 16760703;
       const redcolor = 16744319;
 
@@ -1929,7 +1945,7 @@ try {
       if (interaction.command.name === "getroleicon") {
         const role = interaction.options.getRole("role");
         if (!role.iconURL()) return await interaction.reply({ content: "指定されたロールにアイコンはありませんでした。", ephemeral: true });
-        const url = `https://cdn.discordapp.com/role-icons/${role.id}/${role.icon}.png?size=4096`;
+        const url = role.iconURL({ size: 4096, extension: "png" });
         await interaction.reply({
           embeds: [
             {
@@ -2060,10 +2076,64 @@ try {
         await interaction.reply("リセットが完了しました。");
       };
 
+      if (interaction.command.name === "guildinfo") {
+        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        const guild = interaction.guild;
+        const geticon = interaction.options.getBoolean("icon");
+        let extension = interaction.options.getBoolean("gif") ? "gif" : "png";
+        const iconurl = guild.iconURL({ size: 4096, extension: extension });
+        const owner = await guild.fetchOwner();
+        const ownercolor = owner.roles.color ? owner.roles.color.color : mutaocolor;
+
+        if (geticon) {
+          if (!iconurl) return await interaction.reply({ content: "アイコンが設定されていません。", ephemeral: true });
+
+          return await interaction.reply({
+            embeds: [
+              {
+                title: "画像URL",
+                url: iconurl,
+                image: { url: iconurl },
+                color: ownercolor
+              }
+            ]
+          });
+        };
+
+        const createdAt = today(guild.createdAt);
+
+        let i = 0;
+        let ignorebot;
+        (await guild.members.fetch()).map(member => {
+          if (member.user.bot) return;
+          i = i + 1;
+          ignorebot = i;
+        });
+
+        await interaction.reply({
+          embeds: [
+            {
+              title: guild.name,
+              description: `**サーバー作成日:** ${createdAt}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人`,
+              thumbnail: { url: iconurl ? iconurl : undefined },
+              color: ownercolor,
+              footer: {
+                text: `所有者: ${owner.user.tag}`,
+                icon_url: avatar_to_URL(owner.user)
+              }
+            }
+          ]
+        })
+      };
+
       if (interaction.command.name === "test") {
         if (interaction.user.id !== "606093171151208448") return await interaction.reply("管理者及び開発者のみ実行可能です。");
-        const queue = useQueue(interaction.guild.id);
-        console.log(queue.node.getTimestamp());
+        const fetchguild = await (await fetch.fetch(`https://discord.com/api/guilds/${interaction.guild.id}`, {
+          headers: {
+            "Authorization": `Bot ${process.env.DISCORD_TOKEN}`
+          }
+        })).json();
+        console.log(fetchguild);
       };
     } catch (e) {
       console.log(today(new Date()));
