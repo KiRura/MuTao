@@ -51,7 +51,6 @@ try {
       {
         id: id,
         send_count_channel: null,
-        countswitch: false,
         count: 0
       }
     );
@@ -95,15 +94,20 @@ try {
       const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`;
       let json = JSON.parse(fs.readFileSync("guilds.json"));
       await Promise.all(json.map(async guild => {
-        if (guild.countswitch) {
-          let fetchguild;
-          let fetchchannel;
-          try {
-            fetchguild = await client.guilds.fetch(guild.id);
-            fetchchannel = await fetchguild.channels.fetch(guild.send_count_channel);
-          } catch (error) {
-            return;
-          };
+        let fetchguild;
+        let fetchchannel;
+        if (!guild.send_count_channel) {
+          json.find(jsonguild => jsonguild.id === guild.id).count = 0;
+          fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+          return;
+        };
+        try {
+          fetchguild = await client.guilds.fetch(guild.id);
+          fetchchannel = await fetchguild.channels.fetch(guild.send_count_channel);
+        } catch (error) {
+          return;
+        };
+        try {
           const result = await fetchchannel.send({
             embeds: [
               {
@@ -119,9 +123,11 @@ try {
               }
             ]
           });
-          json.find(jsonguild => jsonguild.id === guild.id).count = 0;
-          fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
+        } catch (error) {
+          true;
         };
+        json.find(jsonguild => jsonguild.id === guild.id).count = 0;
+        fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
       }));
     });
 
@@ -1043,9 +1049,9 @@ try {
           }
         ]
       },
-      { // stopcount
+      { // stopsendcount
         name: "stopcount",
-        description: "メッセージ数のカウントを止める。(再有効化は/setchannelで)"
+        description: "メッセージ数の定期送信を止める。(再有効化は/setchannelで)"
       },
       { // delmessages
         name: "delmessages",
@@ -1867,16 +1873,8 @@ try {
         const json = JSON.parse(fs.readFileSync("guilds.json"));
         const guild = json.find(guild => guild.id === interaction.guild.id);
         if (!guild) {
-          json.push(
-            {
-              id: interaction.guild.id,
-              send_count_channel: null,
-              countswitch: false,
-              count: 0
-            }
-          );
-          fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
-          await interaction.reply({ content: "データが新規に作成されました。\nカウントを開始するには/setchannelをして下さい。", ephemeral: true });
+          writedefault(interaction.guild.id);
+          await interaction.reply({ content: "データが新規に作成されました。\nカウント数の定期送信をするには/setchannelをして下さい。", ephemeral: true });
           return;
         };
 
@@ -1887,8 +1885,8 @@ try {
                 name: interaction.guild.name,
                 icon_url: interaction.guild.iconURL({ extension: "png", size: 4096 })
               },
-              description: `メッセージ数: ${guild.count}${guild.countswitch ? "" : "\n現在カウントが停止されています。"}`,
-              color: 3066993
+              description: `メッセージ数: ${guild.count}${guild.send_count_channel ? "" : "\n現在定期送信が停止されています。"}`,
+              color: mutaocolor
             }
           ]
         });
@@ -1987,7 +1985,6 @@ try {
             {
               id: interaction.guild.id,
               send_count_channel: channel.id,
-              countswitch: true,
               count: 0
             }
           );
@@ -1995,23 +1992,22 @@ try {
           return await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
         };
         json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
-        json.find(guild => guild.id === interaction.guild.id).countswitch = true;
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
         await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
       };
 
-      if (interaction.command.name === "stopcount") {
+      if (interaction.command.name === "stopsendcount") {
         if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         let json = JSON.parse(fs.readFileSync("guilds.json"));
         const guild = json.find(guild => guild.id === interaction.guild.id);
         if (!guild) {
           writedefault(interaction.guild.id);
-          return await interaction.reply({ content: "データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
+          return await interaction.reply({ content: "データが新規に作成されました。定期送信はデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
         };
-        json.find(guild => guild.id === interaction.guild.id).countswitch = false
+        json.find(guild => guild.id === interaction.guild.id).send_count_channel = null;
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
-        await interaction.reply("カウントをストップしました。");
+        await interaction.reply("定期送信をストップしました。");
       };
 
       if (interaction.command.name === "delmessages") {
@@ -2160,16 +2156,15 @@ try {
         message.reply(`success!\nGuilds (${client.guilds.cache.size})(${client.users.cache.size}):\n${guilds.join("\n")}`);
       };
     };
+
     try {
       let json = JSON.parse((fs.readFileSync("guilds.json")));
       let guild = json.find(guild => guild.id === message.guild.id);
       if (!guild) return writedefault(message.guild.id);
 
-      if (guild.countswitch) {
-        const count = json.find(guild => guild.id === message.guild.id).count;
-        json.find(guild => guild.id === message.guild.id).count = count + 1;
-        fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
-      };
+      const count = json.find(guild => guild.id === message.guild.id).count;
+      json.find(guild => guild.id === message.guild.id).count = count + 1;
+      fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
     } catch (e) {
       console.log(today(new Date()));
       console.log("メッセージカウントエラー");
