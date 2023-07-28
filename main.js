@@ -2096,8 +2096,6 @@ try {
           });
         };
 
-        const createdAt = today(guild.createdAt);
-
         let i = 0;
         let ignorebot;
         (await guild.members.fetch()).map(member => {
@@ -2106,11 +2104,16 @@ try {
           ignorebot = i;
         });
 
+        const json = JSON.parse(fs.readFileSync("guilds.json"));
+        const jsonguild = json.find(guild => guild.id === interaction.guild.id);
+        if (!jsonguild) writedefault(interaction.guild.id);
+        const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : "無効") : "無効";
+
         await interaction.reply({
           embeds: [
             {
               title: guild.name,
-              description: `**サーバー作成日:** ${createdAt}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人`,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**メッセージカウント定期送信:** ${count}`,
               thumbnail: { url: iconurl ? iconurl : undefined },
               color: ownercolor,
               footer: {
