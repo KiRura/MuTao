@@ -17,7 +17,7 @@ const redcolor = 16744319;
 
 try {
   require("dotenv").config();
-  const { Client, GatewayIntentBits, PermissionFlagsBits, DiscordAPIError, ChannelType, ApplicationCommandOptionType, StageChannel } = require("discord.js");
+  const { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType } = require("discord.js");
   const translate = require("deepl");
   const client = new Client({ intents: Object.values(GatewayIntentBits) });
   const API_KEY = process.env.DEEPL_API_KEY;
