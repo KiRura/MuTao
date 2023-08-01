@@ -1092,11 +1092,6 @@ try {
             type: ApplicationCommandOptionType.Boolean,
             name: "icon",
             description: "アイコンを取得する"
-          },
-          {
-            type: ApplicationCommandOptionType.Boolean,
-            name: "gif",
-            description: "gifか否か"
           }
         ]
       }
@@ -2075,9 +2070,7 @@ try {
       if (interaction.command.name === "guildinfo") {
         if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         const guild = interaction.guild;
-        const geticon = interaction.options.getBoolean("icon");
-        let extension = interaction.options.getBoolean("gif") ? "gif" : "png";
-        const iconurl = guild.iconURL({ size: 4096, extension: extension });
+        const iconurl = guild.iconURL({ size: 4096, extension: "png" });
         const owner = await guild.fetchOwner();
         const ownercolor = owner.roles.color ? owner.roles.color.color : mutaocolor;
 
@@ -2117,7 +2110,7 @@ try {
               thumbnail: { url: iconurl ? iconurl : undefined },
               color: ownercolor,
               footer: {
-                text: `所有者: ${owner.user.tag}`,
+                text: `所有者: ${owner.user.tag} | ${owner.id}`,
                 icon_url: avatar_to_URL(owner.user)
               }
             }
@@ -2157,6 +2150,42 @@ try {
           return `ID: ${guild.id}, Name: ${guild.name} (${guild.memberCount})`;
         });
         message.reply(`success!\nGuilds (${client.guilds.cache.size})(${client.users.cache.size}):\n${guilds.join("\n")}`);
+      };
+
+      if (message.content.match("サーバー詳細")) {
+        const guild = await client.guilds.fetch(message.content.slice(7));
+        if (!guild) return await message.reply("無い");
+        const iconurl = guild.iconURL({ size: 4096, extension: "png" });
+        const owner = await guild.fetchOwner();
+        const ownercolor = owner.roles.color ? owner.roles.color.color : mutaocolor;
+
+        let i = 0;
+        let ignorebot;
+        (await guild.members.fetch()).map(member => {
+          if (member.user.bot) return;
+          i = i + 1;
+          ignorebot = i;
+        });
+
+        const json = JSON.parse(fs.readFileSync("guilds.json"));
+        const jsonguild = json.find(jsonguild => jsonguild.id === guild.id);
+        if (!jsonguild) writedefault(guild.id);
+        const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : "無効") : "無効";
+
+        await message.reply({
+          embeds: [
+            {
+              title: guild.name,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**メッセージカウント定期送信:** ${count}`,
+              thumbnail: { url: iconurl ? iconurl : undefined },
+              color: ownercolor,
+              footer: {
+                text: `所有者: ${owner.user.tag} | ${owner.id}`,
+                icon_url: avatar_to_URL(owner.user)
+              }
+            }
+          ]
+        });
       };
     };
 
