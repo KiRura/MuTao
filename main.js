@@ -71,7 +71,6 @@ try {
     if (!queue.currentTrack) return "再生中の曲が無いよ！";
     return false;
   };
-
   function times(length) {
     const hours = ("00" + Math.floor(length / 3600)).slice(-2)
     const minutes = ("00" + Math.floor((length % 3600) / 60)).slice(-2)
@@ -1096,10 +1095,11 @@ try {
         ]
       }
     ]);
+
     console.log(`${client.user.tag} all ready`);
   });
 
-  client.on("interactionCreate", async (interaction) => {
+  client.on("interactionCreate", async interaction => {
     try {
       if (!interaction.isCommand()) return;
 
@@ -1503,7 +1503,7 @@ try {
         try {
           userinfo = await client.users.fetch(id);
         } catch (error) {
-          return await interaction.reply({ content: "指定したIDはユーザーではありません。", ephemeral: true })
+          return await interaction.reply({ content: "指定したIDはユーザーではありません。", ephemeral: true });
         };
 
         await interaction.reply({
@@ -1522,14 +1522,15 @@ try {
         const targetrole = interaction.options.get("role");
         if (interaction.options.getSubcommandGroup() === "user") {
           if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-            if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
             try {
               if (interaction.options.getSubcommand() === "add") {
+                if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
                 await targetuser.roles.add(targetrole.role);
                 await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`);
               };
 
               if (interaction.options.getSubcommand() === "remove") {
+                if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply("管理者権限所持者のみ実行可能です。");
                 await targetuser.roles.remove(targetrole.role);
                 await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`);
               };
@@ -1541,7 +1542,7 @@ try {
           };
 
           if (interaction.options.getSubcommand() === "list") {
-            const guildroles = interaction.guild.roles.cache.size
+            const guildroles = interaction.guild.roles.cache.size;
             if (targetuser.roles.highest.rawPosition === 0) {
               await interaction.reply("何も...無いじゃないか...ッ！！！");
             } else if (targetuser.roles.color === null && targetuser.roles.highest) {
@@ -1566,8 +1567,8 @@ try {
                   }
                 }]
               });
-            }
-          }
+            };
+          };
         };
 
         if (interaction.options.getSubcommandGroup() === "all") {
@@ -1610,7 +1611,7 @@ try {
           (await interaction.guild.members.fetch()).map(async member => {
             if (member.user.bot) i += 1;
           });
-          members = i;
+          const members = i;
 
           try {
             const add = interaction.options.getSubcommand() === "add";
@@ -1622,12 +1623,12 @@ try {
               add ? await member.roles.add(targetrole.role) : await member.roles.remove(targetrole.role);
             }));
             const content = add ? `${targetrole.role.name}を${members}人に付与したよ！` : `${targetrole.role.name}を${members}人から奪取したよ！`;
-            await interaction.editReply(content).catch(async e => await interaction.channel.send(content).catch(e => { return; }));
-            await interaction.user.send(add ? `ロールの付与が完了しました。` : `ロールの剥奪が完了しました。`).catch(e => { return; });
+            await interaction.editReply(content).catch(async e => await interaction.channel.send(content).catch(e => { true; }));
+            await interaction.user.send(add ? `ロールの付与が完了しました。` : `ロールの剥奪が完了しました。`).catch(e => { true; });
           } catch (error) {
             await interaction.reply(`エラー\n${error}`).catch(async e => await interaction.channel.send(`エラー\n${error}`));
             console.log(error);
-          }
+          };
         };
       };
 
@@ -1952,6 +1953,7 @@ try {
 
       if (interaction.command.name === "deafall") {
         if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.DeafenMembers)) return await interaction.reply({ content: "スピーカーミュートする権限がありません！", ephemeral: true });
         if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
         let vc = interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
@@ -1960,12 +1962,14 @@ try {
         let cancel = interaction.options.getBoolean("cancel");
         cancel = cancel ? false : true;
         const membersize = vc.members.size;
+
         await interaction.deferReply();
         try {
           await vc.members.map(async m => await m.voice.setDeaf(cancel));
         } catch (error) {
           return await interaction.followUp("権限的に無理でした。");
         };
+        
         await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
       };
 
@@ -1986,7 +1990,7 @@ try {
           fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
           return await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
         };
-        json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
+        json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id;
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
         await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`);
       };
@@ -2057,13 +2061,16 @@ try {
       if (interaction.command.name === "resetcount") {
         if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
+
         let guilds = JSON.parse(fs.readFileSync("guilds.json"));
         if (!guilds.find(guild => guild.id === interaction.guild.id)) {
           writedefault(interaction.guild.id);
           return await interaction.reply({ content: "データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。", ephemeral: true });
         };
+
         guilds.find(guild => guild.id === interaction.guild.id).count = 0;
         fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(guilds)));
+
         await interaction.reply("リセットが完了しました。");
       };
 
@@ -2115,7 +2122,7 @@ try {
               }
             }
           ]
-        })
+        });
       };
 
       if (interaction.command.name === "test") {
@@ -2142,7 +2149,7 @@ try {
     };
   });
 
-  client.on("messageCreate", async (message) => {
+  client.on("messageCreate", async message => {
     if (message.author.bot || message.system || !message.guild) return;
     if (message.guild.id === "1074670271312711740" && message.author.id === "606093171151208448") {
       if (message.content === "サーバー一覧") {
@@ -2197,14 +2204,14 @@ try {
       const count = json.find(guild => guild.id === message.guild.id).count;
       json.find(guild => guild.id === message.guild.id).count = count + 1;
       fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
-    } catch (e) {
+    } catch (error) {
       console.log(today(new Date()));
       console.log("メッセージカウントエラー");
-      console.log(e);
+      console.log(error);
     };
   });
 
-  discordplayer.events.on("error", (error) => {
+  discordplayer.events.on("error", error => {
     if (error.message.match("The operation was aborted")) return;
     console.log(today(new Date()));
     console.log("discordplayer エラー");
@@ -2227,10 +2234,10 @@ try {
   //   member.roles.remove("1099312160284352512");
   // });
 
-  client.login(process.env.DISCORD_TOKEN).catch(e => {
+  client.login(process.env.DISCORD_TOKEN).catch(error => {
     console.log(today(new Date()));
     console.log("client.login() エラー");
-    console.log(e);
+    console.log(error);
   });
 
 } catch (error) {
