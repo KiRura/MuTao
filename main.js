@@ -627,7 +627,8 @@ try {
           {
             type: ApplicationCommandOptionType.Integer,
             name: "number",
-            description: "スキップする曲数"
+            description: "スキップする曲数",
+            minValue: 1
           }
         ]
       },
@@ -673,7 +674,8 @@ try {
             type: ApplicationCommandOptionType.Integer,
             name: "number",
             description: "/queueでタイトルの左に表示された番号",
-            required: true
+            required: true,
+            minValue: 1
           }
         ]
       },
@@ -685,6 +687,7 @@ try {
             type: ApplicationCommandOptionType.Integer,
             name: "page",
             description: "ページ",
+            minValue: 1
           }
         ]
       },
@@ -999,7 +1002,8 @@ try {
             type: ApplicationCommandOptionType.Integer,
             name: "color",
             description: "10進数のカラーコード",
-            maxValue: 16777215
+            maxValue: 16777215,
+            minValue: 0
           },
           {
             type: ApplicationCommandOptionType.String,
@@ -1033,6 +1037,7 @@ try {
             type: ApplicationCommandOptionType.Number,
             name: "duration",
             description: "秒数",
+            minValue: 0,
             required: true
           }
         ]
@@ -1413,7 +1418,7 @@ try {
         const number = interaction.options.getInteger("number");
         const track = queue.tracks.toArray()[number - 1];
 
-        if (number <= 0 || number > queue.getSize()) return await interaction.reply({ content: "指定した番号の曲は存在しません。", ephemeral: true });
+        if (number > queue.getSize()) return await interaction.reply({ content: "指定した番号の曲は存在しません。", ephemeral: true });
 
         await interaction.deferReply();
         await interaction.followUp(`**${number}.** ${track.title}を削除したよ！`);
@@ -1426,7 +1431,7 @@ try {
         const queue = useQueue(interaction.guild.id);
         let page = interaction.options.getInteger("page");
         if (page === null) page = 1;
-        if (page < 1 || page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
+        if (page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
         if (queue.history.getSize() === 0) return await interaction.reply({ content: "履歴はまだ保存されていません", ephemeral: true });
 
         await interaction.deferReply();
