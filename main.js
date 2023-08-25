@@ -14,10 +14,11 @@ function today(dt) {
 };
 const mutaocolor = 16760703;
 const redcolor = 16744319;
+const greencolor = 9043849;
 
 try {
   require("dotenv").config();
-  const { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType } = require("discord.js");
+  const { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType, cleanCodeBlockContent } = require("discord.js");
   const translate = require("deepl");
   const client = new Client({ intents: Object.values(GatewayIntentBits) });
   const API_KEY = process.env.DEEPL_API_KEY;
@@ -1974,7 +1975,7 @@ try {
         } catch (error) {
           return await interaction.followUp("権限的に無理でした。");
         };
-        
+
         await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`);
       };
 
@@ -2184,11 +2185,13 @@ try {
         if (!jsonguild) writedefault(guild.id);
         const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : "無効") : "無効";
 
+        const join_now_time = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24);
+
         await message.reply({
           embeds: [
             {
               title: guild.name,
-              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**メッセージカウント定期送信:** ${count}`,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n滞在期間: ${join_now_time}日\n**メッセージカウント定期送信:** ${count}`,
               thumbnail: { url: iconurl ? iconurl : undefined },
               color: ownercolor,
               footer: {
@@ -2214,6 +2217,62 @@ try {
       console.log("メッセージカウントエラー");
       console.log(error);
     };
+  });
+
+  client.on("guildCreate", async guild => {
+    const members = await guild.members.fetch();
+    let result = 0;
+    members.map(member => {
+      if (member.user.bot) return;
+      result++;
+    });
+
+    const owner = await guild.fetchOwner();
+    await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
+      embeds: [
+        {
+          title: `+ ${guild.name}`,
+          color: greencolor,
+          thumbnail: {
+            url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
+          },
+          description: `人数: ${guild.memberCount}\nbot除外人数: ${result}\n作成日: ${today(guild.createdAt)}`,
+          footer: {
+            text: owner.user.tag,
+            icon_url: avatar_to_URL(owner.user)
+          }
+        }
+      ]
+    });
+  });
+
+  client.on("guildDelete", async guild => {
+    const members = await guild.members.fetch();
+    let result = 0;
+    members.map(member => {
+      if (member.user.bot) return;
+      result++;
+    });
+
+    const join_kick_time = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24);
+
+    const owner = await guild.fetchOwner();
+    await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
+      embeds: [
+        {
+          title: `- ${guild.name}`,
+          color: redcolor,
+          thumbnail: {
+            url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
+          },
+          description: `人数: ${guild.memberCount}\nbot除外人数: ${result}\n作成日: ${today(guild.createdAt)}\n滞在期間: ${join_kick_time}日`,
+          footer: {
+            text: owner.user.tag,
+            icon_url: avatar_to_URL(owner.user)
+          }
+        }
+      ]
+    });
   });
 
   discordplayer.events.on("error", error => {
