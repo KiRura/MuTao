@@ -2110,6 +2110,8 @@ try {
           ignorebot = i;
         });
 
+        const join_now_time = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24);
+
         const json = JSON.parse(fs.readFileSync("guilds.json"));
         const jsonguild = json.find(guild => guild.id === interaction.guild.id);
         if (!jsonguild) writedefault(interaction.guild.id);
@@ -2119,7 +2121,7 @@ try {
           embeds: [
             {
               title: guild.name,
-              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**メッセージカウント定期送信:** ${count}`,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**滞在期間:** ${join_now_time}日\n**メッセージカウント定期送信:** ${count}`,
               thumbnail: { url: iconurl ? iconurl : undefined },
               color: ownercolor,
               footer: {
@@ -2191,7 +2193,7 @@ try {
           embeds: [
             {
               title: guild.name,
-              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n滞在期間: ${join_now_time}日\n**メッセージカウント定期送信:** ${count}`,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**滞在期間:** ${join_now_time}日\n**メッセージカウント定期送信:** ${count}`,
               thumbnail: { url: iconurl ? iconurl : undefined },
               color: ownercolor,
               footer: {
@@ -2236,7 +2238,7 @@ try {
           thumbnail: {
             url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
           },
-          description: `人数: ${guild.memberCount}\nbot除外人数: ${result}\n作成日: ${today(guild.createdAt)}`,
+          description: `**人数:** ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}`,
           footer: {
             text: owner.user.tag,
             icon_url: avatar_to_URL(owner.user)
@@ -2265,7 +2267,7 @@ try {
           thumbnail: {
             url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
           },
-          description: `人数: ${guild.memberCount}\nbot除外人数: ${result}\n作成日: ${today(guild.createdAt)}\n滞在期間: ${join_kick_time}日`,
+          description: `**人数**: ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}\n**滞在期間:** ${join_kick_time}日`,
           footer: {
             text: owner.user.tag,
             icon_url: avatar_to_URL(owner.user)
