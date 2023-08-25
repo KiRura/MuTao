@@ -2084,6 +2084,7 @@ try {
         if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
         const guild = interaction.guild;
         const iconurl = guild.iconURL({ size: 4096, extension: "png" });
+        const geticon = interaction.options.getBoolean("icon");
         const owner = await guild.fetchOwner();
         const ownercolor = owner.roles.color ? owner.roles.color.color : mutaocolor;
 
@@ -2240,7 +2241,7 @@ try {
           },
           description: `**人数:** ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}`,
           footer: {
-            text: owner.user.tag,
+            text: `所有者: ${owner.user.tag} | ${owner.id}`,
             icon_url: avatar_to_URL(owner.user)
           }
         }
@@ -2269,7 +2270,7 @@ try {
           },
           description: `**人数**: ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}\n**滞在期間:** ${join_kick_time}日`,
           footer: {
-            text: owner.user.tag,
+            text: `所有者: ${owner.user.tag} | ${owner.id}`,
             icon_url: avatar_to_URL(owner.user)
           }
         }
