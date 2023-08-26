@@ -2267,7 +2267,7 @@ try {
             thumbnail: {
               url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
             },
-            description: `**人数**: ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}\n**滞在期間:** ${join_kick_time}日`,
+            description: `**人数**: ${guild.memberCount}\n**作成日:** ${today(guild.createdAt)}\n**滞在期間:** ${join_kick_time}日`,
             footer: {
               text: `所有者: ${owner.user.tag} | ${owner.id}`,
               icon_url: avatar_to_URL(owner.user)
