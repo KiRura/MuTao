@@ -2223,59 +2223,63 @@ try {
   });
 
   client.on("guildCreate", async guild => {
-    const members = await guild.members.fetch();
-    let result = 0;
-    members.map(member => {
-      if (member.user.bot) return;
-      result++;
-    });
+    try {
+      const members = await guild.members.fetch();
+      let result = 0;
+      members.map(member => {
+        if (member.user.bot) return;
+        result++;
+      });
 
-    const owner = await guild.fetchOwner();
-    await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
-      embeds: [
-        {
-          title: `+ ${guild.name}`,
-          color: greencolor,
-          thumbnail: {
-            url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
-          },
-          description: `**人数:** ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}`,
-          footer: {
-            text: `所有者: ${owner.user.tag} | ${owner.id}`,
-            icon_url: avatar_to_URL(owner.user)
+      const owner = await guild.fetchOwner();
+      await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
+        embeds: [
+          {
+            title: `+ ${guild.name} | ${guild.id}`,
+            color: greencolor,
+            thumbnail: {
+              url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
+            },
+            description: `**人数:** ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}`,
+            footer: {
+              text: `所有者: ${owner.user.tag} | ${owner.id}`,
+              icon_url: avatar_to_URL(owner.user)
+            }
           }
-        }
-      ]
-    });
+        ]
+      });
+    } catch (error) {
+      console.log(today(new Date()));
+      console.log("guildCreate Error");
+      console.log(error);
+    };
   });
 
   client.on("guildDelete", async guild => {
-    const members = await guild.members.fetch();
-    let result = 0;
-    members.map(member => {
-      if (member.user.bot) return;
-      result++;
-    });
+    try {
+      const join_kick_time = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24);
 
-    const join_kick_time = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24);
-
-    const owner = await guild.fetchOwner();
-    await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
-      embeds: [
-        {
-          title: `- ${guild.name}`,
-          color: redcolor,
-          thumbnail: {
-            url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
-          },
-          description: `**人数**: ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}\n**滞在期間:** ${join_kick_time}日`,
-          footer: {
-            text: `所有者: ${owner.user.tag} | ${owner.id}`,
-            icon_url: avatar_to_URL(owner.user)
+      await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
+        embeds: [
+          {
+            title: `- ${guild.name} | ${guild.id}`,
+            color: redcolor,
+            thumbnail: {
+              url: guild.iconURL() ? guild.iconURL({ size: 4096, extension: "png" }) : null
+            },
+            description: `**人数**: ${guild.memberCount}\n**bot除外人数:** ${result}\n**作成日:** ${today(guild.createdAt)}\n**滞在期間:** ${join_kick_time}日`,
+            footer: {
+              text: `所有者: ${owner.user.tag} | ${owner.id}`,
+              icon_url: avatar_to_URL(owner.user)
+            }
           }
-        }
-      ]
-    });
+        ]
+      });
+    } catch (error) {
+      console.log(today(new Date()));
+      console.log("guildDelete Error");
+      console.log(error);
+    };
   });
 
   discordplayer.events.on("error", error => {
