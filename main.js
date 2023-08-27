@@ -2257,6 +2257,7 @@ try {
 
   client.on("guildDelete", async guild => {
     try {
+      const owner = await guild.fetchOwner();
       const join_kick_time = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24);
 
       await (await (await client.guilds.fetch("1074670271312711740")).channels.fetch("1144550066531598426")).send({
