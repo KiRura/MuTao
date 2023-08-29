@@ -1178,9 +1178,7 @@ try {
         let vol = volume ? volume : 30;
         if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50;
  
-        if (url.match("youtube.com") && url.match("list=") && url.match("&si=")) {
-          url = url.substring(0, url.indexOf("&si="));
-        };
+        if (url.match("youtube.com") && url.match("list=") && url.match("&si=")) url = url.substring(0, url.indexOf("&si="));
 
         await interaction.deferReply();
         const track = await discordplayer.search(url, {
