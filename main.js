@@ -2289,7 +2289,7 @@ try {
   try {
     discordplayer.events.on("playerTrigger", async queue => {
       if (!queue.guild.members.me.permissions.has(PermissionFlagsBits.ChangeNickname)) return;
-      await queue.guild.members.me.setNickname(`${queue.currentTrack.title.substring(0, 24)} | MuTao`);
+      await queue.guild.members.me.setNickname(`${queue.currentTrack.title.substring(0, 21)}${queue.currentTrack.title.length > 21 ? "..." : ""} | MuTao`);
     });
 
     discordplayer.events.on("queueDelete", async queue => {
