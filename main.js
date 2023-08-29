@@ -12,9 +12,13 @@ function today(dt) {
 
   return `${y}年(${wareki})${("00" + (m + 1)).slice(-2)}月${("00" + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`;
 };
+
 const mutaocolor = 16760703;
 const redcolor = 16744319;
 const greencolor = 9043849;
+
+const noguild = "サーバー内でのみ実行できます！";
+const ataokanumber = "指定した数字があたおか";
 
 try {
   require("dotenv").config();
@@ -65,7 +69,7 @@ try {
     return avatar ? avatar : `${user.defaultAvatarURL}?size=4096`;
   };
   function return_music(interaction) {
-    if (!interaction.guild) return "サーバー内でしか実行できません！";
+    if (!interaction.guild) return noguild;
     const queue = useQueue(interaction.guild.id);
     if (!queue && interaction.guild.members.me.voice.channel) return "多分再起動したのでplayをするかvcから蹴るかして下さいな。";
     if (!queue) return "VCに入ってないよ！";
@@ -1164,7 +1168,7 @@ try {
       };
 
       if (interaction.command.name === "play") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.guild.members.me.voice.channel) { // undefined回避
           if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionFlagsBits.Connect)) return await interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
         };
@@ -1237,7 +1241,7 @@ try {
       };
 
       if (interaction.command.name === "leave") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         const queue = useQueue(interaction.guild.id);
         if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: "多分再起動したのでplayをするかvcから蹴るかして下さいな。", ephemeral: true });
         if (!queue) return await interaction.reply({ content: "VCに入ってないよ！", ephemeral: true, });
@@ -1285,7 +1289,7 @@ try {
         let page = interaction.options.getInteger("page");
         if (page === null) page = 1;
         const maxpages = (Math.floor(queue.getSize() / 10)) + 1;
-        if (page > maxpages) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
+        if (page > maxpages) return await interaction.reply({ content: ataokanumber, ephemeral: true });
 
         await interaction.deferReply(); // タイムアウト防止
 
@@ -1320,7 +1324,7 @@ try {
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
         const queue = useQueue(interaction.guild.id);
         let number = interaction.options.getInteger("to");
-        if (number && (number < 1 || number > queue.getSize())) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
+        if (number && (number < 1 || number > queue.getSize())) return await interaction.reply({ content: ataokanumber, ephemeral: true });
         await interaction.deferReply();
 
         let t;
@@ -1364,7 +1368,7 @@ try {
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
         const queue = useQueue(interaction.guild.id);
         let num = interaction.options.getInteger("number");
-        if (num < 0 || num > queue.getSize()) return await interaction.reply({ content: "数字があたおか", ephemeral: true });
+        if (num < 0 || num > queue.getSize()) return await interaction.reply({ content: ataokanumber, ephemeral: true });
         const vol = queue.node.volume;
 
         let t; let time;
@@ -1421,7 +1425,7 @@ try {
         const number = interaction.options.getInteger("number");
         const track = queue.tracks.toArray()[number - 1];
 
-        if (number > queue.getSize()) return await interaction.reply({ content: "指定した番号の曲は存在しません。", ephemeral: true });
+        if (number > queue.getSize()) return await interaction.reply({ content: ataokanumber, ephemeral: true });
 
         await interaction.deferReply();
         await interaction.followUp(`**${number}.** ${track.title}を削除したよ！`);
@@ -1434,7 +1438,7 @@ try {
         const queue = useQueue(interaction.guild.id);
         let page = interaction.options.getInteger("page");
         if (page === null) page = 1;
-        if (page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: "ページ数があたおか", ephemeral: true });
+        if (page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: ataokanumber, ephemeral: true });
         if (queue.history.getSize() === 0) return await interaction.reply({ content: "履歴はまだ保存されていません", ephemeral: true });
 
         await interaction.deferReply();
@@ -1503,7 +1507,7 @@ try {
         const seek = interaction.options.getNumber("seek");
         await interaction.deferReply();
 
-        await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp("数字があたおかだったかも");
+        await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp(ataokanumber);
       };
 
       if (interaction.command.name === "userinfo") {
@@ -1526,7 +1530,7 @@ try {
       };
 
       if (interaction.command.name === "role") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         const targetuser = interaction.options.getMember("user");
         const targetrole = interaction.options.get("role");
         if (interaction.options.getSubcommandGroup() === "user") {
@@ -1642,7 +1646,7 @@ try {
       };
 
       if (interaction.command.name === "send") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でしか実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         try {
           const description = interaction.options.getString("description");
           const channel = interaction.options.getChannel("channel");
@@ -1737,8 +1741,8 @@ try {
               color: mutaocolor
             }
           ]
-        }).catch(async e => {
-          await interaction.reply({ content: `送信できません\n${e}` });
+        }).catch(async error => {
+          await interaction.reply({ content: `送信できません\n${error}`, ephemeral: true });
         });
       };
 
@@ -1756,12 +1760,11 @@ try {
 
         if (result.status !== 200) return await interaction.reply(`${result.status}\n${result.statusText}`);
         const translated = result.data.translations[0];
-        if (translated.text.length > 4096) return await interaction.followUp("翻訳結果が4096文字より長かったため送信できません。");
 
         await interaction.followUp({
           embeds: [{
             title: `${translated.detected_source_language} → ${outlang}`,
-            description: `${translated.text}`,
+            description: `${translated.text.substring(0, 4096)}${translated.text.length > 4096 ? "..." : ""}`,
             color: mutaocolor
           }]
         });
@@ -1783,7 +1786,7 @@ try {
 
       if (interaction.command.name === "searchimage") {
         const image = interaction.options.getAttachment("image");
-        const url = await interaction.options.getString("url");
+        const url = interaction.options.getString("url");
         if (!image && !url) return await interaction.reply({ content: "画像かURLを指定して下さい。", ephemeral: true });
         if (image && url) return await interaction.reply({ content: "どちらか一方のみを指定して下さい", ephemeral: true });
         const imageurl = image ? image.url : url;
@@ -1874,7 +1877,7 @@ try {
       };
 
       if (interaction.command.name === "messages") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         const json = JSON.parse(fs.readFileSync("guilds.json"));
         const guild = json.find(guild => guild.id === interaction.guild.id);
         if (!guild) {
@@ -1898,7 +1901,7 @@ try {
       };
 
       if (interaction.command.name === "disconall") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         const vc = interaction.options.getChannel("vc");
         if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: "VCを指定するかVCに入室して下さい。", ephemeral: true });
@@ -1907,7 +1910,7 @@ try {
         const memberssize = vc.members.size;
         await interaction.deferReply();
         try {
-          await vc.members.map(async m => await m.voice.disconnect());
+          vc.members.map(async m => await m.voice.disconnect());
         } catch (error) {
           return await interaction.followUp("権限が変更されました。");
         };
@@ -1961,7 +1964,7 @@ try {
       };
 
       if (interaction.command.name === "deafall") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.DeafenMembers)) return await interaction.reply({ content: "スピーカーミュートする権限がありません！", ephemeral: true });
         if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
         let vc = interaction.options.getChannel("vc");
@@ -1983,7 +1986,7 @@ try {
       };
 
       if (interaction.command.name === "setchannel") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         await interaction.deferReply();
         const channel = interaction.options.getChannel("channel");
@@ -2005,7 +2008,7 @@ try {
       };
 
       if (interaction.command.name === "stopsendcount") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます", ephemeral: true });
         let json = JSON.parse(fs.readFileSync("guilds.json"));
         const guild = json.find(guild => guild.id === interaction.guild.id);
@@ -2019,7 +2022,7 @@ try {
       };
 
       if (interaction.command.name === "delmessages") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でしか実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
 
         const channel = interaction.options.getChannel("channel");
@@ -2068,7 +2071,7 @@ try {
       };
 
       if (interaction.command.name === "resetcount") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: "管理者権限所持者のみ実行できます。", ephemeral: true });
 
         let guilds = JSON.parse(fs.readFileSync("guilds.json"));
@@ -2084,7 +2087,7 @@ try {
       };
 
       if (interaction.command.name === "guildinfo") {
-        if (!interaction.guild) return await interaction.reply({ content: "サーバー内でないと実行できません！", ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         const guild = interaction.guild;
         const iconurl = guild.iconURL({ size: 4096, extension: "png" });
         const geticon = interaction.options.getBoolean("icon");
@@ -2294,7 +2297,7 @@ try {
 
     discordplayer.events.on("queueDelete", async queue => {
       if (!queue.guild.members.me.permissions.has(PermissionFlagsBits.ChangeNickname)) return;
-      await queue.guild.members.me.setNickname("MuTao");
+      await queue.guild.members.me.setNickname(null);
     });
   } catch (error) {
     console.log(today(new Date()));
