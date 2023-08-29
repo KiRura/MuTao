@@ -1169,7 +1169,7 @@ try {
           if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionFlagsBits.Connect)) return await interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
         };
 
-        const url = await interaction.options.getString("url").replace("&feature=share", "");
+        let url = String(interaction.options.getString("url")).replace("&feature=share", "");
         let vc = await interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
         vc = vc ? vc : interaction.guild.members.me.voice.channel;
@@ -1177,6 +1177,10 @@ try {
         const volume = await interaction.options.getInteger("vol");
         let vol = volume ? volume : 30;
         if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50;
+ 
+        if (url.match("youtube.com") && url.match("list=") && url.match("&si=")) {
+          url = url.substring(0, url.indexOf("&si="));
+        };
 
         await interaction.deferReply();
         const track = await discordplayer.search(url, {
@@ -1369,11 +1373,11 @@ try {
         if (interaction.command.name === "nowp" || !num) {
           t = queue.currentTrack;
           const progress = queue.node.createProgressBar(); // 埋め込み作り(discordplayer神)
-          time = queue.node.getTimestamp().progress === Infinity ? "**ライブ配信**" : `\n**残り:** ${times((queue.currentTrack.durationMS - queue.node.getTimestamp().current.value) / 1000)}\n\n**${progress}**`;
+          time = queue.node.getTimestamp().progress === Infinity ? "\n**ライブ配信**" : `\n**残り:** ${times((queue.currentTrack.durationMS - queue.node.getTimestamp().current.value) / 1000)}\n\n**${progress}**`;
         } else {
           num = num - 1;
           t = queue.tracks.toArray()[num];
-          time = `\n**長さ:** ${t.duration}`;
+          time = `\n**長さ:** ${t.durationMS === 0 ? "ライブ" : t.duration}`;
         };
 
         await interaction.reply({
