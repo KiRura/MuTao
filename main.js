@@ -1388,7 +1388,7 @@ try {
               thumbnail: { url: t.thumbnail },
               description: `**投稿者:** ${t.author}\n**リクエスト:** ${t.requestedBy.username}${time}`,
               color: mutaocolor,
-              footer: { text: `今までに${queue.history.getSize()}曲再生しました。｜ボリューム: ${vol}%` }
+              footer: { text: `今までに${queue.history.getSize()}曲再生しました｜ボリューム: ${vol}%` }
             }
           ]
         });
