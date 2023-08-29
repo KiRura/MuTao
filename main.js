@@ -627,8 +627,8 @@ try {
         options: [
           {
             type: ApplicationCommandOptionType.Integer,
-            name: "number",
-            description: "スキップする曲数",
+            name: "to",
+            description: "/queueで表示された番号の曲へスキップ",
             minValue: 1
           }
         ]
@@ -1321,7 +1321,7 @@ try {
         const returnmusic = return_music(interaction);
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
         const queue = useQueue(interaction.guild.id);
-        let number = interaction.options.getInteger("number");
+        let number = interaction.options.getInteger("to");
         if (number && (number < 1 || number > queue.getSize())) return await interaction.reply({ content: "指定した数字があたおか", ephemeral: true });
         await interaction.deferReply();
 
