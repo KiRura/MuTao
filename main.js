@@ -1350,7 +1350,7 @@ try {
         let embed = {
           embeds: [
             {
-              description: `**再生開始:**\n[${t.title}](${t.url})\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.durationMS === 0 ? "ライブ" : t.duration}`,
+              description: `**再生開始:**${t.title.length < 15 ? ` [${t.title}](${t.url})` : `\n[${t.title}](${t.url})`}\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.durationMS === 0 ? "ライブ" : t.duration}`,
               color: mutaocolor,
               thumbnail: { url: t.thumbnail }
             }
