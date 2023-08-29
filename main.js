@@ -1036,7 +1036,7 @@ try {
         options: [
           {
             type: ApplicationCommandOptionType.Number,
-            name: "duration",
+            name: "sec",
             description: "秒数",
             minValue: 0,
             required: true
@@ -1502,9 +1502,10 @@ try {
         const returnmusic = return_music(interaction);
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true });
         const queue = useQueue(interaction.guild.id);
-        const duration = interaction.options.getNumber("duration");
+        const seek = interaction.options.getNumber("seek");
+        await interaction.deferReply();
 
-        await queue.node.seek(duration * 1000) ? await interaction.reply(`${duration}秒に移動したよ！`) : await interaction.reply({ content: "数字があたおかだったかも", ephemeral: true });
+        await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp("数字があたおかだったかも");
       };
 
       if (interaction.command.name === "userinfo") {
