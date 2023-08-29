@@ -1177,7 +1177,7 @@ try {
         const volume = await interaction.options.getInteger("vol");
         let vol = volume ? volume : 30;
         if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50;
- 
+
         if (url.match("youtube.com") && url.match("list=") && url.match("&si=")) url = url.substring(0, url.indexOf("&si="));
 
         await interaction.deferReply();
@@ -2285,6 +2285,22 @@ try {
       console.log(error);
     };
   });
+
+  try {
+    discordplayer.events.on("playerTrigger", async queue => {
+      if (!queue.guild.members.me.permissions.has(PermissionFlagsBits.ChangeNickname)) return;
+      await queue.guild.members.me.setNickname(`${queue.currentTrack.title.substring(0, 24)} | MuTao`);
+    });
+
+    discordplayer.events.on("queueDelete", async queue => {
+      if (!queue.guild.members.me.permissions.has(PermissionFlagsBits.ChangeNickname)) return;
+      await queue.guild.members.me.setNickname("MuTao");
+    });
+  } catch (error) {
+    console.log(today(new Date()));
+    console.log("ニックネーム変えるあたりのエラー");
+    console.log(error);
+  };
 
   discordplayer.events.on("error", error => {
     if (error.message.match("The operation was aborted")) return;
