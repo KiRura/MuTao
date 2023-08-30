@@ -1106,6 +1106,15 @@ try {
       }
     ]);
 
+    await (await (await client.guilds.fetch("1099309562781245440")).channels.fetch("1146562994688503999")).send({
+      embeds: [
+        {
+          title: "MuTaoが起動しました。",
+          color: greencolor,
+          footer: { text: today(new Date()) }
+        }
+      ]
+    });
     console.log(`${client.user.tag} all ready`);
   });
 
