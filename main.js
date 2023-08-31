@@ -42,6 +42,7 @@ try {
   const discordTogether = new DiscordTogether(client);
   const fs = require("fs");
   const cron = require("node-cron");
+  const crypto = require("crypto");
   const Vision = require("@google-cloud/vision");
   const vision = new Vision.ImageAnnotatorClient();
 
@@ -1103,6 +1104,24 @@ try {
             description: "アイコンを取得する"
           }
         ]
+      },
+      { // password
+        name: "password",
+        description: "ランダムな文字を生成する",
+        options: [
+          {
+            type: ApplicationCommandOptionType.Boolean,
+            name: "ephemeral",
+            description: "他の人が見えないようにする"
+          },
+          {
+            type: ApplicationCommandOptionType.Integer,
+            name: "length",
+            description: "文字数 | デフォルト: 8",
+            minValue: 1,
+            maxValue: 2000
+          }
+        ]
       }
     ]);
 
@@ -2147,6 +2166,14 @@ try {
             }
           ]
         });
+      };
+
+      if (interaction.command.name === "password") {
+        let n = interaction.options.getInteger("length");
+        if (n === null) n = 8;
+        let ephemeral = interaction.options.getBoolean("ephemeral");
+        if (!ephemeral) ephemeral = false;
+        await interaction.reply({ content: crypto.randomBytes(n).toString("base64").substring(0, n), ephemeral: ephemeral });
       };
 
       if (interaction.command.name === "test") {
