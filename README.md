@@ -1,6 +1,6 @@
 # MuTao
 
-![png](https://cdn.discordapp.com/avatars/710757661364191273/d5dd680beb890ce2cf96b81117a7500e.png?size=4096)
+![png](https://cdn.discordapp.com/attachments/970275644686602240/1148142461114400808/14_20230904152804.png)
 
 音楽再生、ロール一括付与・剥奪、絵文字保存、YouTube等のサムネの保存、メッセージカウントなど、様々な機能を無心に詰め込んだBot。
 
