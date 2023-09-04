@@ -8,6 +8,6 @@
 
 すぐに修正するようにはしていますが、諸事情により修正できずやむを得ず機能自体を停止したり放置したりする場合もあります(例: /searchimageのエラーなど)。
 
-[導入はこちらから](https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275347008576&scope=applications.commands%20bot)
+[導入はこちらから](https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275347008576&scope=applications.commands%20bot) (permissions=275347008576)
 
 [Discord公式鯖](https://discord.gg/ky97Uqu3YY)
