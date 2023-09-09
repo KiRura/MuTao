@@ -1,4 +1,7 @@
-# MuTao
+<p align="center">
+  <img width=10% src="https://cdn.discordapp.com/attachments/970275644686602240/1148142461114400808/14_20230904152804.png">
+</p>
+<h1 align="center">MuTao</h1>
 
 音楽再生、ロール一括付与・剥奪、絵文字保存、YouTube等のサムネの保存、メッセージカウントなど、様々な機能を無心に詰め込んだBot。
 
@@ -6,6 +9,6 @@
 
 すぐに修正するようにはしていますが、諸事情により修正できずやむを得ず機能自体を停止したり放置したりする場合もあります(例: /searchimageのエラーなど)。
 
-導入: https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275347008576&scope=applications.commands%20bot
+[導入はこちらから](https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275347008576&scope=applications.commands%20bot) (permissions=275347008576)
 
-サポート鯖: https://discord.gg/ky97Uqu3YY
+[Discord公式鯖](https://discord.gg/ky97Uqu3YY)
