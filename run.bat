@@ -1,7 +1,7 @@
 @echo off
 
 :LOOP
-    node main.js
+    npm run start
 goto :LOOP
 
 exit /b 0

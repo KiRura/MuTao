@@ -1,4 +1,5 @@
-function today(dt) {
+function today() {
+  const dt = new Date();
   const y = dt.getFullYear();
   const m = dt.getMonth();
   const d = dt.getDate();
@@ -45,11 +46,11 @@ try {
 
   console.log("loaded modules");
 
-  const wait = (sec) => {
+  function wait(sec) {
     return new Promise((resolve) => {
       setTimeout(resolve, sec * 1000);
     });
-  };
+  }
   function writedefault(id) {
     let json = JSON.parse(fs.readFileSync("guilds.json"));
     json.push(
@@ -1127,7 +1128,7 @@ try {
         {
           title: "MuTaoが起動しました。",
           color: greencolor,
-          footer: { text: today(new Date()) }
+          footer: { text: today() }
         }
       ]
     });
@@ -1194,14 +1195,12 @@ try {
 
       if (interaction.command.name === "play") {
         if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
-        if (!interaction.guild.members.me.voice.channel) { // undefined回避
-          if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.Connect) && !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionFlagsBits.Connect)) return await interaction.reply({ content: "VCに接続できる権限が無いよ！", ephemeral: true });
-        };
-
-        let url = String(interaction.options.getString("url")).replace("&feature=share", "");
         let vc = await interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
         vc = vc ? vc : interaction.guild.members.me.voice.channel;
+        if (!vc.joinable) return await interaction.reply({ content: "VCに接続できないよ！", ephemeral: true });
+
+        let url = String(interaction.options.getString("url")).replace("&feature=share", "");
         if (!vc) return await interaction.reply({ content: "playコマンド\nVCに入るか\nVC指定するか", ephemeral: true });
         const volume = await interaction.options.getInteger("vol");
         let vol = volume ? volume : 30;
@@ -1234,6 +1233,7 @@ try {
             }
           });
         } catch (error) {
+          console.log(today());
           console.error(error);
           useQueue(interaction.guild.id).delete();
           return await interaction.followUp(`処理中にエラーが発生しました。`);
@@ -2186,7 +2186,7 @@ try {
         await interaction.reply({ content: "てすとこんぷりーてっど！", ephemeral: true });
       };
     } catch (e) {
-      console.log(today(new Date()));
+      console.log(today());
       console.log("interaction エラー");
       console.log(e);
       if (interaction.user.id !== "606093171151208448") {
@@ -2258,7 +2258,7 @@ try {
       json.find(guild => guild.id === message.guild.id).count = count + 1;
       fs.writeFileSync("guilds.json", Buffer.from(JSON.stringify(json)));
     } catch (error) {
-      console.log(today(new Date()));
+      console.log(today());
       console.log("メッセージカウントエラー");
       console.log(error);
     };
@@ -2291,7 +2291,7 @@ try {
         ]
       });
     } catch (error) {
-      console.log(today(new Date()));
+      console.log(today());
       console.log("guildCreate Error");
       console.log(error);
     };
@@ -2319,7 +2319,7 @@ try {
         ]
       });
     } catch (error) {
-      console.log(today(new Date()));
+      console.log(today());
       console.log("guildDelete Error");
       console.log(error);
     };
@@ -2336,14 +2336,14 @@ try {
       await queue.guild.members.me.setNickname(null);
     });
   } catch (error) {
-    console.log(today(new Date()));
+    console.log(today());
     console.log("ニックネーム変えるあたりのエラー");
     console.log(error);
   };
 
   discordplayer.on("error", error => {
     if (error.message.match("The operation was aborted")) return;
-    console.log(today(new Date()));
+    console.log(today());
     console.log("discordplayer エラー");
     console.log(error);
   });
@@ -2365,13 +2365,13 @@ try {
   // });
 
   client.login(process.env.DISCORD_TOKEN).catch(error => {
-    console.log(today(new Date()));
+    console.log(today());
     console.log("client.login() エラー");
     console.log(error);
   });
 
 } catch (error) {
-  console.log(today(new Date()));
+  console.log(today());
   console.log("コード全体のエラー");
   console.log(error);
 };
