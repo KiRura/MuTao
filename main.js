@@ -1198,10 +1198,10 @@ try {
         let vc = await interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
         vc = vc ? vc : interaction.guild.members.me.voice.channel;
+        if (!vc) return await interaction.reply({ content: "playコマンド\nVCに入るか\nVC指定するか", ephemeral: true });
         if (!vc.joinable) return await interaction.reply({ content: "VCに接続できないよ！", ephemeral: true });
 
         let url = String(interaction.options.getString("url")).replace("&feature=share", "");
-        if (!vc) return await interaction.reply({ content: "playコマンド\nVCに入るか\nVC指定するか", ephemeral: true });
         const volume = await interaction.options.getInteger("vol");
         let vol = volume ? volume : 30;
         if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50;
