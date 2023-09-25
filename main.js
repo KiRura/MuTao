@@ -1194,7 +1194,6 @@ try {
       };
 
       if (interaction.command.name === "play") {
-        return await interaction.reply({ content:"現在使用できません。", ephemeral: true })
         if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true });
         let vc = await interaction.options.getChannel("vc");
         vc = vc ? vc : interaction.member.voice.channel;
