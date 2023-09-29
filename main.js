@@ -426,7 +426,7 @@ try {
       },
       { // getthumbnail
         name: 'getthumbnail',
-        description: 'YouTubeのサムネを取得',
+        description: '再生中の曲、もしくは指定した曲のサムネを取得',
         options: [
           {
             type: ApplicationCommandOptionType.String,
