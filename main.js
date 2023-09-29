@@ -1227,7 +1227,7 @@ try {
         'guildinfo'
       ]
 
-      if (inguildCommands === command) {
+      if (inguildCommands.find(inguildCommand => inguildCommand === command)) {
         if (!(await isGuild(interaction))) return
       };
 
