@@ -9,39 +9,25 @@ import ping from 'ping'
 import fs from 'fs'
 import cron from 'node-cron'
 import crypto from 'crypto'
+import { Logger } from "tslog"
+const logger = new Logger({ hideLogPositionForProduction: true })
+logger.info('loaded modules')
 const client = new Client({ intents: Object.values(GatewayIntentBits) })
 const discordTogether = new DiscordTogether(client)
 const discordplayer = Player.singleton(client)
 discordplayer.extractors.loadDefault().then(result => {
   if (result.success) {
-    console.log('loaded discord-player extractors')
+    logger.info('loaded discord-player extractors')
   } else {
-    return console.log(`${result.error.name}\n${result.error.message}\n${result.error.stack}`)
+    return logger.error(`${result.error.name}\n${result.error.message}\n${result.error.stack}`)
   };
 })
-const API_KEY = process.env.DEEPL_API_KEY
-const guildsData = 'data/guilds.json'
-const nicknameData = 'data/nickname.json'
 
 config()
 
-console.log('loaded modules')
-
-function today() {
-  const dt = new Date()
-  const y = dt.getFullYear()
-  const m = dt.getMonth()
-  const d = dt.getDate()
-  const hour = ('00' + (dt.getHours())).slice(-2)
-  const min = ('00' + (dt.getMinutes())).slice(-2)
-  const sec = ('00' + (dt.getSeconds())).slice(-2)
-  const msec = dt.getMilliseconds()
-  const weekItems = ['日', '月', '火', '水', '木', '金', '土']
-  const dayOfWeek = weekItems[dt.getDay()]
-  const wareki = dt.toLocaleDateString('ja-JP-u-ca-japanese', { year: 'numeric' })
-
-  return `${y}年(${wareki})${('00' + (m + 1)).slice(-2)}月${('00' + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`
-};
+const API_KEY = process.env.DEEPL_API_KEY
+const guildsData = 'data/guilds.json'
+const nicknameData = 'data/nickname.json'
 
 const mutaoColor = 16760703
 const redcolor = 16744319
@@ -52,6 +38,21 @@ const notHasManageRole = 'ロール管理の権限がありません。'
 const cannotManageRole = 'このロールは管理できません。'
 
 try {
+  function today() {
+    const dt = new Date()
+    const y = dt.getFullYear()
+    const m = dt.getMonth()
+    const d = dt.getDate()
+    const hour = ('00' + (dt.getHours())).slice(-2)
+    const min = ('00' + (dt.getMinutes())).slice(-2)
+    const sec = ('00' + (dt.getSeconds())).slice(-2)
+    const msec = dt.getMilliseconds()
+    const weekItems = ['日', '月', '火', '水', '木', '金', '土']
+    const dayOfWeek = weekItems[dt.getDay()]
+    const wareki = dt.toLocaleDateString('ja-JP-u-ca-japanese', { year: 'numeric' })
+  
+    return `${y}年(${wareki})${('00' + (m + 1)).slice(-2)}月${('00' + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`
+  };
   function wait(sec) {
     return new Promise((resolve) => {
       setTimeout(resolve, sec * 1000)
@@ -186,15 +187,15 @@ try {
             ]
           })
         } catch (error) {
-          console.log(today())
-          console.error(error)
+          logger.info(today())
+          logger.error(error)
         };
         json.find(jsonguild => jsonguild.id === guild.id).count = 0
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
       }))
     })
 
-    console.log('setting slash commands...')
+    logger.info('setting slash commands...')
     await client.application.commands.set([
       { // help
         name: 'help',
@@ -1188,7 +1189,7 @@ try {
         }
       ]
     })
-    console.log(`${client.user.tag} all ready`)
+    logger.info(`${client.user.tag} all ready`)
   })
 
   client.on(Events.InteractionCreate, async interaction => {
@@ -1245,9 +1246,7 @@ try {
             }
           }]
         })
-      };
-
-      if (command === 'ping') {
+      } else if (command === 'ping') {
         await interaction.deferReply()
         const embed = new EmbedBuilder()
           .setTitle('Pong!')
@@ -1281,9 +1280,7 @@ try {
             }
           ])
         await interaction.editReply({ embeds: [embed] })
-      };
-
-      if (command === 'play') {
+      } else if (command === 'play') {
         let vc = await option.getChannel('vc')
         vc = vc || interaction.member.voice.channel
         vc = vc || interaction.guild.members.me.voice.channel
@@ -1333,8 +1330,8 @@ try {
             }
           })
         } catch (error) {
-          console.log(today())
-          console.error(error)
+          logger.info(today())
+          logger.error(error)
           useQueue(interaction.guild.id).delete()
           return await interaction.followUp('処理中にエラーが発生しました。')
         };
@@ -1365,9 +1362,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'leave') {
+      } else if (command === 'leave') {
         const queue = useQueue(interaction.guild.id)
         if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true })
         if (!queue) return await interaction.reply({ content: 'VCに入ってないよ！', ephemeral: true })
@@ -1377,25 +1372,19 @@ try {
         await interaction.followUp('またね！')
         await wait(3) // そういう演出
         await interaction.deleteReply()
-      };
-
-      if (command === 'pause') {
+      } else if (command === 'pause') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
 
         queue.node.pause() ? await interaction.reply('一時停止したよ') : await interaction.reply({ content: '既に一時停止中だよ！', ephemeral: true }) // deferReply/followUpをするとephemeralが使えないらしい
-      };
-
-      if (command === 'unpause') {
+      } else if (command === 'unpause') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
 
         queue.node.resume() ? await interaction.reply('一時停止を解除したよ') : await interaction.reply({ content: '一時停止がされてなかったよ', ephemeral: true })
-      };
-
-      if (command === 'clear') {
+      } else if (command === 'clear') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1405,9 +1394,7 @@ try {
         await interaction.deferReply()
         queue.tracks.clear()
         await interaction.followUp(`${losttracks}曲がダイソンの手によってまっさらになったよ`)
-      };
-
-      if (command === 'queue') {
+      } else if (command === 'queue') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1443,9 +1430,7 @@ try {
             }
           }]
         })
-      };
-
-      if (command === 'skip') {
+      } else if (command === 'skip') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1487,9 +1472,7 @@ try {
         if (queue.getSize() !== 0) embed.embeds[0].title = `**残り:** ${queue.estimatedDuration === 0 ? 'ライブのみ' : queue.durationFormatted} / ${queue.getSize()}曲`
         if (number) embed.embeds[0].description = `${embed.embeds[0].description}\n${number + 1}曲スキップしました。`
         await interaction.followUp(embed)
-      };
-
-      if (command === 'nowp' || command === 'songinfo') {
+      } else if (command === 'nowp' || command === 'songinfo') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1520,9 +1503,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'loop') {
+      } else if (command === 'loop') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1542,9 +1523,7 @@ try {
           sendmode = 'リピートを**解除**したよ！'
         };
         await interaction.reply(sendmode)
-      };
-
-      if (command === 'remove') {
+      } else if (command === 'remove') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1556,9 +1535,7 @@ try {
         await interaction.deferReply()
         await interaction.followUp(`**${number}.** ${track.title}を削除したよ！`)
         queue.node.remove(track)
-      };
-
-      if (command === 'songhistory') {
+      } else if (command === 'songhistory') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1602,9 +1579,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'shuffle') {
+      } else if (command === 'shuffle') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1613,9 +1588,7 @@ try {
         await interaction.deferReply()
         queue.tracks.shuffle()
         await interaction.followUp(`${queue.tracks.data.length}曲をぐしゃぐしゃにしたよ！`)
-      };
-
-      if (command === 'setvolume') {
+      } else if (command === 'setvolume') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1624,9 +1597,7 @@ try {
 
         const success = queue.node.setVolume(vol)
         await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : 'なんかセットできませんでした。'}`)
-      };
-
-      if (command === 'seek') {
+      } else if (command === 'seek') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1634,9 +1605,7 @@ try {
         await interaction.deferReply()
 
         await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp(ataokanumber)
-      };
-
-      if (command === 'userinfo') {
+      } else if (command === 'userinfo') {
         const id = await option.getString('id')
         let userinfo
         try {
@@ -1653,9 +1622,7 @@ try {
             thumbnail: { url: avatarToURL(userinfo) }
           }]
         })
-      };
-
-      if (command === 'role') {
+      } else if (command === 'role') {
         const group = option.getSubcommandGroup()
         const manage = option.getSubcommand()
         if (!(await permissionHas(interaction, PermissionFlagsBits.ManageRoles, notHasManageRole)) && (manage === 'add' || manage === 'remove')) return
@@ -1735,9 +1702,7 @@ try {
                 .catch(error => { })
             })
         };
-      };
-
-      if (command === 'send') {
+      } else if (command === 'send') {
         try {
           const description = option.getString('description')
           const channel = option.getChannel('channel')
@@ -1805,17 +1770,11 @@ try {
           return await interaction.reply({ content: `権限的か開発者のミスかそういう仕様で送信できませんでした。\n${error}`, ephemeral: true })
         };
         await interaction.reply('送信できました！')
-      };
-
-      if (command === 'siranami') {
+      } else if (command === 'siranami') {
         await interaction.reply('https://www.youtube.com/@ShiranamIroriCH')
-      };
-
-      if (command === 'ggrks') {
+      } else if (command === 'ggrks') {
         await interaction.reply('https://google.com')
-      };
-
-      if (command === 'getthumbnail') {
+      } else if (command === 'getthumbnail') {
         let thumbnail
         const url = option.getString('url')
         if (url !== null) {
@@ -1841,12 +1800,10 @@ try {
             }
           ]
         }).catch(async error => {
-          console.log(today())
-          console.error(error)
+          logger.info(today())
+          logger.error(error)
         })
-      };
-
-      if (command === 'trans') {
+      } else if (command === 'trans') {
         await interaction.deferReply()
         const sourcetext = option.getString('sourcetext')
         const outlang = option.getString('outlang')
@@ -1868,9 +1825,7 @@ try {
             color: mutaoColor
           }]
         })
-      };
-
-      if (command === 'today') {
+      } else if (command === 'today') {
         const dt = new Date()
         const y = dt.getFullYear()
         const m = dt.getMonth()
@@ -1882,9 +1837,7 @@ try {
         const yprog = Math.floor((dt.getTime() - (Date.parse(`${y - 1}/12/31`))) / (365 * 24 * 60 * 60 * 1000) * 100)
         const dyrem = Math.floor((Date.parse(`${y}/12/31`) - dt.getTime()) / 1000 / 60 / 60 / 24)
         await interaction.reply(`${today(dt)}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`)
-      };
-
-      if (command === 'searchimage') {
+      } else if (command === 'searchimage') {
         const image = option.getAttachment('image')
         const url = option.getString('url')
         if (!image && !url) return await interaction.reply({ content: '画像かURLを指定して下さい。', ephemeral: true })
@@ -1915,9 +1868,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'avatar') {
+      } else if (command === 'avatar') {
         const id = option.getString('id')
         const member = option.getUser('member')
         if (!id && !member) return await interaction.reply({ content: 'どちらかを指定してね', ephemeral: true })
@@ -1942,9 +1893,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'startactivity') {
+      } else if (command === 'startactivity') {
         if (!interaction.guild) return await interaction.reply('サーバー内で実行して下さい')
         if (!interaction.member.voice.channel) return await interaction.reply({ content: 'VCに入ってから実行して下さい', ephemeral: true })
         const game = option.getString('activity')
@@ -1953,9 +1902,7 @@ try {
           if (invite.code === '50035') return await interaction.reply({ content: '存在しないアクティビティです', ephemeral: true })
           return await interaction.reply(invite.code)
         })
-      };
-
-      if (command === 'saveemoji') {
+      } else if (command === 'saveemoji') {
         const emoji = option.getString('emojiid')
         let type = option.get('type')
         if (!Number(emoji)) return await interaction.reply(String(emoji).replace('<', '').replace('>', '').replace(':', ''))
@@ -1974,9 +1921,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'messages') {
+      } else if (command === 'messages') {
         const json = JSON.parse(fs.readFileSync(guildsData))
         const guild = json.find(guild => guild.id === interaction.guild.id)
         if (!guild) {
@@ -1997,9 +1942,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'disconall') {
+      } else if (command === 'disconall') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         let vc = option.getChannel('vc')
         if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: 'VCを指定するかVCに入室して下さい。', ephemeral: true })
@@ -2013,9 +1956,7 @@ try {
           return await interaction.followUp('権限が変更されました。')
         };
         await interaction.followUp(`${memberssize}人を切断しました。`)
-      };
-
-      if (command === 'banner') {
+      } else if (command === 'banner') {
         const type = option.getBoolean('gif') ? 'gif' : 'png'
         let id = option.getString('id')
         const member = option.getUser('member')
@@ -2044,9 +1985,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'getroleicon') {
+      } else if (command === 'getroleicon') {
         const role = option.getRole('role')
         if (!role.iconURL()) return await interaction.reply({ content: '指定されたロールにアイコンはありませんでした。', ephemeral: true })
         const url = role.iconURL({ size: 4096, extension: 'png' })
@@ -2059,9 +1998,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'deafall') {
+      } else if (command === 'deafall') {
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.DeafenMembers)) return await interaction.reply({ content: 'スピーカーミュートする権限がありません！', ephemeral: true })
         if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
         let vc = option.getChannel('vc')
@@ -2080,9 +2017,7 @@ try {
         };
 
         await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`)
-      };
-
-      if (command === 'setchannel') {
+      } else if (command === 'setchannel') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         await interaction.deferReply()
         const channel = option.getChannel('channel')
@@ -2101,9 +2036,7 @@ try {
         json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
         await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
-      };
-
-      if (command === 'stopsendcount') {
+      } else if (command === 'stopsendcount') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         const json = JSON.parse(fs.readFileSync(guildsData))
         const guild = json.find(guild => guild.id === interaction.guild.id)
@@ -2114,9 +2047,7 @@ try {
         json.find(guild => guild.id === interaction.guild.id).send_count_channel = null
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
         await interaction.reply('定期送信をストップしました。')
-      };
-
-      if (command === 'delmessages') {
+      } else if (command === 'delmessages') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
 
         const channel = option.getChannel('channel')
@@ -2143,11 +2074,9 @@ try {
         };
 
         const finish = `<#${channel.id}>内の${num}個のメッセージを削除しました。`
-        interaction.editReply(finish).catch(e => interaction.channel.send(finish).catch(error => { console.error(error) }))
-        interaction.user.send(finish).catch(error => { console.error(error) })
-      };
-
-      if (command === 'deeplusage') {
+        interaction.editReply(finish).catch(e => interaction.channel.send(finish).catch(error => { logger.error(error) }))
+        interaction.user.send(finish).catch(error => { logger.error(error) })
+      } else if (command === 'deeplusage') {
         const result = await (await fetch('https://api-free.deepl.com/v2/usage', {
           method: 'GET',
           headers: {
@@ -2162,9 +2091,7 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'resetcount') {
+      } else if (command === 'resetcount') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
 
         const guilds = JSON.parse(fs.readFileSync(guildsData))
@@ -2177,9 +2104,7 @@ try {
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(guilds)))
 
         await interaction.reply('リセットが完了しました。')
-      };
-
-      if (command === 'guildinfo') {
+      } else if (command === 'guildinfo') {
         const guild = interaction.guild
         const iconurl = guild.iconURL({ size: 4096, extension: 'png' })
         const geticon = option.getBoolean('icon')
@@ -2230,30 +2155,28 @@ try {
             }
           ]
         })
-      };
-
-      if (command === 'password') {
+      } else if (command === 'password') {
         let n = option.getInteger('length')
         if (n === null) n = 8
         let ephemeral = option.getBoolean('ephemeral')
         if (!ephemeral) ephemeral = false
         await interaction.reply({ content: crypto.randomBytes(n).toString('base64').substring(0, n), ephemeral })
-      };
-
-      if (command === 'test') {
+      } else if (command === 'test') {
         if (interaction.user.id !== '606093171151208448') return await interaction.reply('管理者及び開発者のみ実行可能です。')
         const text = option.getString('text1')
         const track = await discordplayer.search(text, {
           requestedBy: interaction.user,
           searchEngine: QueryType.AUTO
         })
-        console.log(track)
+        logger.info(track)
         await interaction.reply({ content: 'てすとこんぷりーてっど！', ephemeral: true })
-      };
+      } else {
+        await interaction.reply({ content: '実装されていないコマンド？', ephemeral: true })
+      }
     } catch (e) {
-      console.log(today())
-      console.log('interaction エラー')
-      console.log(e)
+      logger.info(today())
+      logger.info('interaction エラー')
+      logger.error(e)
       if (interaction.user.id !== '606093171151208448') {
         await client.users.cache.get('606093171151208448').send(`${interaction.guild ? `${interaction.guild.name}(${interaction.guild.id})の${interaction.user.tag}` : interaction.user.tag}\nがデバッガーになってくれたお知らせ\n${e}`)
         const error = e
@@ -2323,13 +2246,13 @@ try {
       json.find(guild => guild.id === message.guild.id).count = count + 1
       fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
     } catch (error) {
-      console.log(today())
-      console.log('メッセージカウントエラー')
-      console.log(error)
+      logger.info(today())
+      logger.info('メッセージカウントエラー')
+      logger.error(error)
     };
   })
 
-  client.on('guildCreate', async guild => {
+  client.on(Events.GuildCreate, async guild => {
     try {
       const members = await guild.members.fetch()
       let result = 0
@@ -2356,13 +2279,13 @@ try {
         ]
       })
     } catch (error) {
-      console.log(today())
-      console.log('guildCreate Error')
-      console.log(error)
+      logger.info(today())
+      logger.info('guildCreate Error')
+      logger.error(error)
     };
   })
 
-  client.on('guildDelete', async guild => {
+  client.on(Events.GuildDelete, async guild => {
     try {
       const owner = await guild.fetchOwner()
       const joinKickTime = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24)
@@ -2384,9 +2307,9 @@ try {
         ]
       })
     } catch (error) {
-      console.log(today())
-      console.log('guildDelete Error')
-      console.error(error)
+      logger.info(today())
+      logger.info('guildDelete Error')
+      logger.error(error)
     };
   })
 
@@ -2406,20 +2329,20 @@ try {
       fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
     })
   } catch (error) {
-    console.log(today())
-    console.log('ニックネーム変えるあたりのエラー')
-    console.error(error)
+    logger.info(today())
+    logger.info('ニックネーム変えるあたりのエラー')
+    logger.error(error)
   };
 
   discordplayer.on('error', error => {
     if (error.message.match('The operation was aborted')) return
-    console.log(today())
-    console.log('discordplayer エラー')
-    console.error(error)
+    logger.info(today())
+    logger.info('discordplayer エラー')
+    logger.error(error)
   })
 
   // client.on("messageReactionAdd", async (reaction, user) => { // https://discord.gg/M9MmS6k2jT
-  //   console.log(reaction);
+  //   logger.info(reaction);
   //   if (reaction.message.id !== "1099317662854697091") return;
   //   if (reaction.emoji.name !== "✅") return;
   //   const member = reaction.message.guild.members.resolve(user);
@@ -2427,7 +2350,7 @@ try {
   // });
 
   // client.on("messageReactionRemove", async (reaction, user) => {
-  //   console.log(reaction);
+  //   logger.info(reaction);
   //   if (reaction.message.id !== "1099317662854697091") return;
   //   if (reaction.emoji.name !== "✅") return;
   //   const member = reaction.message.guild.members.resolve(user);
@@ -2435,12 +2358,12 @@ try {
   // });
 
   client.login(process.env.DISCORD_TOKEN).catch(error => {
-    console.log(today())
-    console.log('client.login() エラー')
-    console.error(error)
+    logger.info(today())
+    logger.info('client.login() エラー')
+    logger.error(error)
   })
 } catch (error) {
-  console.log(today())
-  console.log('コード全体のエラー')
-  console.error(error)
+  logger.info(today())
+  logger.info('コード全体のエラー')
+  logger.error(error)
 };

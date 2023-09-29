@@ -13,6 +13,7 @@
     "node-cron": "^3.0.2",
     "ping": "^0.4.4",
     "play-dl": "^1.9.7",
+    "tslog": "^4.9.2",
     "youtube-ext": "^1.1.14",
     "yt-stream": "^1.4.8",
     "ytdl-core": "^4.11.5"
