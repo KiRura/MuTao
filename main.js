@@ -20,12 +20,14 @@ discordplayer.extractors.loadDefault().then(result => {
   };
 })
 const API_KEY = process.env.DEEPL_API_KEY
+const guildsData = 'data/guilds.json'
+const nicknameData = 'data/nickname.json'
 
 config()
 
 console.log('loaded modules')
 
-function today () {
+function today() {
   const dt = new Date()
   const y = dt.getFullYear()
   const m = dt.getMonth()
@@ -50,13 +52,13 @@ const notHasManageRole = 'ロール管理の権限がありません。'
 const cannotManageRole = 'このロールは管理できません。'
 
 try {
-  function wait (sec) {
+  function wait(sec) {
     return new Promise((resolve) => {
       setTimeout(resolve, sec * 1000)
     })
   }
-  function writedefault (id) {
-    const json = JSON.parse(fs.readFileSync('guilds.json'))
+  function writedefault(id) {
+    const json = JSON.parse(fs.readFileSync(guildsData))
     json.push(
       {
         id,
@@ -64,23 +66,23 @@ try {
         count: 0
       }
     )
-    fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+    fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
   };
-  function avatarToURL (user) {
+  function avatarToURL(user) {
     if (user.avatarURL()) {
       return user.avatarURL({ size: 4096 })
     } else {
       return user.defaultAvatarURL
     };
   };
-  function returnMusic (interaction) {
+  function returnMusic(interaction) {
     const queue = useQueue(interaction.guild.id)
     if (!queue && interaction.guild.members.me.voice.channel) return '多分再起動したのでplayをするかvcから蹴るかして下さいな。'
     if (!queue) return 'VCに入ってないよ！'
     if (!queue.currentTrack) return '再生中の曲が無いよ！'
     return false
   };
-  function times (length) {
+  function times(length) {
     const hours = ('00' + Math.floor(length / 3600)).slice(-2)
     const minutes = ('00' + Math.floor((length % 3600) / 60)).slice(-2)
     const seconds = ('00' + Math.floor((length % 3600) % 60)).slice(-2)
@@ -92,13 +94,13 @@ try {
       return `00:${seconds}`
     };
   };
-  async function googlePing () {
+  async function googlePing() {
     return (await ping.promise.probe('8.8.8.8')).time
   }
-  function roleHas (user, role) {
+  function roleHas(user, role) {
     return user.roles.cache.has(role.id)
   };
-  async function managerole (user, or, role, interaction) {
+  async function managerole(user, or, role, interaction) {
     const has = user.roles.cache.has(role.id)
     if (or === 'add') {
       if (has) {
@@ -128,14 +130,14 @@ try {
         })
     }
   }
-  async function permissionHas (interaction, PermissionFlagsBits, String) {
+  async function permissionHas(interaction, PermissionFlagsBits, String) {
     if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits)) {
       await interaction.reply({ content: String, ephemeral: true })
       return false
     };
     return true
   };
-  async function isGuild (interaction) {
+  async function isGuild(interaction) {
     if (!interaction.inGuild()) {
       await interaction.reply({ content: 'サーバー内でのみ実行できます。', ephemeral: true })
       return false
@@ -152,13 +154,13 @@ try {
     cron.schedule('59 59 23 * * *', async () => {
       const dt = new Date()
       const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`
-      const json = JSON.parse(fs.readFileSync('guilds.json'))
+      const json = JSON.parse(fs.readFileSync(guildsData))
       await Promise.all(json.map(async guild => {
         let fetchguild
         let fetchchannel
         if (!guild.send_count_channel) {
           json.find(jsonguild => jsonguild.id === guild.id).count = 0
-          fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+          fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
           return
         };
         try {
@@ -188,7 +190,7 @@ try {
           console.error(error)
         };
         json.find(jsonguild => jsonguild.id === guild.id).count = 0
-        fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
       }))
     })
 
@@ -1303,6 +1305,17 @@ try {
         if (!track.hasTracks()) return await interaction.followUp('何かしらの原因により処理できません。')
 
         const getqueue = useQueue(interaction.guild.id)
+        if (!getqueue) {
+          let currentNickname = interaction.guild.members.me.nickname
+          if (currentNickname !== null) {
+            let json = JSON.parse(fs.readFileSync(nicknameData))
+            json.push({
+              id: interaction.guild.id,
+              nickname: currentNickname
+            })
+            fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
+          }
+        }
         const urlboolean = (url.startsWith('http://') || url.startsWith('https://'))
         const queuesize = urlboolean ? (getqueue ? getqueue.getSize() : 0) + track.tracks.length : (getqueue ? getqueue.getSize() : 0) + 1
         const queuenumber = getqueue ? `${getqueue.getSize() + 1}番目に追加｜キュー内合計: ${queuesize}曲` : '再生開始'
@@ -1964,7 +1977,7 @@ try {
       };
 
       if (command === 'messages') {
-        const json = JSON.parse(fs.readFileSync('guilds.json'))
+        const json = JSON.parse(fs.readFileSync(guildsData))
         const guild = json.find(guild => guild.id === interaction.guild.id)
         if (!guild) {
           writedefault(interaction.guild.id)
@@ -2073,7 +2086,7 @@ try {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         await interaction.deferReply()
         const channel = option.getChannel('channel')
-        const json = JSON.parse(fs.readFileSync('guilds.json'))
+        const json = JSON.parse(fs.readFileSync(guildsData))
         if (!json.find(guild => guild.id === interaction.guild.id)) {
           json.push(
             {
@@ -2082,24 +2095,24 @@ try {
               count: 0
             }
           )
-          fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+          fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
           return await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
         };
         json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
-        fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
         await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
       };
 
       if (command === 'stopsendcount') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
-        const json = JSON.parse(fs.readFileSync('guilds.json'))
+        const json = JSON.parse(fs.readFileSync(guildsData))
         const guild = json.find(guild => guild.id === interaction.guild.id)
         if (!guild) {
           writedefault(interaction.guild.id)
           return await interaction.reply({ content: 'データが新規に作成されました。定期送信はデフォルトで無効です。\n/setchannelで有効化します。', ephemeral: true })
         };
         json.find(guild => guild.id === interaction.guild.id).send_count_channel = null
-        fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
         await interaction.reply('定期送信をストップしました。')
       };
 
@@ -2154,14 +2167,14 @@ try {
       if (command === 'resetcount') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
 
-        const guilds = JSON.parse(fs.readFileSync('guilds.json'))
+        const guilds = JSON.parse(fs.readFileSync(guildsData))
         if (!guilds.find(guild => guild.id === interaction.guild.id)) {
           writedefault(interaction.guild.id)
           return await interaction.reply({ content: 'データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。', ephemeral: true })
         };
 
         guilds.find(guild => guild.id === interaction.guild.id).count = 0
-        fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(guilds)))
+        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(guilds)))
 
         await interaction.reply('リセットが完了しました。')
       };
@@ -2198,7 +2211,7 @@ try {
 
         const joinNowTime = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24)
 
-        const json = JSON.parse(fs.readFileSync('guilds.json'))
+        const json = JSON.parse(fs.readFileSync(guildsData))
         const jsonguild = json.find(guild => guild.id === interaction.guild.id)
         if (!jsonguild) writedefault(interaction.guild.id)
         const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : '無効') : '無効'
@@ -2277,7 +2290,7 @@ try {
           ignorebot = i
         })
 
-        const json = JSON.parse(fs.readFileSync('guilds.json'))
+        const json = JSON.parse(fs.readFileSync(guildsData))
         const jsonguild = json.find(jsonguild => jsonguild.id === guild.id)
         if (!jsonguild) writedefault(guild.id)
         const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : '無効') : '無効'
@@ -2302,13 +2315,13 @@ try {
     };
 
     try {
-      const json = JSON.parse((fs.readFileSync('guilds.json')))
+      const json = JSON.parse((fs.readFileSync(guildsData)))
       const guild = json.find(guild => guild.id === message.guild.id)
       if (!guild) return writedefault(message.guild.id)
 
       const count = json.find(guild => guild.id === message.guild.id).count
       json.find(guild => guild.id === message.guild.id).count = count + 1
-      fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
+      fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
     } catch (error) {
       console.log(today())
       console.log('メッセージカウントエラー')
@@ -2380,12 +2393,17 @@ try {
   try {
     discordplayer.events.on('playerTrigger', async queue => {
       if (!queue.guild.members.me.permissions.has(PermissionFlagsBits.ChangeNickname)) return
-      await queue.guild.members.me.setNickname(`${queue.currentTrack.title.substring(0, 21)}${queue.currentTrack.title.length > 21 ? '...' : ''} | MuTao`)
+      await queue.guild.members.me.setNickname(`${queue.currentTrack.title.substring(0, 29)}${queue.currentTrack.title.length > 29 ? '...' : ''}`)
     })
 
     discordplayer.events.on('queueDelete', async queue => {
       if (!queue.guild.members.me.permissions.has(PermissionFlagsBits.ChangeNickname)) return
-      await queue.guild.members.me.setNickname(null)
+      let json = JSON.parse(fs.readFileSync(nicknameData))
+      const guild = json.find(guild => guild.id === queue.guild.id)
+      if (!guild) return await queue.guild.members.me.setNickname(null)
+      await queue.guild.members.me.setNickname(guild.nickname)
+      json = json.filter(guild => guild.id !== queue.guild.id)
+      fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
     })
   } catch (error) {
     console.log(today())
