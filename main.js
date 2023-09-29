@@ -1196,7 +1196,7 @@ try {
       const admin = await client.users.fetch('606093171151208448')
       const adminicon = avatarToURL(admin)
       const adminname = admin.username
-      const command = interaction.command
+      const command = interaction.command.name
       const option = interaction.options
       const inguildCommands = [
         'role',
