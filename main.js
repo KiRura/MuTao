@@ -45,7 +45,6 @@ const mutaoColor = 16760703
 const redcolor = 16744319
 const greencolor = 9043849
 
-const noguild = 'サーバー内でのみ実行できます！'
 const ataokanumber = '指定した数字があたおか'
 const notHasManageRole = 'ロール管理の権限がありません。'
 const cannotManageRole = 'このロールは管理できません。'
@@ -75,7 +74,6 @@ try {
     };
   };
   function returnMusic (interaction) {
-    if (!interaction.guild) return noguild
     const queue = useQueue(interaction.guild.id)
     if (!queue && interaction.guild.members.me.voice.channel) return '多分再起動したのでplayをするかvcから蹴るかして下さいな。'
     if (!queue) return 'VCに入ってないよ！'
@@ -433,8 +431,7 @@ try {
           {
             type: ApplicationCommandOptionType.String,
             name: 'url',
-            description: 'YouTube URL',
-            required: true
+            description: 'URL'
           }
         ]
       },
@@ -1199,15 +1196,42 @@ try {
       const admin = await client.users.fetch('606093171151208448')
       const adminicon = avatarToURL(admin)
       const adminname = admin.username
-      const command = interaction.command.name
+      const command = interaction.command
       const option = interaction.options
-      const inguildCommands = ['role']
+      const inguildCommands = [
+        'role',
+        'play',
+        'leave',
+        'pause',
+        'unpause',
+        'clear',
+        'queue',
+        'skip',
+        'nowp',
+        'songinfo',
+        'loop',
+        'remove',
+        'songhistory',
+        'shuffle',
+        'setvolume',
+        'seek',
+        'role',
+        'startactivity',
+        'disconall',
+        'getroleicon',
+        'deafall',
+        'setchannel',
+        'messages',
+        'stopsendcount',
+        'resetcount',
+        'guildinfo'
+      ]
 
       if (inguildCommands === command) {
         if (!(await isGuild(interaction))) return
       };
 
-      if (interaction.command.name === 'help') {
+      if (command === 'help') {
         const result = await ping.promise.probe('8.8.8.8')
         await interaction.reply({
           embeds: [{
@@ -1221,7 +1245,7 @@ try {
         })
       };
 
-      if (interaction.command.name === 'ping') {
+      if (command === 'ping') {
         await interaction.deferReply()
         const embed = new EmbedBuilder()
           .setTitle('Pong!')
@@ -1257,16 +1281,15 @@ try {
         await interaction.editReply({ embeds: [embed] })
       };
 
-      if (interaction.command.name === 'play') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
-        let vc = await interaction.options.getChannel('vc')
+      if (command === 'play') {
+        let vc = await option.getChannel('vc')
         vc = vc || interaction.member.voice.channel
         vc = vc || interaction.guild.members.me.voice.channel
         if (!vc) return await interaction.reply({ content: 'playコマンド\nVCに入るか\nVC指定するか', ephemeral: true })
         if (!vc.joinable) return await interaction.reply({ content: 'VCに接続できないよ！', ephemeral: true })
 
-        let url = String(interaction.options.getString('url')).replace('&feature=share', '')
-        const volume = await interaction.options.getInteger('vol')
+        let url = String(option.getString('url')).replace('&feature=share', '')
+        const volume = await option.getInteger('vol')
         let vol = volume || 30
         if (vol > 50 && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) vol = 50
 
@@ -1331,8 +1354,7 @@ try {
         })
       };
 
-      if (interaction.command.name === 'leave') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'leave') {
         const queue = useQueue(interaction.guild.id)
         if (!queue && interaction.guild.members.me.voice.channel) return await interaction.reply({ content: '多分再起動したのでplayをするかvcから蹴るかして下さいな。', ephemeral: true })
         if (!queue) return await interaction.reply({ content: 'VCに入ってないよ！', ephemeral: true })
@@ -1344,7 +1366,7 @@ try {
         await interaction.deleteReply()
       };
 
-      if (interaction.command.name === 'pause') {
+      if (command === 'pause') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1352,7 +1374,7 @@ try {
         queue.node.pause() ? await interaction.reply('一時停止したよ') : await interaction.reply({ content: '既に一時停止中だよ！', ephemeral: true }) // deferReply/followUpをするとephemeralが使えないらしい
       };
 
-      if (interaction.command.name === 'unpause') {
+      if (command === 'unpause') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1360,7 +1382,7 @@ try {
         queue.node.resume() ? await interaction.reply('一時停止を解除したよ') : await interaction.reply({ content: '一時停止がされてなかったよ', ephemeral: true })
       };
 
-      if (interaction.command.name === 'clear') {
+      if (command === 'clear') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1372,12 +1394,12 @@ try {
         await interaction.followUp(`${losttracks}曲がダイソンの手によってまっさらになったよ`)
       };
 
-      if (interaction.command.name === 'queue') {
+      if (command === 'queue') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
 
-        let page = interaction.options.getInteger('page')
+        let page = option.getInteger('page')
         if (page === null) page = 1
         const maxpages = (Math.floor(queue.getSize() / 10)) + 1
         if (page > maxpages) return await interaction.reply({ content: ataokanumber, ephemeral: true })
@@ -1410,11 +1432,11 @@ try {
         })
       };
 
-      if (interaction.command.name === 'skip') {
+      if (command === 'skip') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        let number = interaction.options.getInteger('to')
+        let number = option.getInteger('to')
         if (number && (number < 1 || number > queue.getSize())) return await interaction.reply({ content: ataokanumber, ephemeral: true })
         await interaction.deferReply()
 
@@ -1454,16 +1476,16 @@ try {
         await interaction.followUp(embed)
       };
 
-      if (interaction.command.name === 'nowp' || interaction.command.name === 'songinfo') {
+      if (command === 'nowp' || command === 'songinfo') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        let num = interaction.options.getInteger('number')
+        let num = option.getInteger('number')
         if (num < 0 || num > queue.getSize()) return await interaction.reply({ content: ataokanumber, ephemeral: true })
         const vol = queue.node.volume
 
         let t; let time
-        if (interaction.command.name === 'nowp' || !num) {
+        if (command === 'nowp' || !num) {
           t = queue.currentTrack
           const progress = queue.node.createProgressBar() // 埋め込み作り(discordplayer神)
           time = queue.node.getTimestamp().progress === Infinity ? '\n**ライブ配信**' : `\n**残り:** ${times((queue.currentTrack.durationMS - queue.node.getTimestamp().current.value) / 1000)}\n\n**${progress}**`
@@ -1487,12 +1509,12 @@ try {
         })
       };
 
-      if (interaction.command.name === 'loop') {
+      if (command === 'loop') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
 
-        const mode = interaction.options.get('mode')
+        const mode = option.get('mode')
         if (queue.repeatMode === mode.value) return await interaction.reply({ content: '既にそのモードです！', ephemeral: true })
         queue.setRepeatMode(mode.value)
         let sendmode
@@ -1509,11 +1531,11 @@ try {
         await interaction.reply(sendmode)
       };
 
-      if (interaction.command.name === 'remove') {
+      if (command === 'remove') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        const number = interaction.options.getInteger('number')
+        const number = option.getInteger('number')
         const track = queue.tracks.toArray()[number - 1]
 
         if (number > queue.getSize()) return await interaction.reply({ content: ataokanumber, ephemeral: true })
@@ -1523,11 +1545,11 @@ try {
         queue.node.remove(track)
       };
 
-      if (interaction.command.name === 'songhistory') {
+      if (command === 'songhistory') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        let page = interaction.options.getInteger('page')
+        let page = option.getInteger('page')
         if (page === null) page = 1
         if (page > ((Math.floor(queue.history.getSize() / 10)) + 1)) return await interaction.reply({ content: ataokanumber, ephemeral: true })
         if (queue.history.getSize() === 0) return await interaction.reply({ content: '履歴はまだ保存されていません', ephemeral: true })
@@ -1569,7 +1591,7 @@ try {
         })
       };
 
-      if (interaction.command.name === 'shuffle') {
+      if (command === 'shuffle') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
@@ -1580,29 +1602,29 @@ try {
         await interaction.followUp(`${queue.tracks.data.length}曲をぐしゃぐしゃにしたよ！`)
       };
 
-      if (interaction.command.name === 'setvolume') {
+      if (command === 'setvolume') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        let vol = interaction.options.getInteger('vol')
+        let vol = option.getInteger('vol')
         if (vol > 50 && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) vol = 50
 
         const success = queue.node.setVolume(vol)
         await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : 'なんかセットできませんでした。'}`)
       };
 
-      if (interaction.command.name === 'seek') {
+      if (command === 'seek') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        const seek = interaction.options.getNumber('seek')
+        const seek = option.getNumber('seek')
         await interaction.deferReply()
 
         await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp(ataokanumber)
       };
 
-      if (interaction.command.name === 'userinfo') {
-        const id = await interaction.options.getString('id')
+      if (command === 'userinfo') {
+        const id = await option.getString('id')
         let userinfo
         try {
           userinfo = await client.users.fetch(id)
@@ -1702,14 +1724,13 @@ try {
         };
       };
 
-      if (interaction.command.name === 'send') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'send') {
         try {
-          const description = interaction.options.getString('description')
-          const channel = interaction.options.getChannel('channel')
-          if (!interaction.options.getBoolean('embed')) {
-            const attachmentimage = interaction.options.getAttachment('attachmentimage')
-            const urlimage = interaction.options.getString('urlimage')
+          const description = option.getString('description')
+          const channel = option.getChannel('channel')
+          if (!option.getBoolean('embed')) {
+            const attachmentimage = option.getAttachment('attachmentimage')
+            const urlimage = option.getString('urlimage')
             const image = attachmentimage ? attachmentimage.url : urlimage
             const content = {}
             content.content = description
@@ -1726,36 +1747,36 @@ try {
               }
             ]
           }
-          const title = interaction.options.getString('title')
+          const title = option.getString('title')
           if (title !== null) embed.embeds[0].title = title
-          const url = interaction.options.getString('url')
+          const url = option.getString('url')
           if (url !== null) embed.embeds[0].url = url
-          const attachmentimage = interaction.options.getAttachment('attachmentimage')
-          const urlimage = interaction.options.getString('urlimage')
+          const attachmentimage = option.getAttachment('attachmentimage')
+          const urlimage = option.getString('urlimage')
           const image = attachmentimage ? attachmentimage.url : urlimage
           if (image !== null && (image.startsWith('http://') || image.startsWith('https://'))) embed.embeds[0].image = { url: image }
-          const attachmentthumbnail = interaction.options.getAttachment('attachmentthumbnail')
-          const urlthumbnail = interaction.options.getString('urlthumbnail')
+          const attachmentthumbnail = option.getAttachment('attachmentthumbnail')
+          const urlthumbnail = option.getString('urlthumbnail')
           const thumbnail = attachmentthumbnail ? attachmentthumbnail.url : urlthumbnail
           if (thumbnail !== null && (thumbnail.startsWith('http://') || thumbnail.startsWith('https://'))) embed.embeds[0].thumbnail = { url: thumbnail }
-          const authortext = interaction.options.getString('authortext')
-          const authorurl = interaction.options.getString('authorurl')
-          const attachmentauthorimage = interaction.options.getAttachment('attachmentauthorimage')
-          const urlauthorimage = interaction.options.getString('urlauthorimage')
+          const authortext = option.getString('authortext')
+          const authorurl = option.getString('authorurl')
+          const attachmentauthorimage = option.getAttachment('attachmentauthorimage')
+          const urlauthorimage = option.getString('urlauthorimage')
           if (authortext !== null || authorurl !== null || attachmentauthorimage !== null || urlauthorimage !== null) embed.embeds[0].author = {}
           if (authortext !== null) embed.embeds[0].author.name = authortext
           if (authorurl !== null) embed.embeds[0].author.url = authorurl
           const authorimage = attachmentauthorimage ? attachmentauthorimage.url : urlauthorimage
           if (authorimage !== null && (authorimage.startsWith('http://') || authorimage.startsWith('https://'))) embed.embeds[0].author.icon_url = authorimage
-          const footertext = interaction.options.getString('footertext')
-          const attachmentfooterimage = interaction.options.getAttachment('attachmentfooterimage')
-          const urlfooterimage = interaction.options.getString('urlfooterimage')
+          const footertext = option.getString('footertext')
+          const attachmentfooterimage = option.getAttachment('attachmentfooterimage')
+          const urlfooterimage = option.getString('urlfooterimage')
           if (footertext !== null || attachmentfooterimage !== null || urlfooterimage !== null) embed.embeds[0].footer = {}
           if (footertext !== null) embed.embeds[0].footer.text = footertext
           const footerimage = attachmentfooterimage ? attachmentfooterimage.url : urlfooterimage
           if (footerimage !== null && (footerimage.startsWith('http://') || footerimage.startsWith('https://'))) embed.embeds[0].footer.icon_url = footerimage
-          const rgbcolor = interaction.options.getInteger('color')
-          const hexcolor = interaction.options.getString('hexcolor')
+          const rgbcolor = option.getInteger('color')
+          const hexcolor = option.getString('hexcolor')
           if (rgbcolor !== null || hexcolor !== null) {
             if (hexcolor === null || (hexcolor !== null && rgbcolor !== null)) embed.embeds[0].color = rgbcolor
             if (rgbcolor === null) {
@@ -1773,40 +1794,49 @@ try {
         await interaction.reply('送信できました！')
       };
 
-      if (interaction.command.name === 'siranami') {
+      if (command === 'siranami') {
         await interaction.reply('https://www.youtube.com/@ShiranamIroriCH')
       };
 
-      if (interaction.command.name === 'ggrks') {
+      if (command === 'ggrks') {
         await interaction.reply('https://google.com')
       };
 
-      if (interaction.command.name === 'getthumbnail') {
-        const url = interaction.options.getString('url')
-        const track = await discordplayer.search(url, {
-          searchEngine: QueryType.AUTO
-        })
-        if (!track.hasTracks()) return await interaction.reply({ content: '処理できません。', ephemeral: true })
-        await interaction.reply({
+      if (command === 'getthumbnail') {
+        let thumbnail
+        const url = option.getString('url')
+        if (url !== null) {
+          const track = await discordplayer.search(url, {
+            searchEngine: QueryType.AUTO
+          })
+          if (!track.hasTracks()) return await interaction.reply({ content: '処理できません。', ephemeral: true })
+          thumbnail = track.tracks[0].thumbnail
+        } else if (useQueue(interaction.guild.id) !== null) {
+          thumbnail = useQueue(interaction.guild.id).currentTrack.thumbnail
+        } else {
+          return await interaction.reply({ content: 'URLを指定するか曲を再生して下さい。', ephemeral: true })
+        }
+        interaction.reply({
           embeds: [
             {
               title: '画像URL',
               image: {
-                url: track.tracks[0].thumbnail
+                url: thumbnail
               },
-              url: track.tracks[0].thumbnail,
+              url: thumbnail,
               color: mutaoColor
             }
           ]
         }).catch(async error => {
-          await interaction.reply({ content: `送信できません\n${error}`, ephemeral: true })
+          console.log(today())
+          console.error(error)
         })
       };
 
-      if (interaction.command.name === 'trans') {
+      if (command === 'trans') {
         await interaction.deferReply()
-        const sourcetext = interaction.options.getString('sourcetext')
-        const outlang = interaction.options.getString('outlang')
+        const sourcetext = option.getString('sourcetext')
+        const outlang = option.getString('outlang')
 
         const result = await translate({
           free_api: true,
@@ -1827,7 +1857,7 @@ try {
         })
       };
 
-      if (interaction.command.name === 'today') {
+      if (command === 'today') {
         const dt = new Date()
         const y = dt.getFullYear()
         const m = dt.getMonth()
@@ -1841,9 +1871,9 @@ try {
         await interaction.reply(`${today(dt)}\n今日の進行度: ${dprog}%(残り${mrem}分)\n今月の進行度: ${mprog}%(残り${drem}日)\n今年の進行度: ${yprog}%(残り${dyrem}日)`)
       };
 
-      if (interaction.command.name === 'searchimage') {
-        const image = interaction.options.getAttachment('image')
-        const url = interaction.options.getString('url')
+      if (command === 'searchimage') {
+        const image = option.getAttachment('image')
+        const url = option.getString('url')
         if (!image && !url) return await interaction.reply({ content: '画像かURLを指定して下さい。', ephemeral: true })
         if (image && url) return await interaction.reply({ content: 'どちらか一方のみを指定して下さい', ephemeral: true })
         const imageurl = image ? image.url : url
@@ -1874,9 +1904,9 @@ try {
         })
       };
 
-      if (interaction.command.name === 'avatar') {
-        const id = interaction.options.getString('id')
-        const member = interaction.options.getUser('member')
+      if (command === 'avatar') {
+        const id = option.getString('id')
+        const member = option.getUser('member')
         if (!id && !member) return await interaction.reply({ content: 'どちらかを指定してね', ephemeral: true })
         if (id && member) return await interaction.reply({ content: 'どちらか一方を指定してね', ephemeral: true })
         let user
@@ -1901,10 +1931,10 @@ try {
         })
       };
 
-      if (interaction.command.name === 'startactivity') {
+      if (command === 'startactivity') {
         if (!interaction.guild) return await interaction.reply('サーバー内で実行して下さい')
         if (!interaction.member.voice.channel) return await interaction.reply({ content: 'VCに入ってから実行して下さい', ephemeral: true })
-        const game = interaction.options.getString('activity')
+        const game = option.getString('activity')
 
         discordTogether.createTogetherCode(interaction.member.voice.channel.id, game).then(async invite => {
           if (invite.code === '50035') return await interaction.reply({ content: '存在しないアクティビティです', ephemeral: true })
@@ -1912,9 +1942,9 @@ try {
         })
       };
 
-      if (interaction.command.name === 'saveemoji') {
-        const emoji = interaction.options.getString('emojiid')
-        let type = interaction.options.get('type')
+      if (command === 'saveemoji') {
+        const emoji = option.getString('emojiid')
+        let type = option.get('type')
         if (!Number(emoji)) return await interaction.reply(String(emoji).replace('<', '').replace('>', '').replace(':', ''))
 
         if (type === null || type.value === 'png') type = 'png'
@@ -1933,8 +1963,7 @@ try {
         })
       };
 
-      if (interaction.command.name === 'messages') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'messages') {
         const json = JSON.parse(fs.readFileSync('guilds.json'))
         const guild = json.find(guild => guild.id === interaction.guild.id)
         if (!guild) {
@@ -1957,10 +1986,9 @@ try {
         })
       };
 
-      if (interaction.command.name === 'disconall') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'disconall') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
-        let vc = interaction.options.getChannel('vc')
+        let vc = option.getChannel('vc')
         if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: 'VCを指定するかVCに入室して下さい。', ephemeral: true })
         if (vc === null) vc = interaction.member.voice.channel
         if (!vc.members) return await interaction.reply({ content: '指定先のVCには誰もいません。', ephemeral: true })
@@ -1974,10 +2002,10 @@ try {
         await interaction.followUp(`${memberssize}人を切断しました。`)
       };
 
-      if (interaction.command.name === 'banner') {
-        const type = interaction.options.getBoolean('gif') ? 'gif' : 'png'
-        let id = interaction.options.getString('id')
-        const member = interaction.options.getUser('member')
+      if (command === 'banner') {
+        const type = option.getBoolean('gif') ? 'gif' : 'png'
+        let id = option.getString('id')
+        const member = option.getUser('member')
         if (id === null && !member) id = interaction.user.id
         if (member) id = member.id
         const result = await (await fetch(`https://discord.com/api/users/${id}`, {
@@ -2005,8 +2033,8 @@ try {
         })
       };
 
-      if (interaction.command.name === 'getroleicon') {
-        const role = interaction.options.getRole('role')
+      if (command === 'getroleicon') {
+        const role = option.getRole('role')
         if (!role.iconURL()) return await interaction.reply({ content: '指定されたロールにアイコンはありませんでした。', ephemeral: true })
         const url = role.iconURL({ size: 4096, extension: 'png' })
         await interaction.reply({
@@ -2020,15 +2048,14 @@ try {
         })
       };
 
-      if (interaction.command.name === 'deafall') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'deafall') {
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.DeafenMembers)) return await interaction.reply({ content: 'スピーカーミュートする権限がありません！', ephemeral: true })
         if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
-        let vc = interaction.options.getChannel('vc')
+        let vc = option.getChannel('vc')
         vc = vc || interaction.member.voice.channel
         if (!vc) return await interaction.reply({ content: 'vcに参加するか指定して下さい。', ephemeral: true })
         if (!vc.members) return await interaction.reply({ content: '指定先のvcには誰もいません', ephemeral: true })
-        let cancel = interaction.options.getBoolean('cancel')
+        let cancel = option.getBoolean('cancel')
         cancel = !cancel
         const membersize = vc.members.size
 
@@ -2042,11 +2069,10 @@ try {
         await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`)
       };
 
-      if (interaction.command.name === 'setchannel') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'setchannel') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         await interaction.deferReply()
-        const channel = interaction.options.getChannel('channel')
+        const channel = option.getChannel('channel')
         const json = JSON.parse(fs.readFileSync('guilds.json'))
         if (!json.find(guild => guild.id === interaction.guild.id)) {
           json.push(
@@ -2064,8 +2090,7 @@ try {
         await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
       };
 
-      if (interaction.command.name === 'stopsendcount') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'stopsendcount') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         const json = JSON.parse(fs.readFileSync('guilds.json'))
         const guild = json.find(guild => guild.id === interaction.guild.id)
@@ -2078,16 +2103,15 @@ try {
         await interaction.reply('定期送信をストップしました。')
       };
 
-      if (interaction.command.name === 'delmessages') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'delmessages') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
 
-        const channel = interaction.options.getChannel('channel')
+        const channel = option.getChannel('channel')
 
         const me = interaction.guild.members.me
         if (!me.permissions.has(PermissionFlagsBits.ManageMessages) || !me.permissionsIn(channel.id).has(PermissionFlagsBits.ManageMessages)) return await interaction.reply({ content: 'メッセージを管理する権限がありません！', ephemeral: true })
 
-        const num = interaction.options.getInteger('number')
+        const num = option.getInteger('number')
 
         await interaction.reply(`<#${channel.id}>内の${num}個のメッセージを削除しています...。`)
         const fetchreply = await interaction.fetchReply()
@@ -2110,7 +2134,7 @@ try {
         interaction.user.send(finish).catch(error => { console.error(error) })
       };
 
-      if (interaction.command.name === 'deeplusage') {
+      if (command === 'deeplusage') {
         const result = await (await fetch('https://api-free.deepl.com/v2/usage', {
           method: 'GET',
           headers: {
@@ -2127,8 +2151,7 @@ try {
         })
       };
 
-      if (interaction.command.name === 'resetcount') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'resetcount') {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
 
         const guilds = JSON.parse(fs.readFileSync('guilds.json'))
@@ -2143,11 +2166,10 @@ try {
         await interaction.reply('リセットが完了しました。')
       };
 
-      if (interaction.command.name === 'guildinfo') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
+      if (command === 'guildinfo') {
         const guild = interaction.guild
         const iconurl = guild.iconURL({ size: 4096, extension: 'png' })
-        const geticon = interaction.options.getBoolean('icon')
+        const geticon = option.getBoolean('icon')
         const owner = await guild.fetchOwner()
         const ownercolor = owner.roles.color ? owner.roles.color.color : mutaoColor
 
@@ -2197,17 +2219,17 @@ try {
         })
       };
 
-      if (interaction.command.name === 'password') {
-        let n = interaction.options.getInteger('length')
+      if (command === 'password') {
+        let n = option.getInteger('length')
         if (n === null) n = 8
-        let ephemeral = interaction.options.getBoolean('ephemeral')
+        let ephemeral = option.getBoolean('ephemeral')
         if (!ephemeral) ephemeral = false
         await interaction.reply({ content: crypto.randomBytes(n).toString('base64').substring(0, n), ephemeral })
       };
 
-      if (interaction.command.name === 'test') {
+      if (command === 'test') {
         if (interaction.user.id !== '606093171151208448') return await interaction.reply('管理者及び開発者のみ実行可能です。')
-        const text = interaction.options.getString('text1')
+        const text = option.getString('text1')
         const track = await discordplayer.search(text, {
           requestedBy: interaction.user,
           searchEngine: QueryType.AUTO
