@@ -1,4 +1,30 @@
 /* eslint-disable array-callback-return */
+import { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType, EmbedBuilder, Events } from 'discord.js'
+import { config } from 'dotenv'
+import translate from 'deepl'
+import { QueryType, Player, QueueRepeatMode, useQueue } from 'discord-player'
+import { fetch } from 'undici'
+import { DiscordTogether } from 'discord-together'
+import ping from 'ping'
+import fs from 'fs'
+import cron from 'node-cron'
+import crypto from 'crypto'
+const client = new Client({ intents: Object.values(GatewayIntentBits) })
+const discordTogether = new DiscordTogether(client)
+const discordplayer = Player.singleton(client)
+discordplayer.extractors.loadDefault().then(result => {
+  if (result.success) {
+    console.log('loaded discord-player extractors')
+  } else {
+    return console.log(`${result.error.name}\n${result.error.message}\n${result.error.stack}`)
+  };
+})
+const API_KEY = process.env.DEEPL_API_KEY
+
+config()
+
+console.log('loaded modules')
+
 function today () {
   const dt = new Date()
   const y = dt.getFullYear()
@@ -15,38 +41,16 @@ function today () {
   return `${y}年(${wareki})${('00' + (m + 1)).slice(-2)}月${('00' + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`
 };
 
-const mutaocolor = 16760703
+const mutaoColor = 16760703
 const redcolor = 16744319
 const greencolor = 9043849
 
 const noguild = 'サーバー内でのみ実行できます！'
 const ataokanumber = '指定した数字があたおか'
+const notHasManageRole = 'ロール管理の権限がありません。'
+const cannotManageRole = 'このロールは管理できません。'
 
 try {
-  require('dotenv').config()
-  const { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType } = require('discord.js')
-  const translate = require('deepl')
-  const client = new Client({ intents: Object.values(GatewayIntentBits) })
-  const API_KEY = process.env.DEEPL_API_KEY
-  const { QueryType, Player, QueueRepeatMode, useQueue } = require('discord-player')
-  const discordplayer = Player.singleton(client)
-  discordplayer.extractors.loadDefault().then(result => {
-    if (result.success) {
-      console.log('loaded discord-player extractors')
-    } else {
-      return console.log(`${result.error.name}\n${result.error.message}\n${result.error.stack}`)
-    };
-  })
-  const fetch = require('undici')
-  const ping = require('ping')
-  const { DiscordTogether } = require('discord-together')
-  const discordTogether = new DiscordTogether(client)
-  const fs = require('fs')
-  const cron = require('node-cron')
-  const crypto = require('crypto')
-
-  console.log('loaded modules')
-
   function wait (sec) {
     return new Promise((resolve) => {
       setTimeout(resolve, sec * 1000)
@@ -64,9 +68,11 @@ try {
     fs.writeFileSync('guilds.json', Buffer.from(JSON.stringify(json)))
   };
   function avatarToURL (user) {
-    if (!user.id) return null
-    const avatar = user.avatarURL({ extension: 'png', size: 4096 })
-    return avatar || `${user.defaultAvatarURL}?size=4096`
+    if (user.avatarURL()) {
+      return user.avatarURL({ size: 4096 })
+    } else {
+      return user.defaultAvatarURL
+    };
   };
   function returnMusic (interaction) {
     if (!interaction.guild) return noguild
@@ -88,8 +94,58 @@ try {
       return `00:${seconds}`
     };
   };
+  async function googlePing () {
+    return (await ping.promise.probe('8.8.8.8')).time
+  }
+  function roleHas (user, role) {
+    return user.roles.cache.has(role.id)
+  };
+  async function managerole (user, or, role, interaction) {
+    const has = user.roles.cache.has(role.id)
+    if (or === 'add') {
+      if (has) {
+        await interaction.reply({ content: '既にロールが付いています。', ephemeral: true })
+        return false
+      };
+      user.roles.add(role)
+        .then(() => {
+          return true
+        })
+        .catch(async error => {
+          await interaction.reply({ content: cannotManageRole })
+          return false
+        })
+    } else {
+      if (!has) {
+        await interaction.reply({ content: '既にロールが外されています。', ephemeral: true })
+        return false
+      };
+      user.roles.remove(role)
+        .then(() => {
+          return true
+        })
+        .catch(async error => {
+          await interaction.reply({ content: cannotManageRole })
+          return false
+        })
+    }
+  }
+  async function permissionHas (interaction, PermissionFlagsBits, String) {
+    if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits)) {
+      await interaction.reply({ content: String, ephemeral: true })
+      return false
+    };
+    return true
+  };
+  async function isGuild (interaction) {
+    if (!interaction.inGuild()) {
+      await interaction.reply({ content: 'サーバー内でのみ実行できます。', ephemeral: true })
+      return false
+    };
+    return true
+  };
 
-  client.once('ready', async () => {
+  client.once(Events.ClientReady, async client => {
     setInterval(async () => {
       const result = await ping.promise.probe('8.8.8.8')
       client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${(await client.guilds.fetch()).size} servers・${client.users.cache.size} users・${result.time}ms` })
@@ -122,7 +178,7 @@ try {
                   icon_url: fetchguild.iconURL({ extension: 'png', size: 4096 })
                 },
                 description: `メッセージ数: ${guild.count}`,
-                color: mutaocolor,
+                color: mutaoColor,
                 footer: {
                   text: `日付: ${date}`
                 }
@@ -204,24 +260,23 @@ try {
           {
             type: ApplicationCommandOptionType.SubcommandGroup,
             name: 'user',
-            description: '特定のユーザーのロールを管理',
+            description: '1ユーザーを対象に',
             options: [
               {
-                // /role user add
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'add',
-                description: '追加',
+                description: '付与',
                 options: [
                   {
                     type: ApplicationCommandOptionType.User,
                     name: 'user',
-                    description: 'ユーザー',
+                    description: '対象ユーザー',
                     required: true
                   },
                   {
                     type: ApplicationCommandOptionType.Role,
                     name: 'role',
-                    description: 'ロール',
+                    description: '付与するロール',
                     required: true
                   }
                 ]
@@ -229,18 +284,18 @@ try {
               {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'remove',
-                description: '削除',
+                description: '剥奪',
                 options: [
                   {
                     type: ApplicationCommandOptionType.User,
                     name: 'user',
-                    description: 'ユーザー',
+                    description: '対象ユーザー',
                     required: true
                   },
                   {
                     type: ApplicationCommandOptionType.Role,
                     name: 'role',
-                    description: 'ロール',
+                    description: '剥奪するロール',
                     required: true
                   }
                 ]
@@ -248,12 +303,12 @@ try {
               {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'list',
-                description: '一覧',
+                description: 'ロール一覧',
                 options: [
                   {
                     type: ApplicationCommandOptionType.User,
                     name: 'user',
-                    description: 'ユーザー',
+                    description: '対象ユーザー',
                     required: true
                   }
                 ]
@@ -263,17 +318,17 @@ try {
           {
             type: ApplicationCommandOptionType.SubcommandGroup,
             name: 'all',
-            description: '全てのユーザーのロールを管理',
+            description: '全ユーザーを対象に',
             options: [
               {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'add',
-                description: '追加',
+                description: '付与',
                 options: [
                   {
                     type: ApplicationCommandOptionType.Role,
                     name: 'role',
-                    description: 'ロール',
+                    description: '付与するロール',
                     required: true
                   },
                   {
@@ -286,12 +341,12 @@ try {
               {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'remove',
-                description: '削除',
+                description: '剥奪',
                 options: [
                   {
                     type: ApplicationCommandOptionType.Role,
                     name: 'role',
-                    description: 'ロール',
+                    description: '剥奪するロール',
                     required: true
                   },
                   {
@@ -305,18 +360,18 @@ try {
           },
           {
             type: ApplicationCommandOptionType.SubcommandGroup,
-            name: 'allbot',
-            description: '全てのbotのロールを管理',
+            name: 'bot',
+            description: 'botを対象に',
             options: [
               {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'add',
-                description: '追加',
+                description: '付与',
                 options: [
                   {
                     type: ApplicationCommandOptionType.Role,
                     name: 'role',
-                    description: 'ロール',
+                    description: '付与するロール',
                     required: true
                   }
                 ]
@@ -324,12 +379,12 @@ try {
               {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'remove',
-                description: '削除',
+                description: '剥奪',
                 options: [
                   {
                     type: ApplicationCommandOptionType.Role,
                     name: 'role',
-                    description: 'ロール',
+                    description: '剥奪するロール',
                     required: true
                   }
                 ]
@@ -1137,20 +1192,27 @@ try {
     console.log(`${client.user.tag} all ready`)
   })
 
-  client.on('interactionCreate', async interaction => {
+  client.on(Events.InteractionCreate, async interaction => {
     try {
       if (!interaction.isCommand()) return
 
       const admin = await client.users.fetch('606093171151208448')
       const adminicon = avatarToURL(admin)
       const adminname = admin.username
+      const command = interaction.command.name
+      const option = interaction.options
+      const inguildCommands = ['role']
+
+      if (inguildCommands === command) {
+        if (!(await isGuild(interaction))) return
+      };
 
       if (interaction.command.name === 'help') {
         const result = await ping.promise.probe('8.8.8.8')
         await interaction.reply({
           embeds: [{
             description: 'サポート鯖: https://discord.gg/ky97Uqu3YY\n\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・数時間レベルの長さの曲を流そうとすると退出してしまう問題があります。原因が分かり次第修正します。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。',
-            color: mutaocolor,
+            color: mutaoColor,
             footer: {
               icon_url: `${adminicon}`,
               text: `Made by ${adminname}・${result.time}ms`
@@ -1160,39 +1222,39 @@ try {
       };
 
       if (interaction.command.name === 'ping') {
-        const pong = (await ping.promise.probe('8.8.8.8')).time
-        const embed = [
-          {
-            title: 'Pong!',
-            fields: [
-              {
-                name: 'Ping 8.8.8.8',
-                value: `${pong} ms`,
-                inline: true
-              },
-              {
-                name: 'WebSocket',
-                value: `${client.ws.ping} ms`,
-                inline: true
-              },
-              {
-                name: 'API Endpoint',
-                value: 'waiting...',
-                inline: true
-              }
-            ],
-            footer: {
-              text: `Made by ${adminname}`,
-              iconURL: adminicon
+        await interaction.deferReply()
+        const embed = new EmbedBuilder()
+          .setTitle('Pong!')
+          .setFields([
+            {
+              name: 'ping 8.8.8.8',
+              value: `${await googlePing()} ms`,
+              inline: true
             },
-            color: mutaocolor
-          }
-        ]
-        await interaction.reply({ embeds: embed })
-        const reply = await interaction.fetchReply()
-        const endpoint = reply.createdTimestamp - interaction.createdTimestamp
-        embed[0].fields[2].value = `${endpoint} ms`
-        await interaction.editReply({ embeds: embed })
+            {
+              name: 'WebSocket',
+              value: `${client.ws.ping === -1 ? 'none' : `${client.ws.ping} ms`}`,
+              inline: true
+            },
+            {
+              name: 'API Endpoint',
+              value: 'waiting...',
+              inline: true
+            }
+          ])
+          .setColor(mutaoColor)
+        const reply = await interaction.followUp({ embeds: [embed] })
+        const apiEndpoint = reply.createdTimestamp - interaction.createdTimestamp
+        embed
+          .spliceFields(-1, 1)
+          .addFields([
+            {
+              name: 'API Endpoint',
+              value: `${apiEndpoint} ms`,
+              inline: true
+            }
+          ])
+        await interaction.editReply({ embeds: [embed] })
       };
 
       if (interaction.command.name === 'play') {
@@ -1263,7 +1325,7 @@ try {
               thumbnail: { url: thumbnail },
               footer: { text: queuenumber },
               url: t.url,
-              color: mutaocolor
+              color: mutaoColor
             }
           ]
         })
@@ -1340,7 +1402,7 @@ try {
             thumbnail: {
               url: queue.currentTrack.thumbnail
             },
-            color: mutaocolor,
+            color: mutaoColor,
             footer: {
               text: `ページ: ${page}/${maxpages}`
             }
@@ -1382,7 +1444,7 @@ try {
           embeds: [
             {
               description: `**再生開始:**${t.title.length < 15 ? ` [${t.title}](${t.url})` : `\n[${t.title}](${t.url})`}\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`,
-              color: mutaocolor,
+              color: mutaoColor,
               thumbnail: { url: t.thumbnail }
             }
           ]
@@ -1418,7 +1480,7 @@ try {
               url: t.url,
               thumbnail: { url: t.thumbnail },
               description: `**投稿者:** ${t.author}\n**リクエスト:** ${t.requestedBy.username}${time}`,
-              color: mutaocolor,
+              color: mutaoColor,
               footer: { text: `今までに${queue.history.getSize()}曲再生しました｜ボリューム: ${vol}%` }
             }
           ]
@@ -1495,7 +1557,7 @@ try {
             {
               title: `今までに${trackslength} / ${queue.history.getSize()}曲再生したよ！`,
               description: `**再生中:** (${queue.node.getTimestamp().progress === Infinity ? 'ライブ' : `${queue.node.getTimestamp().current.label} / ${queue.currentTrack.duration}`}) [${queue.currentTrack.title.substring(0, 20)}${queue.currentTrack.title.length > 20 ? '...' : ''}](${queue.currentTrack.url})\n\n${tracks.join('\n')}${queue.history.getSize() > (pageStart * -1) ? `\n**...**\n**他:** ${queue.history.getSize() + pageStart}曲` : ''}`,
-              color: mutaocolor,
+              color: mutaoColor,
               thumbnail: {
                 url: queue.currentTrack.thumbnail
               },
@@ -1552,125 +1614,91 @@ try {
           embeds: [{
             title: `${userinfo.tag}`,
             description: `**作成日:** ${today(userinfo.createdAt)}\n**bot:** ${userinfo.bot ? 'YES' : 'NO'}\n**プロフ:** <@${userinfo.id}>`,
-            color: userinfo.accentColor ? userinfo.accentColor : mutaocolor,
+            color: userinfo.accentColor ? userinfo.accentColor : mutaoColor,
             thumbnail: { url: avatarToURL(userinfo) }
           }]
         })
       };
 
-      if (interaction.command.name === 'role') {
-        if (!interaction.guild) return await interaction.reply({ content: noguild, ephemeral: true })
-        const targetuser = interaction.options.getMember('user')
-        const targetrole = interaction.options.get('role')
-        if (interaction.options.getSubcommandGroup() === 'user') {
-          if (interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-            try {
-              if (interaction.options.getSubcommand() === 'add') {
-                if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply('管理者権限所持者のみ実行可能です。')
-                await targetuser.roles.add(targetrole.role)
-                await interaction.reply(`${targetuser.displayName}に${targetrole.role.name}を付与したよ！`)
-              };
+      if (command === 'role') {
+        const group = option.getSubcommandGroup()
+        const manage = option.getSubcommand()
+        if (!(await permissionHas(interaction, PermissionFlagsBits.ManageRoles, notHasManageRole)) && (manage === 'add' || manage === 'remove')) return
+        const user = option.getMember('user')
+        const role = option.getRole('role')
 
-              if (interaction.options.getSubcommand() === 'remove') {
-                if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return interaction.reply('管理者権限所持者のみ実行可能です。')
-                await targetuser.roles.remove(targetrole.role)
-                await interaction.reply(`${targetuser.displayName}から${targetrole.role.name}を強奪したよ！`)
-              };
-            } catch (error) {
-              return await interaction.reply({ content: '順位的に操作できませんでした。', ephemeral: true })
-            };
+        if (group === 'user') {
+          if (manage === 'add' || manage === 'remove') {
+            if ((await managerole(user, manage, role, interaction)) === false) return
+            const content = manage === 'add' ? `${user.displayName} への ${role.name} の付与が完了しました。` : `${user.displayName} から ${role.name} の剥奪が完了しました。`
+            await interaction.reply(content)
           } else {
-            return await interaction.reply({ content: 'ロールを管理できる権限が無いよ！', ephemeral: true })
-          };
-
-          if (interaction.options.getSubcommand() === 'list') {
-            const guildroles = interaction.guild.roles.cache.size
-            if (targetuser.roles.highest.rawPosition === 0) {
-              await interaction.reply('何も...無いじゃないか...ッ！！！')
-            } else if (targetuser.roles.color === null && targetuser.roles.highest) {
-              await interaction.reply({
-                embeds: [{
-                  title: `${targetuser.user.tag}`,
-                  description: `**ロール数**: ${targetuser.roles.cache.size}\n**一番上のロール**: ${targetuser.roles.highest}\nID: ${targetuser.roles.highest.id}\n順番(上から): ${guildroles - targetuser.roles.highest.rawPosition}/${guildroles}`,
-                  color: `${targetuser.roles.highest.color}`,
-                  thumbnail: {
-                    url: avatarToURL(targetuser.user)
-                  }
-                }]
-              })
-            } else {
-              await interaction.reply({
-                embeds: [{
-                  title: `${targetuser.user.tag}`,
-                  description: `**ロール数**: ${targetuser.roles.cache.size}\n**名前の色になっているロール**: ${targetuser.roles.color}\nID: ${targetuser.roles.color.id}\nカラーコード: ${targetuser.roles.color.hexColor}\n順番(上から): ${guildroles - targetuser.roles.color.rawPosition}/${guildroles}\n**一番上のロール**: ${targetuser.roles.highest}\nID: ${targetuser.roles.highest.id}\n順番(上から): ${guildroles - targetuser.roles.highest.rawPosition}/${guildroles}`,
-                  color: targetuser.roles.color.color,
-                  thumbnail: {
-                    url: targetuser.user.avatar ? `https://cdn.discordapp.com/avatars/${targetuser.user.id}/${targetuser.user.avatar}.png?size=4096` : `${targetuser.user.defaultAvatarURL}?size=4096`
-                  }
-                }]
-              })
-            };
-          };
-        };
-
-        if (interaction.options.getSubcommandGroup() === 'all') {
-          if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: 'ロールを管理できる権限が無いよ！', ephemeral: true })
-          if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply('管理者権限所持者のみ実行可能です。')
-          const ignore = interaction.options.getBoolean('ignorebot')
-          let members
-          if (ignore) {
-            let i = 0;
-            (await interaction.guild.members.fetch()).map(async member => {
-              if (!member.user.bot) i += 1
+            const size = user.roles.cache.size
+            if (size === 1) return await interaction.reply({ content: `対象のユーザー ${user.displayName} にロールが付いていません。`, ephemeral: true })
+            const rolesize = (await interaction.guild.roles.fetch()).size
+            const highest = user.roles.highest
+            const color = user.roles.color
+            await interaction.reply({
+              embeds: [
+                {
+                  title: `${user.user.tag} のロール一覧 (${size - 1})`,
+                  description: `${user.roles.cache.map(role => {
+                    if (role.name === '@everyone') return
+                    return `${role}`
+                  }).join('\n')}\n**最上位:** ${highest} (${rolesize - highest.rawPosition} / ${rolesize})${color !== null ? `\n**色**: ${color} (${color.hexColor})` : ''}`,
+                  color: color ? color.color : mutaoColor,
+                  thumbnail: { url: avatarToURL(user.user) }
+                }
+              ]
             })
-            members = i
-          } else {
-            members = interaction.guild.memberCount
           };
-          try {
-            const add = interaction.options.getSubcommand() === 'add'
-            await interaction.reply(add ? `${targetrole.role.name}を${members}人に付与中` : `${targetrole.role.name}を${members}人から奪取中`)
-            await Promise.all((await interaction.guild.members.fetch()).map(async member => {
+        } else {
+          const members = await interaction.guild.members.fetch()
+          const ignore = option.getBoolean('ignorebot')
+          let membersize = 0
+          members.map(member => {
+            if (group === 'all') {
               if (ignore && member.user.bot) return
-              const has = member.roles.cache.get(targetrole.role.id)
-              if ((add && has) || (!add && !has)) return
-              add ? await member.roles.add(targetrole.role) : await member.roles.remove(targetrole.role)
-            }))
-            const content = add ? `${targetrole.role.name}を${members}人に付与したよ！` : `${targetrole.role.name}を${members}人から奪取したよ！`
-            await interaction.editReply(content).catch(async e => await interaction.channel.send(content).catch(e => { }))
-            await interaction.user.send(add ? 'ロールの付与が完了しました。' : 'ロールの剥奪が完了しました。').catch(e => { })
-          } catch (error) {
-            await interaction.reply(`エラー\n${error}`).catch(async e => await interaction.channel.send(`エラー\n${error}`))
-            console.log(error)
-          };
-        };
-
-        if (interaction.options.getSubcommandGroup() === 'allbot') {
-          if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: 'ロールを管理できる権限が無いよ！', ephemeral: true })
-          if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply('管理者権限所持者のみ実行可能です。')
-
-          let i = 0;
-          (await interaction.guild.members.fetch()).map(async member => {
-            if (member.user.bot) i += 1
-          })
-          const members = i
-
-          try {
-            const add = interaction.options.getSubcommand() === 'add'
-            await interaction.reply(add ? `${targetrole.role.name}を${members}人に付与中` : `${targetrole.role.name}を${members}人から奪取中`)
-            await Promise.all((await interaction.guild.members.fetch()).map(async member => {
+            } else {
               if (!member.user.bot) return
-              const has = member.roles.cache.get(targetrole.role.id)
-              if ((add && has) || (!add && !has)) return
-              add ? await member.roles.add(targetrole.role) : await member.roles.remove(targetrole.role)
-            }))
-            const content = add ? `${targetrole.role.name}を${members}人に付与したよ！` : `${targetrole.role.name}を${members}人から奪取したよ！`
-            await interaction.editReply(content).catch(async e => await interaction.channel.send(content).catch(error => { console.error(error) }))
-            await interaction.user.send(add ? 'ロールの付与が完了しました。' : 'ロールの剥奪が完了しました。').catch(error => { console.error(error) })
-          } catch (error) {
-            await interaction.reply(`エラー\n${error}`).catch(async e => await interaction.channel.send(`エラー\n${error}`))
-            console.log(error)
-          };
+            };
+            const has = roleHas(member, role)
+            if (manage === 'add') {
+              if (has) return
+            } else {
+              if (!has) return
+            };
+            membersize++
+          })
+          if (membersize === 0) return await interaction.reply({ content: '対象人数が0人です。', ephemeral: true })
+
+          let content = manage === 'add' ? `${membersize}人に ${role.name} の付与を開始します。` : `${membersize}人から ${role.name} の剥奪を開始します。`
+          await interaction.reply(content)
+
+          await Promise.all(members.map(async member => {
+            if (group === 'all') {
+              if (ignore && member.user.bot) return
+            } else {
+              if (!member.user.bot) return
+            };
+            const has = roleHas(member, role)
+            if (manage === 'add') {
+              if (has) return
+              await member.roles.add(role)
+            } else {
+              if (!has) return
+              await member.roles.remove(role)
+            };
+          }))
+
+          content = manage === 'add' ? `${membersize}人への ${role.name} の付与が完了しました。` : `${membersize}人からの ${role.name} の剥奪が完了しました。`
+          interaction.user.send(content).catch(error => { })
+          interaction.fetchReply()
+            .then(async () => { return await interaction.editReply(content) })
+            .catch(error => {
+              interaction.channel.send(content)
+                .catch(error => { })
+            })
         };
       };
 
@@ -1767,7 +1795,7 @@ try {
                 url: track.tracks[0].thumbnail
               },
               url: track.tracks[0].thumbnail,
-              color: mutaocolor
+              color: mutaoColor
             }
           ]
         }).catch(async error => {
@@ -1794,7 +1822,7 @@ try {
           embeds: [{
             title: `${translated.detected_source_language} → ${outlang}`,
             description: `${translated.text.substring(0, 4096)}${translated.text.length > 4096 ? '...' : ''}`,
-            color: mutaocolor
+            color: mutaoColor
           }]
         })
       };
@@ -1822,7 +1850,7 @@ try {
         const apiurl = `https://api.irucabot.com/imgcheck/check_url?url=${imageurl}`
         await interaction.deferReply()
 
-        const result = await (await fetch.fetch(apiurl, { method: 'GET' })).json()
+        const result = await (await fetch(apiurl, { method: 'GET' })).json()
         if (result.status === 'error') return await interaction.followUp(`${result.code}\n${result.message_ja}`)
         let description
         let color
@@ -1831,7 +1859,7 @@ try {
           color = redcolor
         } else {
           description = `[${result.count}個の画像がヒットしました。](${result.resulturl})`
-          color = mutaocolor
+          color = mutaoColor
         };
         await interaction.followUp({
           embeds: [
@@ -1867,7 +1895,7 @@ try {
               image: {
                 url: avatar
               },
-              color: mutaocolor
+              color: mutaoColor
             }
           ]
         })
@@ -1899,7 +1927,7 @@ try {
               image: {
                 url
               },
-              color: mutaocolor
+              color: mutaoColor
             }
           ]
         })
@@ -1923,7 +1951,7 @@ try {
                 icon_url: interaction.guild.iconURL({ extension: 'png', size: 4096 })
               },
               description: `メッセージ数: ${guild.count}${guild.send_count_channel !== null ? '' : '\n現在定期送信が停止されています。'}`,
-              color: mutaocolor
+              color: mutaoColor
             }
           ]
         })
@@ -1952,7 +1980,7 @@ try {
         const member = interaction.options.getUser('member')
         if (id === null && !member) id = interaction.user.id
         if (member) id = member.id
-        const result = await (await fetch.fetch(`https://discord.com/api/users/${id}`, {
+        const result = await (await fetch(`https://discord.com/api/users/${id}`, {
           method: 'GET',
           headers: {
             Authorization: `Bot ${process.env.DISCORD_TOKEN}`
@@ -2083,7 +2111,7 @@ try {
       };
 
       if (interaction.command.name === 'deeplusage') {
-        const result = await (await fetch.fetch('https://api-free.deepl.com/v2/usage', {
+        const result = await (await fetch('https://api-free.deepl.com/v2/usage', {
           method: 'GET',
           headers: {
             Authorization: `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`
@@ -2093,7 +2121,7 @@ try {
           embeds: [
             {
               description: `**今月の翻訳文字数:** ${result.character_count}文字\n**残り:** ${result.character_limit - result.character_count}文字`,
-              color: mutaocolor
+              color: mutaoColor
             }
           ]
         })
@@ -2121,7 +2149,7 @@ try {
         const iconurl = guild.iconURL({ size: 4096, extension: 'png' })
         const geticon = interaction.options.getBoolean('icon')
         const owner = await guild.fetchOwner()
-        const ownercolor = owner.roles.color ? owner.roles.color.color : mutaocolor
+        const ownercolor = owner.roles.color ? owner.roles.color.color : mutaoColor
 
         if (geticon) {
           if (!iconurl) return await interaction.reply({ content: 'アイコンが設定されていません。', ephemeral: true })
@@ -2217,7 +2245,7 @@ try {
         if (!guild) return await message.reply('無い')
         const iconurl = guild.iconURL({ size: 4096, extension: 'png' })
         const owner = await guild.fetchOwner()
-        const ownercolor = owner.roles.color ? owner.roles.color.color : mutaocolor
+        const ownercolor = owner.roles.color ? owner.roles.color.color : mutaoColor
 
         let i = 0
         let ignorebot;
