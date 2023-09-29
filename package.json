@@ -24,5 +24,25 @@
     "eslint-plugin-n": "^16.1.0",
     "eslint-plugin-promise": "^6.1.1"
   },
-  "type": "module"
+  "type": "module",
+  "name": "mutao",
+  "description": "<p align=\"center\">\r   <img width=10% src=\"https://cdn.discordapp.com/attachments/970275644686602240/1148142461114400808/14_20230904152804.png\">\r </p>\r <h1 align=\"center\">MuTao</h1>",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KiRura/MuTao.git"
+  },
+  "keywords": [
+    "MuTao"
+  ],
+  "author": "KiRura",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KiRura/MuTao/issues"
+  },
+  "homepage": "https://github.com/KiRura/MuTao"
 }
