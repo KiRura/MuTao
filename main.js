@@ -37,7 +37,6 @@ const greencolor = 9043849
 const ataokanumber = '指定した数字があたおか'
 const notHasManageRole = 'ロール管理の権限がありません。'
 const cannotManageRole = 'このロールは管理できません。'
-const noHasChangeNickname = '自身のニックネームを変える権限がありません。'
 
 try {
   function today() {
@@ -1390,7 +1389,10 @@ try {
         queue.delete()
         await interaction.followUp('またね！')
         await wait(3) // そういう演出
-        await interaction.deleteReply()
+        interaction.deleteReply()
+          .catch(error => {
+            return
+          })
       } else if (command === 'pause') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
@@ -1508,7 +1510,7 @@ try {
           num = num - 1
           t = queue.tracks.toArray()[num]
           time = `\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`
-        };
+        }
 
         await interaction.reply({
           embeds: [
@@ -1616,6 +1618,11 @@ try {
 
         const success = queue.node.setVolume(vol)
         await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : 'なんかセットできませんでした。'}`)
+        await wait(3)
+        interaction.deleteReply()
+          .catch(error => {
+            return
+          })
       } else if (command === 'seek') {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
@@ -2203,11 +2210,11 @@ try {
         await interaction.reply(errormsg).catch(async e => await interaction.channel.send(errormsg).catch(async e => await interaction.user.send(errormsg).catch(e => { })))
       } else {
         await interaction.user.send(`おめえエラー起こしてんじゃねえよ\n${e}`)
-      };
-    };
+      }
+    }
   })
 
-  client.on('messageCreate', async message => {
+  client.on(Events.MessageCreate, async message => {
     if (message.author.bot || message.system || !message.guild) return
     if (message.guild.id === '1074670271312711740' && message.author.id === '606093171151208448') {
       if (message.content === 'サーバー一覧') {
