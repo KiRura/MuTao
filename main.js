@@ -2326,10 +2326,8 @@ try {
         ]
       })
     } catch (error) {
-      logger.info(today())
-      logger.info('guildDelete Error')
-      logger.error(error)
-    };
+      return
+    }
   })
 
   try {
