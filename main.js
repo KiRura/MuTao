@@ -10,6 +10,7 @@ import fs from 'fs'
 import cron from 'node-cron'
 import crypto from 'crypto'
 import { Logger } from "tslog"
+import { error } from 'console'
 const logger = new Logger({ hideLogPositionForProduction: true })
 logger.info('loaded modules')
 const client = new Client({ intents: Object.values(GatewayIntentBits) })
@@ -36,6 +37,7 @@ const greencolor = 9043849
 const ataokanumber = '指定した数字があたおか'
 const notHasManageRole = 'ロール管理の権限がありません。'
 const cannotManageRole = 'このロールは管理できません。'
+const noHasChangeNickname = '自身のニックネームを変える権限がありません。'
 
 try {
   function today() {
@@ -194,6 +196,20 @@ try {
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
       }))
     })
+
+    logger.info('cleaning nickname data...')
+    let json = JSON.parse(fs.readFileSync(nicknameData))
+    await Promise.all(json.map(guild => {
+      client.guilds.fetch(guild.id)
+        .then(async fetchguild => {
+          await fetchguild.members.me.setNickname(guild.nickname)
+        })
+        .catch(error => {
+          return
+        })
+    }))
+    fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify([])))
+    logger.info('cleaned nickname data')
 
     logger.info('setting slash commands...')
     await client.application.commands.set([
@@ -1179,6 +1195,7 @@ try {
         ]
       }
     ])
+    logger.info('set slash commands')
 
     await (await (await client.guilds.fetch('1099309562781245440')).channels.fetch('1146562994688503999')).send({
       embeds: [
