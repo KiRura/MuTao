@@ -1306,11 +1306,16 @@ try {
           let currentNickname = interaction.guild.members.me.nickname
           if (currentNickname !== null) {
             let json = JSON.parse(fs.readFileSync(nicknameData))
-            json.push({
-              id: interaction.guild.id,
-              nickname: currentNickname
-            })
-            fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
+            if (json.find(guild => guild.id === interaction.guild.id)) {
+              json.find(guild => guild.id === interaction.guild.id).nickname = currentNickname
+              fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
+            } else {
+              json.push({
+                id: interaction.guild.id,
+                nickname: currentNickname
+              })
+              fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
+            }
           }
         }
         const urlboolean = (url.startsWith('http://') || url.startsWith('https://'))
