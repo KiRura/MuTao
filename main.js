@@ -9,13 +9,13 @@ import ping from 'ping'
 import fs from 'fs'
 import cron from 'node-cron'
 import crypto from 'crypto'
-import { Logger } from "tslog"
-import { error } from 'console'
-const logger = new Logger({ hideLogPositionForProduction: true })
+import { Logger } from 'tslog'
+
+export const logger = new Logger({ hideLogPositionForProduction: true })
 logger.info('loaded modules')
-const client = new Client({ intents: Object.values(GatewayIntentBits) })
-const discordTogether = new DiscordTogether(client)
-const discordplayer = Player.singleton(client)
+export const client = new Client({ intents: Object.values(GatewayIntentBits) })
+export const discordTogether = new DiscordTogether(client)
+export const discordplayer = Player.singleton(client)
 discordplayer.extractors.loadDefault().then(result => {
   if (result.success) {
     logger.info('loaded discord-player extractors')
@@ -26,127 +26,148 @@ discordplayer.extractors.loadDefault().then(result => {
 
 config()
 
-const API_KEY = process.env.DEEPL_API_KEY
-const guildsData = 'data/guilds.json'
-const nicknameData = 'data/nickname.json'
+export const API_KEY = process.env.DEEPL_API_KEY
+export const guildsData = 'data/guilds.json'
+export const nicknameData = 'data/nickname.json'
 
-const mutaoColor = 16760703
-const redcolor = 16744319
-const greencolor = 9043849
+export const mutaoColor = 16760703
+export const redcolor = 16744319
+export const greencolor = 9043849
 
-const ataokanumber = '指定した数字があたおか'
-const notHasManageRole = 'ロール管理の権限がありません。'
-const cannotManageRole = 'このロールは管理できません。'
+export const ataokanumber = '指定した数字があたおか'
+export const notHasManageRole = 'ロール管理の権限がありません。'
+export const cannotManageRole = 'このロールは管理できません。'
 
-try {
-  function today() {
-    const dt = new Date()
-    const y = dt.getFullYear()
-    const m = dt.getMonth()
-    const d = dt.getDate()
-    const hour = ('00' + (dt.getHours())).slice(-2)
-    const min = ('00' + (dt.getMinutes())).slice(-2)
-    const sec = ('00' + (dt.getSeconds())).slice(-2)
-    const msec = dt.getMilliseconds()
-    const weekItems = ['日', '月', '火', '水', '木', '金', '土']
-    const dayOfWeek = weekItems[dt.getDay()]
-    const wareki = dt.toLocaleDateString('ja-JP-u-ca-japanese', { year: 'numeric' })
-  
-    return `${y}年(${wareki})${('00' + (m + 1)).slice(-2)}月${('00' + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`
+/**
+ * @param {Date} date
+ * @returns
+ */
+export function today (date) {
+  const dt = date || new Date()
+  const y = dt.getFullYear()
+  const m = dt.getMonth()
+  const d = dt.getDate()
+  const hour = ('00' + (dt.getHours())).slice(-2)
+  const min = ('00' + (dt.getMinutes())).slice(-2)
+  const sec = ('00' + (dt.getSeconds())).slice(-2)
+  const msec = dt.getMilliseconds()
+  const weekItems = ['日', '月', '火', '水', '木', '金', '土']
+  const dayOfWeek = weekItems[dt.getDay()]
+  const wareki = dt.toLocaleDateString('ja-JP-u-ca-japanese', { year: 'numeric' })
+
+  return `${y}年(${wareki})${('00' + (m + 1)).slice(-2)}月${('00' + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`
+}
+export function wait (sec) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, sec * 1000)
+  })
+}
+export function writedefault (id) {
+  const json = JSON.parse(fs.readFileSync(guildsData))
+  json.push(
+    {
+      id,
+      send_count_channel: null,
+      count: 0
+    }
+  )
+  fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
+}
+/**
+ * @param {User} user
+ * @returns
+ */
+export function avatarToURL (user) {
+  if (user.avatarURL()) {
+    return user.avatarURL({ size: 4096 })
+  } else {
+    return user.defaultAvatarURL
   };
-  function wait(sec) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, sec * 1000)
-    })
-  }
-  function writedefault(id) {
-    const json = JSON.parse(fs.readFileSync(guildsData))
-    json.push(
-      {
-        id,
-        send_count_channel: null,
-        count: 0
-      }
-    )
-    fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
+}
+export function returnMusic (interaction) {
+  const queue = useQueue(interaction.guild.id)
+  if (!queue && interaction.guild.members.me.voice.channel) return '多分再起動したのでplayをするかvcから蹴るかして下さいな。'
+  if (!queue) return 'VCに入ってないよ！'
+  if (!queue.currentTrack) return '再生中の曲が無いよ！'
+  return false
+}
+export function times (length) {
+  const hours = ('00' + Math.floor(length / 3600)).slice(-2)
+  const minutes = ('00' + Math.floor((length % 3600) / 60)).slice(-2)
+  const seconds = ('00' + Math.floor((length % 3600) % 60)).slice(-2)
+  if (hours !== '00') {
+    return `${hours}:${minutes}:${seconds}`
+  } else if (minutes !== '00') {
+    return `${minutes}:${seconds}`
+  } else {
+    return `00:${seconds}`
   };
-  function avatarToURL(user) {
-    if (user.avatarURL()) {
-      return user.avatarURL({ size: 4096 })
-    } else {
-      return user.defaultAvatarURL
+}
+export async function googlePing () {
+  return (await ping.promise.probe('8.8.8.8')).time
+}
+export function roleHas (user, role) {
+  return user.roles.cache.has(role.id)
+}
+export async function managerole (user, or, role, interaction) {
+  const has = user.roles.cache.has(role.id)
+  if (or === 'add') {
+    if (has) {
+      await interaction.reply({ content: '既にロールが付いています。', ephemeral: true })
+      return false
     };
-  };
-  function returnMusic(interaction) {
-    const queue = useQueue(interaction.guild.id)
-    if (!queue && interaction.guild.members.me.voice.channel) return '多分再起動したのでplayをするかvcから蹴るかして下さいな。'
-    if (!queue) return 'VCに入ってないよ！'
-    if (!queue.currentTrack) return '再生中の曲が無いよ！'
+    user.roles.add(role)
+      .then(() => {
+        return true
+      })
+      .catch(async _error => {
+        await interaction.reply({ content: cannotManageRole })
+        return false
+      })
+  } else {
+    if (!has) {
+      await interaction.reply({ content: '既にロールが外されています。', ephemeral: true })
+      return false
+    };
+    user.roles.remove(role)
+      .then(() => {
+        return true
+      })
+      .catch(async _error => {
+        await interaction.reply({ content: cannotManageRole })
+        return false
+      })
+  }
+}
+export async function permissionHas (interaction, PermissionFlagsBits, String) {
+  if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits)) {
+    await interaction.reply({ content: String, ephemeral: true })
     return false
   };
-  function times(length) {
-    const hours = ('00' + Math.floor(length / 3600)).slice(-2)
-    const minutes = ('00' + Math.floor((length % 3600) / 60)).slice(-2)
-    const seconds = ('00' + Math.floor((length % 3600) % 60)).slice(-2)
-    if (hours !== '00') {
-      return `${hours}:${minutes}:${seconds}`
-    } else if (minutes !== '00') {
-      return `${minutes}:${seconds}`
-    } else {
-      return `00:${seconds}`
-    };
+  return true
+}
+export async function isGuild (interaction) {
+  if (!interaction.inGuild()) {
+    await interaction.reply({ content: 'サーバー内でのみ実行できます。', ephemeral: true })
+    return false
   };
-  async function googlePing() {
-    return (await ping.promise.probe('8.8.8.8')).time
-  }
-  function roleHas(user, role) {
-    return user.roles.cache.has(role.id)
-  };
-  async function managerole(user, or, role, interaction) {
-    const has = user.roles.cache.has(role.id)
-    if (or === 'add') {
-      if (has) {
-        await interaction.reply({ content: '既にロールが付いています。', ephemeral: true })
-        return false
-      };
-      user.roles.add(role)
-        .then(() => {
-          return true
-        })
-        .catch(async error => {
-          await interaction.reply({ content: cannotManageRole })
-          return false
-        })
-    } else {
-      if (!has) {
-        await interaction.reply({ content: '既にロールが外されています。', ephemeral: true })
-        return false
-      };
-      user.roles.remove(role)
-        .then(() => {
-          return true
-        })
-        .catch(async error => {
-          await interaction.reply({ content: cannotManageRole })
-          return false
-        })
-    }
-  }
-  async function permissionHas(interaction, PermissionFlagsBits, String) {
-    if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits)) {
-      await interaction.reply({ content: String, ephemeral: true })
-      return false
-    };
-    return true
-  };
-  async function isGuild(interaction) {
-    if (!interaction.inGuild()) {
-      await interaction.reply({ content: 'サーバー内でのみ実行できます。', ephemeral: true })
-      return false
-    };
-    return true
-  };
+  return true
+}
+/**
+ * @param {Client} client
+ * @returns
+ */
+export async function admin (client) {
+  return await client.users.fetch('606093171151208448')
+}
+export async function adminicon () {
+  return avatarToURL(await admin())
+}
+export async function adminname () {
+  return (await admin()).username
+}
 
+try {
   client.once(Events.ClientReady, async client => {
     setInterval(async () => {
       const result = await ping.promise.probe('8.8.8.8')
@@ -197,14 +218,14 @@ try {
     })
 
     logger.info('cleaning nickname data...')
-    let json = JSON.parse(fs.readFileSync(nicknameData))
+    const json = JSON.parse(fs.readFileSync(nicknameData))
     await Promise.all(json.map(guild => {
       client.guilds.fetch(guild.id)
         .then(async fetchguild => {
           await fetchguild.members.me.setNickname(guild.nickname)
         })
-        .catch(error => {
-          return
+        .catch(_error => {
+
         })
     }))
     fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify([])))
@@ -1248,7 +1269,7 @@ try {
 
       if (inguildCommands.find(inguildCommand => inguildCommand === command)) {
         if (!(await isGuild(interaction))) return
-      };
+      }
 
       if (command === 'help') {
         const result = await ping.promise.probe('8.8.8.8')
@@ -1319,15 +1340,15 @@ try {
 
         const getqueue = useQueue(interaction.guild.id)
         if (!getqueue) {
-          let currentNickname = interaction.guild.members.me.nickname
+          const currentNickname = interaction.guild.members.me.nickname
           if (currentNickname !== null) {
-            let json = JSON.parse(fs.readFileSync(nicknameData))
+            const json = JSON.parse(fs.readFileSync(nicknameData))
             if (!json.find(guild => guild.id === interaction.guild.id)) {
               json.push({
                 id: interaction.guild.id,
                 nickname: currentNickname
               })
-            } 
+            }
             fs.writeFileSync(nicknameData, Buffer.from(JSON.stringify(json)))
           }
         }
@@ -1390,8 +1411,8 @@ try {
         await interaction.followUp('またね！')
         await wait(3) // そういう演出
         interaction.deleteReply()
-          .catch(error => {
-            return
+          .catch(_error => {
+
           })
       } else if (command === 'pause') {
         const returnmusic = returnMusic(interaction)
@@ -1620,8 +1641,8 @@ try {
         await interaction.reply(`${success ? `ボリュームを${vol}%に設定しました。` : 'なんかセットできませんでした。'}`)
         await wait(3)
         interaction.deleteReply()
-          .catch(error => {
-            return
+          .catch(_error => {
+
           })
       } else if (command === 'seek') {
         const returnmusic = returnMusic(interaction)
@@ -1720,12 +1741,12 @@ try {
           }))
 
           content = manage === 'add' ? `${membersize}人への ${role.name} の付与が完了しました。` : `${membersize}人からの ${role.name} の剥奪が完了しました。`
-          interaction.user.send(content).catch(error => { })
+          interaction.user.send(content).catch(_error => { })
           interaction.fetchReply()
             .then(async () => { return await interaction.editReply(content) })
-            .catch(error => {
+            .catch(_error => {
               interaction.channel.send(content)
-                .catch(error => { })
+                .catch(_error => { })
             })
         };
       } else if (command === 'send') {
@@ -2221,7 +2242,7 @@ try {
         const guilds = client.guilds.cache.map(guild => {
           return `ID: ${guild.id}, Name: ${guild.name} (${guild.memberCount})`
         })
-        message.reply(`success!\nGuilds (${client.guilds.cache.size})(${client.users.cache.size}):\n${guilds.join('\n')}`)
+        message.reply(String(`success!\nGuilds (${client.guilds.cache.size})(${client.users.cache.size}):\n${guilds.join('\n')}`).substring(0, 2000))
       };
 
       if (message.content.match('サーバー詳細')) {
@@ -2261,7 +2282,25 @@ try {
           ]
         })
       };
-    };
+
+      if (message.content === 'メッセージカウント') {
+        const json = JSON.parse(fs.readFileSync(guildsData))
+        let i = 0
+        const guild = await Promise.all(json.map(guild => {
+          return client.guilds.fetch(guild.id)
+            .then(fetchguild => {
+              if (guild.count === 0) return
+              return `**${fetchguild.name}:** ${guild.count} [${guild.send_count_channel === null ? ':red_circle:' : ':green_circle:'}] (${guild.id})`
+            })
+            .catch(_error => {
+              i++
+            })
+        }))
+        console.log(guild)
+        const ignore = guild.filter(string => string === undefined).length + i
+        await message.reply(guild.filter(string => string !== undefined).join('\n') + `\n\n除外: ${ignore} (fetch failed: ${i})\nデータ未生成: ${(await client.guilds.fetch()).size - json.length - i}`)
+      }
+    }
 
     try {
       const json = JSON.parse((fs.readFileSync(guildsData)))
@@ -2333,7 +2372,7 @@ try {
         ]
       })
     } catch (error) {
-      return
+
     }
   })
 
