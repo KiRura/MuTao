@@ -1213,6 +1213,18 @@ try {
             maxValue: 2000
           }
         ]
+      },
+      {
+        name: 'setbitrate',
+        description: '全てのチャンネルのビットレートを最大値か設定した数値にする',
+        options: [
+          {
+            type: ApplicationCommandOptionType.Integer,
+            name: 'bitrate',
+            description: 'ビットレート(Kbps)',
+            minValue: 8
+          }
+        ]
       }
     ])
     logger.info('set slash commands')
@@ -2208,6 +2220,34 @@ try {
         let ephemeral = option.getBoolean('ephemeral')
         if (!ephemeral) ephemeral = false
         await interaction.reply({ content: crypto.randomBytes(n).toString('base64').substring(0, n), ephemeral })
+      } else if (command === 'setbitrate') {
+        if (!(await isGuild(interaction))) return
+        const max = interaction.guild.maximumBitrate
+        let bitrate = (interaction.options.getInteger('bitrate') * 1000) || max
+        if (bitrate > max) bitrate = max
+        const channel = (await interaction.guild.channels.fetch()).filter(channel => channel.type === ChannelType.GuildVoice)
+
+        await interaction.deferReply()
+        let ignore = 0
+        let eq = 0
+        let success = 0
+        await Promise.all(channel.map(async channel => {
+          if (!channel.manageable) return ignore++
+          if (channel.bitrate === bitrate) return eq++
+          await channel.setBitrate(bitrate)
+          return success++
+        }))
+        if (channel.size === ignore) {
+          return await interaction.followUp('全部権限不足で管理できませんでした。')
+        } else if (channel.size === eq) {
+          return await interaction.followUp('全部既に設定しようとしたビットレートと同じでした')
+        } else if (channel.size === (ignore + eq)) {
+          return await interaction.followUp('全部権限不足か既に同じビットレートだったかでスキップされました。')
+        }
+        let content = `${success}個のVCを${bitrate / 1000} Kbpsに設定しました。`
+        if (ignore > 0) content = `${content}\n権限不足: ${ignore}`
+        if (eq > 0) content = `${content}\nスキップ: ${eq}`
+        await interaction.followUp(content)
       } else if (command === 'test') {
         if (interaction.user.id !== '606093171151208448') return await interaction.reply('管理者及び開発者のみ実行可能です。')
         const text = option.getString('text1')
