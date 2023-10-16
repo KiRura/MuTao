@@ -57,11 +57,20 @@ export function today (date) {
 
   return `${y}年(${wareki})${('00' + (m + 1)).slice(-2)}月${('00' + (d)).slice(-2)}日(${dayOfWeek}) ${hour}時${min}分${sec}秒${msec}`
 }
+/**
+ *
+ * @param {number} sec
+ * @returns
+ */
 export function wait (sec) {
   return new Promise((resolve) => {
     setTimeout(resolve, sec * 1000)
   })
 }
+/**
+ *
+ * @param {string} id
+ */
 export function writedefault (id) {
   const json = JSON.parse(fs.readFileSync(guildsData))
   json.push(
@@ -84,6 +93,11 @@ export function avatarToURL (user) {
     return user.defaultAvatarURL
   };
 }
+/**
+ *
+ * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @returns
+ */
 export function returnMusic (interaction) {
   const queue = useQueue(interaction.guild.id)
   if (!queue && interaction.guild.members.me.voice.channel) return '多分再起動したのでplayをするかvcから蹴るかして下さいな。'
@@ -91,6 +105,11 @@ export function returnMusic (interaction) {
   if (!queue.currentTrack) return '再生中の曲が無いよ！'
   return false
 }
+/**
+ *
+ * @param {number} length
+ * @returns
+ */
 export function times (length) {
   const hours = ('00' + Math.floor(length / 3600)).slice(-2)
   const minutes = ('00' + Math.floor((length % 3600) / 60)).slice(-2)
@@ -106,6 +125,12 @@ export function times (length) {
 export async function googlePing () {
   return (await ping.promise.probe('8.8.8.8')).time
 }
+/**
+ *
+ * @param {import('discord.js').User} user
+ * @param {import('discord.js').Role} role
+ * @returns
+ */
 export function roleHas (user, role) {
   return user.roles.cache.has(role.id)
 }
