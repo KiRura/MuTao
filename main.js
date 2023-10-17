@@ -1414,12 +1414,16 @@ try {
 
         let t; let description; let thumbnail
 
-        if (track.hasPlaylist()) {
+        if (track.hasPlaylist() && track.playlist.tracks.length !== 1) {
           t = track.playlist
           thumbnail = t.tracks[0].thumbnail
           description = `**合計時間:** ${t.estimatedDuration === 0 ? 'ライブのみ' : t.durationFormatted}\n**曲数:** ${t.tracks.length}曲`
         } else {
-          t = track.tracks[0]
+          if (track.hasPlaylist()) {
+            t = track.playlist.tracks[0]
+          } else {
+            t = track.tracks[0]
+          }
           thumbnail = t.thumbnail
           description = `**投稿者:** ${t.author}\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`
         };
