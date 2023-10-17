@@ -457,7 +457,15 @@ try {
       },
       { // clear
         name: 'clear',
-        description: 'キューをVCから退出せずに削除する'
+        description: 'キューをVCから退出せずに削除する',
+        options: [
+          {
+            type: ApplicationCommandOptionType.Integer,
+            name: 'number',
+            description: '指定した番号の曲以降を抹消する (/queueで番号確認)',
+            minValue: 1
+          }
+        ]
       },
       { // test
         name: 'test',
@@ -1479,10 +1487,19 @@ try {
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
         if (queue.getSize() === 0) return await interaction.reply({ content: 'キューの中は既に再生中の曲だけだよ！', ephemeral: true })
-        const losttracks = queue.getSize() - 1
+        const number = option.getInteger('number')
+        let losttracks = queue.getSize()
+        if (number !== null) {
+          if (losttracks < number) return await interaction.reply(ataokanumber)
+          losttracks = losttracks - (number - 1)
+          await interaction.deferReply()
+          do {
+            queue.node.remove(queue.tracks.toArray()[number - 1])
+          } while (queue.getSize() >= number)
+        } else {
+          queue.tracks.clear()
+        }
 
-        await interaction.deferReply()
-        queue.tracks.clear()
         await interaction.followUp(`${losttracks}曲がダイソンの手によってまっさらになったよ`)
       } else if (command === 'queue') {
         const returnmusic = returnMusic(interaction)
