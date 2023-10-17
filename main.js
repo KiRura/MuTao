@@ -1301,7 +1301,8 @@ try {
         'messages',
         'stopsendcount',
         'resetcount',
-        'guildinfo'
+        'guildinfo',
+        'setbitrate'
       ]
 
       if (inguildCommands.find(inguildCommand => inguildCommand === command)) {
@@ -2246,7 +2247,6 @@ try {
         if (!ephemeral) ephemeral = false
         await interaction.reply({ content: crypto.randomBytes(n).toString('base64').substring(0, n), ephemeral })
       } else if (command === 'setbitrate') {
-        if (!(await isGuild(interaction))) return
         const max = interaction.guild.maximumBitrate
         let bitrate = (interaction.options.getInteger('bitrate') * 1000) || max
         if (bitrate > max) bitrate = max
