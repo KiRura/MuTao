@@ -1574,7 +1574,6 @@ try {
             const beforeSize = queue.getSize()
             do {
               queue.node.remove(queue.tracks.toArray()[0])
-              logger.info(`${queue.getSize()} | ${beforeSize - number}`)
             } while (queue.getSize() !== beforeSize - number)
           } else {
             t = queue.tracks.toArray()[number]
