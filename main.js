@@ -2424,7 +2424,6 @@ try {
               i++
             })
         }))
-        console.log(guild)
         const ignore = guild.filter(string => string === undefined).length + i
         await message.reply(guild.filter(string => string !== undefined).join('\n') + `\n\n除外: ${ignore} (fetch failed: ${i})\nデータ未生成: ${(await client.guilds.fetch()).size - json.length - i}`)
       }
