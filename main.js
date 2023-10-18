@@ -38,6 +38,8 @@ export const ataokanumber = '指定した数字があたおか'
 export const notHasManageRole = 'ロール管理の権限がありません。'
 export const cannotManageRole = 'このロールは管理できません。'
 
+export const urNotAdmin = '管理者権限所持者のみ実行できます。'
+
 /**
  * @param {Date} date
  * @returns
@@ -170,6 +172,14 @@ export async function permissionHas (interaction, PermissionFlagsBits, String) {
     return false
   };
   return true
+}
+export async function userPermissionHas (interaction, PermissionFlagsBits, String) {
+  if (interaction.member.permissions.has(PermissionFlagsBits)) {
+    return true
+  } else {
+    await interaction.reply({ content: String, ephemeral: true })
+    return false
+  }
 }
 export async function isGuild (interaction) {
   if (!interaction.inGuild()) {
@@ -1328,8 +1338,23 @@ try {
         'setbitrate'
       ]
 
+      const needAdmin = [
+        'disconall',
+        'deafall',
+        'setchannel',
+        'stopsendcount',
+        'delmessages',
+        'resetcount',
+        'setbitrate',
+        'send'
+      ]
+
       if (inguildCommands.find(inguildCommand => inguildCommand === command)) {
         if (!(await isGuild(interaction))) return
+      }
+
+      if (needAdmin.find(needAdminCommand => needAdminCommand === command)) {
+        if (!(await userPermissionHas(interaction, PermissionFlagsBits.Administrator, urNotAdmin))) return
       }
 
       if (command === 'help') {
@@ -1760,6 +1785,7 @@ try {
 
         if (group === 'user') {
           if (manage === 'add' || manage === 'remove') {
+            if (!(await userPermissionHas(interaction, PermissionFlagsBits.Administrator, urNotAdmin))) return
             if ((await managerole(user, manage, role, interaction)) === false) return
             const content = manage === 'add' ? `${user.displayName} への ${role.name} の付与が完了しました。` : `${user.displayName} から ${role.name} の剥奪が完了しました。`
             await interaction.reply(content)
@@ -1784,6 +1810,7 @@ try {
             })
           };
         } else {
+          if (!(await userPermissionHas(interaction, PermissionFlagsBits.Administrator, urNotAdmin))) return
           const members = await interaction.guild.members.fetch()
           const ignore = option.getBoolean('ignorebot')
           let membersize = 0
@@ -2072,7 +2099,6 @@ try {
           ]
         })
       } else if (command === 'disconall') {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         let vc = option.getChannel('vc')
         if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: 'VCを指定するかVCに入室して下さい。', ephemeral: true })
         if (vc === null) vc = interaction.member.voice.channel
@@ -2129,7 +2155,6 @@ try {
         })
       } else if (command === 'deafall') {
         if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.DeafenMembers)) return await interaction.reply({ content: 'スピーカーミュートする権限がありません！', ephemeral: true })
-        if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
         let vc = option.getChannel('vc')
         vc = vc || interaction.member.voice.channel
         if (!vc) return await interaction.reply({ content: 'vcに参加するか指定して下さい。', ephemeral: true })
@@ -2147,7 +2172,6 @@ try {
 
         await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`)
       } else if (command === 'setchannel') {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         await interaction.deferReply()
         const channel = option.getChannel('channel')
         const json = JSON.parse(fs.readFileSync(guildsData))
@@ -2166,7 +2190,6 @@ try {
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
         await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
       } else if (command === 'stopsendcount') {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます', ephemeral: true })
         const json = JSON.parse(fs.readFileSync(guildsData))
         const guild = json.find(guild => guild.id === interaction.guild.id)
         if (!guild) {
@@ -2177,8 +2200,6 @@ try {
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
         await interaction.reply('定期送信をストップしました。')
       } else if (command === 'delmessages') {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
-
         const channel = option.getChannel('channel')
 
         const me = interaction.guild.members.me
@@ -2221,8 +2242,6 @@ try {
           ]
         })
       } else if (command === 'resetcount') {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: '管理者権限所持者のみ実行できます。', ephemeral: true })
-
         const guilds = JSON.parse(fs.readFileSync(guildsData))
         if (!guilds.find(guild => guild.id === interaction.guild.id)) {
           writedefault(interaction.guild.id)
