@@ -1331,7 +1331,7 @@ try {
         const result = await ping.promise.probe('8.8.8.8')
         await interaction.reply({
           embeds: [{
-            description: 'サポート鯖: https://discord.gg/ky97Uqu3YY\n\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・数時間レベルの長さの曲を流そうとすると退出してしまう問題があります。原因が分かり次第修正します。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。',
+            description: '[サポート鯖](https://discord.com/invite/ky97Uqu3YY)\n\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・数時間レベルの長さの曲を流そうとすると退出してしまう問題があります。原因が分かり次第修正します。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。',
             color: mutaoColor,
             footer: {
               icon_url: `${adminicon}`,
