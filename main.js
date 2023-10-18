@@ -1755,7 +1755,7 @@ try {
         const returnmusic = returnMusic(interaction)
         if (returnmusic) return await interaction.reply({ content: returnmusic, ephemeral: true })
         const queue = useQueue(interaction.guild.id)
-        const seek = option.getNumber('seek')
+        const seek = option.getNumber('sec')
         await interaction.deferReply()
 
         await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp(ataokanumber)
