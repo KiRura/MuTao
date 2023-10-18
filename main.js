@@ -1517,15 +1517,15 @@ try {
         const maxpages = (Math.floor(queue.getSize() / 10)) + 1
         if (page > maxpages) return await interaction.reply({ content: ataokanumber, ephemeral: true })
 
-        await interaction.deferReply() // タイムアウト防止
+        await interaction.deferReply()
 
-        const pageStart = 10 * (page - 1) // 埋め込み作り☆
+        const pageStart = 10 * (page - 1)
         const pageEnd = pageStart + 10
-        const tracks = queue.tracks.toArray().slice(pageStart, pageEnd).map((m, i) => { // ですくりぷしょん
+        const tracks = queue.tracks.toArray().slice(pageStart, pageEnd).map((m, i) => {
           return `**${i + pageStart + 1}.** (${m.duration === '0:00' ? 'ライブ' : m.duration}) [${m.title.length <= 20 ? m.title : `${m.title.substring(0, 20)}...`}](${m.url})`
         })
 
-        const length = (queue.estimatedDuration + (queue.currentTrack.durationMS - queue.node.streamTime)) / 1000 // 再生中の曲の長さが含まれてないから足す
+        const length = (queue.estimatedDuration + (queue.currentTrack.durationMS - queue.node.streamTime)) / 1000
         const queuelength = (queue.estimatedDuration + queue.currentTrack.durationMS === 0) ? 'ライブ配信のみ' : `キュー内合計: ${times(length)}`
 
         const streamtime = queue.currentTrack.durationMS === 0 ? 'ライブ' : `${queue.node.getTimestamp().current.label} / ${queue.currentTrack.duration}`
@@ -1560,20 +1560,22 @@ try {
           t = queue.currentTrack
         } else if (!queue.tracks.toArray()[0]) {
           await interaction.followUp('キューが空になったよ！またね！')
-          await wait(1) // そういう演出
+          await wait(1)
           queue.delete()
           await wait(2)
           await interaction.deleteReply()
           return
         } else if (number !== null) {
           number = number - 1
-          if (hold && (number === 1 || number === null)) {
+          if (hold && number === 0) {
             t = queue.tracks.toArray()[0]
-          } else if (hold) {
+          } else if (hold && number !== 0) {
             t = queue.tracks.toArray()[number]
+            const beforeSize = queue.getSize()
             do {
               queue.node.remove(queue.tracks.toArray()[0])
-            } while ((queue.getSize() - number - 4) !== 1)
+              logger.info(`${queue.getSize()} | ${beforeSize - number}`)
+            } while (queue.getSize() !== beforeSize - number)
           } else {
             t = queue.tracks.toArray()[number]
             queue.node.skipTo(t)
@@ -1586,7 +1588,7 @@ try {
         const embed = {
           embeds: [
             {
-              description: `**再生${hold ? '予定' : '開始'}:**${t.title.length < 15 ? ` [${t.title}](${t.url})` : `\n[${t.title}](${t.url})`}\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`,
+              description: `**再生${hold ? '予定' : '開始'}:**${t.title.length < 15 ? ` [${t.title}](${t.url})` : `\n[${t.title}](${t.url})`}\n**リクエスト:** ${t.requestedBy.displayName} (${t.requestedBy.username})\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`,
               color: mutaoColor,
               thumbnail: { url: t.thumbnail }
             }
@@ -1606,7 +1608,7 @@ try {
         let t; let time
         if (command === 'nowp' || !num) {
           t = queue.currentTrack
-          const progress = queue.node.createProgressBar() // 埋め込み作り(discordplayer神)
+          const progress = queue.node.createProgressBar()
           time = queue.node.getTimestamp().progress === Infinity ? '\n**ライブ配信**' : `\n**残り:** ${times((queue.currentTrack.durationMS - queue.node.getTimestamp().current.value) / 1000)}\n\n**${progress}**`
         } else {
           num = num - 1
@@ -1620,7 +1622,7 @@ try {
               title: t.title,
               url: t.url,
               thumbnail: { url: t.thumbnail },
-              description: `**投稿者:** ${t.author}\n**リクエスト:** ${t.requestedBy.username}${time}`,
+              description: `**投稿者:** ${t.author}\n**リクエスト:** ${t.requestedBy.displayName} (${t.requestedBy.username})${time}`,
               color: mutaoColor,
               footer: { text: `今までに${queue.history.getSize()}曲再生しました｜ボリューム: ${vol}%` }
             }
