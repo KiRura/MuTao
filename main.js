@@ -759,6 +759,11 @@ try {
             name: 'to',
             description: '/queueで表示された番号の曲へスキップ',
             minValue: 1
+          },
+          {
+            type: ApplicationCommandOptionType.Boolean,
+            name: 'hold',
+            description: '再生中の曲の再生が終わるまで待つ (toとの併用必須)'
           }
         ]
       },
@@ -1490,13 +1495,14 @@ try {
         const number = option.getInteger('number')
         let losttracks = queue.getSize()
         if (number !== null) {
-          if (losttracks < number) return await interaction.reply(ataokanumber)
-          losttracks = losttracks - (number - 1)
+          if (losttracks < number) return await interaction.reply({ content: ataokanumber, ephemeral: true })
           await interaction.deferReply()
+          losttracks = losttracks - (number - 1)
           do {
             queue.node.remove(queue.tracks.toArray()[number - 1])
           } while (queue.getSize() >= number)
         } else {
+          await interaction.deferReply()
           queue.tracks.clear()
         }
 
@@ -1524,9 +1530,9 @@ try {
 
         const streamtime = queue.currentTrack.durationMS === 0 ? 'ライブ' : `${queue.node.getTimestamp().current.label} / ${queue.currentTrack.duration}`
 
-        return await interaction.followUp({
+        await interaction.followUp({
           embeds: [{
-            title: queuelength,
+            title: queuelength + ` / ${queue.getSize()}曲`,
             description: `**再生中:** (${streamtime}) [${queue.currentTrack.title.length <= 20 ? queue.currentTrack.title : `${queue.currentTrack.title.substring(0, 20)}...`}](${queue.currentTrack.url})\n\n${tracks.join('\n')}${queue.getSize() > pageEnd ? `\n**...**\n**他:** ${queue.getSize() - pageEnd}曲` : ''}`, // 表示したキューの後にいくつかの曲があったらその曲数を表示
             thumbnail: {
               url: queue.currentTrack.thumbnail
@@ -1543,6 +1549,7 @@ try {
         const queue = useQueue(interaction.guild.id)
         let number = option.getInteger('to')
         if (number && (number < 1 || number > queue.getSize())) return await interaction.reply({ content: ataokanumber, ephemeral: true })
+        const hold = option.getBoolean('hold') || false
         await interaction.deferReply()
 
         let t
@@ -1558,10 +1565,19 @@ try {
           await wait(2)
           await interaction.deleteReply()
           return
-        } else if (number) {
+        } else if (number !== null) {
           number = number - 1
-          t = queue.tracks.toArray()[number]
-          queue.node.skipTo(t)
+          if (hold && (number === 1 || number === null)) {
+            t = queue.tracks.toArray()[0]
+          } else if (hold) {
+            t = queue.tracks.toArray()[number]
+            do {
+              queue.node.remove(queue.tracks.toArray()[0])
+            } while ((queue.getSize() - number - 4) !== 1)
+          } else {
+            t = queue.tracks.toArray()[number]
+            queue.node.skipTo(t)
+          }
         } else {
           t = queue.tracks.toArray()[0]
           queue.node.skip()
@@ -1570,14 +1586,14 @@ try {
         const embed = {
           embeds: [
             {
-              description: `**再生開始:**${t.title.length < 15 ? ` [${t.title}](${t.url})` : `\n[${t.title}](${t.url})`}\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`,
+              description: `**再生${hold ? '予定' : '開始'}:**${t.title.length < 15 ? ` [${t.title}](${t.url})` : `\n[${t.title}](${t.url})`}\n**リクエスト者:** ${t.requestedBy.username}\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`,
               color: mutaoColor,
               thumbnail: { url: t.thumbnail }
             }
           ]
         }
         if (queue.getSize() !== 0) embed.embeds[0].title = `**残り:** ${queue.estimatedDuration === 0 ? 'ライブのみ' : queue.durationFormatted} / ${queue.getSize()}曲`
-        if (number) embed.embeds[0].description = `${embed.embeds[0].description}\n${number + 1}曲スキップしました。`
+        if (number) embed.embeds[0].description = `${embed.embeds[0].description}\n${number + 1}曲目にスキップしました。`
         await interaction.followUp(embed)
       } else if (command === 'nowp' || command === 'songinfo') {
         const returnmusic = returnMusic(interaction)
