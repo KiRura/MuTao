@@ -15,7 +15,7 @@
     "play-dl": "^1.9.7",
     "tslog": "^4.9.2",
     "youtube-ext": "^1.1.16",
-    "yt-stream": "^1.4.8",
+    "yt-stream": "^1.4.10",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {

@@ -93,7 +93,7 @@ export function avatarToURL (user) {
     return user.avatarURL({ size: 4096 })
   } else {
     return user.defaultAvatarURL
-  };
+  }
 }
 /**
  *
