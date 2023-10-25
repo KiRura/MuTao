@@ -1291,15 +1291,15 @@ try {
 
   client.on(Events.InteractionCreate, async interaction => {
     try {
-      if (!interaction.isCommand()) return
+      if (!interaction.isChatInputCommand()) return
 
       (await (await client.guilds.fetch('1074670271312711740')).channels.fetch('1163807475196252200')).send({
         embeds: [
           new EmbedBuilder()
             .setDescription(interaction.command.name)
-            .setFooter({ text: `${interaction.guild.name} (${interaction.guild.id})` })
-            .setColor(interaction.member.roles.color ? interaction.member.roles.color.color : mutaoColor)
-            .setAuthor({ name: `${interaction.user.globalName} (${interaction.user.id})`, iconURL: avatarToURL(interaction.user) })
+            .setFooter({ text: `${interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DM'}` })
+            .setColor(interaction.member?.roles.color ? interaction.member.roles.color.color : mutaoColor)
+            .setAuthor({ name: `${interaction.user.displayName} (${interaction.user.id})`, iconURL: avatarToURL(interaction.user) })
         ]
       })
 
