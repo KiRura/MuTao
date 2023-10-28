@@ -1786,7 +1786,7 @@ try {
         if (group === 'user') {
           if (manage === 'add' || manage === 'remove') {
             if (!(await userPermissionHas(interaction, PermissionFlagsBits.Administrator, urNotAdmin))) return
-            if ((await managerole(user, manage, role, interaction)) === false) return
+            if (!(await managerole(user, manage, role, interaction))) return
             const content = manage === 'add' ? `${user.displayName} への ${role.name} の付与が完了しました。` : `${user.displayName} から ${role.name} の剥奪が完了しました。`
             await interaction.reply(content)
           } else {
@@ -1810,16 +1810,18 @@ try {
             })
           };
         } else {
+          if (!(await permissionHas(interaction, PermissionFlagsBits.ManageRoles, notHasManageRole))) return
           if (!(await userPermissionHas(interaction, PermissionFlagsBits.Administrator, urNotAdmin))) return
           const members = await interaction.guild.members.fetch()
           const ignore = option.getBoolean('ignorebot')
           let membersize = 0
           members.map(member => {
+            if (!member.manageable) return
             if (group === 'all') {
               if (ignore && member.user.bot) return
             } else {
               if (!member.user.bot) return
-            };
+            }
             const has = roleHas(member, role)
             if (manage === 'add') {
               if (has) return
@@ -1834,6 +1836,7 @@ try {
           await interaction.reply(content)
 
           await Promise.all(members.map(async member => {
+            if (!member.manageable) return
             if (group === 'all') {
               if (ignore && member.user.bot) return
             } else {
