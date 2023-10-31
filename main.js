@@ -214,20 +214,14 @@ try {
       const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`
       const json = JSON.parse(fs.readFileSync(guildsData))
       await Promise.all(json.map(async guild => {
-        let fetchguild
-        let fetchchannel
         if (!guild.send_count_channel) {
           json.find(jsonguild => jsonguild.id === guild.id).count = 0
           fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
           return
-        };
+        }
         try {
-          fetchguild = await client.guilds.fetch(guild.id)
-          fetchchannel = await fetchguild.channels.fetch(guild.send_count_channel)
-        } catch (error) {
-          return
-        };
-        try {
+          const fetchguild = await client.guilds.fetch(guild.id)
+          const fetchchannel = await fetchguild.channels.fetch(guild.send_count_channel)
           await fetchchannel.send({
             embeds: [
               {
@@ -244,9 +238,8 @@ try {
             ]
           })
         } catch (error) {
-          logger.info(today())
-          logger.error(error)
-        };
+
+        }
         json.find(jsonguild => jsonguild.id === guild.id).count = 0
         fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
       }))
