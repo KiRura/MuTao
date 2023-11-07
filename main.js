@@ -1,5 +1,5 @@
 /* eslint-disable array-callback-return */
-import { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType, EmbedBuilder, Events } from 'discord.js'
+import { Client, GatewayIntentBits, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType, EmbedBuilder, Events, ActivityType } from 'discord.js'
 import { config } from 'dotenv'
 import translate from 'deepl'
 import { QueryType, Player, QueueRepeatMode, useQueue } from 'discord-player'
@@ -206,7 +206,7 @@ try {
   client.once(Events.ClientReady, async client => {
     setInterval(async () => {
       const result = await ping.promise.probe('8.8.8.8')
-      client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${(await client.guilds.fetch()).size} servers・${client.users.cache.size} users・${result.time}ms` })
+      client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${(await client.guilds.fetch()).size} servers・${client.users.cache.size} users・${result.time}ms`, type: ActivityType.Custom })
     }, 30000)
 
     cron.schedule('59 59 23 * * *', async () => {
