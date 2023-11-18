@@ -1380,7 +1380,7 @@ try {
           description = `**投稿者:** ${t.author}\n**長さ:** ${t.durationMS === 0 ? 'ライブ' : t.duration}`
         };
         if (!urlboolean) description = `${description}\n**検索ワード:** ${url.substring(0, 15)}${url.length > 15 ? '...' : ''}`
-
+        description = `注意: 近日中にメンテがしやすくなっただけのMuPlayerをリリースします。MuTaoの音楽機能が使用できなくなります。\n${description}`
         if (!getqueue) queue.queue.history.push(queue.queue.currentTrack)
         await interaction.followUp({
           embeds: [
