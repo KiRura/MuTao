@@ -26,7 +26,6 @@ discordplayer.extractors.loadDefault().then(result => {
 config()
 
 export const API_KEY = process.env.DEEPL_API_KEY
-export const guildsData = 'data/guilds.json'
 export const nicknameData = 'data/nickname.json'
 
 export const mutaoColor = 16760703
@@ -67,21 +66,6 @@ export function wait (sec) {
   return new Promise((resolve) => {
     setTimeout(resolve, sec * 1000)
   })
-}
-/**
- *
- * @param {string} id
- */
-export function writedefault (id) {
-  const json = JSON.parse(fs.readFileSync(guildsData))
-  json.push(
-    {
-      id,
-      send_count_channel: null,
-      count: 0
-    }
-  )
-  fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
 }
 /**
  * @param {User} user
@@ -2158,16 +2142,11 @@ try {
 
         const joinNowTime = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24)
 
-        const json = JSON.parse(fs.readFileSync(guildsData))
-        const jsonguild = json.find(guild => guild.id === interaction.guild.id)
-        if (!jsonguild) writedefault(interaction.guild.id)
-        const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : '無効') : '無効'
-
         await interaction.reply({
           embeds: [
             {
               title: guild.name,
-              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**滞在期間:** ${joinNowTime}日\n**メッセージカウント定期送信:** ${count}`,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**滞在期間:** ${joinNowTime}日`,
               thumbnail: { url: iconurl || undefined },
               color: ownercolor,
               footer: {
@@ -2262,18 +2241,13 @@ try {
           ignorebot = i
         })
 
-        const json = JSON.parse(fs.readFileSync(guildsData))
-        const jsonguild = json.find(jsonguild => jsonguild.id === guild.id)
-        if (!jsonguild) writedefault(guild.id)
-        const count = jsonguild ? (jsonguild.send_count_channel !== null ? `<#${jsonguild.send_count_channel}>` : '無効') : '無効'
-
         const joinNowTime = Math.floor((new Date().getTime() - guild.joinedTimestamp) / 1000 / 60 / 60 / 24)
 
         await message.reply({
           embeds: [
             {
               title: guild.name,
-              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**滞在期間:** ${joinNowTime}日\n**メッセージカウント定期送信:** ${count}`,
+              description: `**サーバー作成日:** ${today(guild.createdAt)}\n**メンバー数:** ${guild.memberCount}人\n**bot除外メンバー数:** ${ignorebot}人\n**滞在期間:** ${joinNowTime}日`,
               thumbnail: { url: iconurl || undefined },
               color: ownercolor,
               footer: {
