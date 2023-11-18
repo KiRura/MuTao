@@ -7,7 +7,6 @@ import { fetch } from 'undici'
 import { DiscordTogether } from 'discord-together'
 import ping from 'ping'
 import fs from 'fs'
-import cron from 'node-cron'
 import crypto from 'crypto'
 import { Logger } from 'tslog'
 
@@ -208,42 +207,6 @@ try {
       const result = await ping.promise.probe('8.8.8.8')
       client.user.setActivity({ name: `${discordplayer.queues.cache.size} / ${(await client.guilds.fetch()).size} servers・${client.users.cache.size} users・${result.time}ms`, type: ActivityType.Custom })
     }, 30000)
-
-    cron.schedule('59 59 23 * * *', async () => {
-      const dt = new Date()
-      const date = `${dt.getFullYear()}/${dt.getMonth() + 1}/${dt.getDate()}`
-      const json = JSON.parse(fs.readFileSync(guildsData))
-      await Promise.all(json.map(async guild => {
-        if (!guild.send_count_channel) {
-          json.find(jsonguild => jsonguild.id === guild.id).count = 0
-          fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
-          return
-        }
-        try {
-          const fetchguild = await client.guilds.fetch(guild.id)
-          const fetchchannel = await fetchguild.channels.fetch(guild.send_count_channel)
-          await fetchchannel.send({
-            embeds: [
-              {
-                author: {
-                  name: fetchguild.name,
-                  icon_url: fetchguild.iconURL({ extension: 'png', size: 4096 })
-                },
-                description: `メッセージ数: ${guild.count}`,
-                color: mutaoColor,
-                footer: {
-                  text: `日付: ${date}`
-                }
-              }
-            ]
-          })
-        } catch (error) {
-
-        }
-        json.find(jsonguild => jsonguild.id === guild.id).count = 0
-        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
-      }))
-    })
 
     logger.info('cleaning nickname data...')
     const json = JSON.parse(fs.readFileSync(nicknameData))
@@ -1011,10 +974,6 @@ try {
           }
         ]
       },
-      { // messages
-        name: 'messages',
-        description: '0:00から今までにサーバー内で送信されたメッセの総数'
-      },
       { // banner
         name: 'banner',
         description: 'バナーを保存する',
@@ -1180,23 +1139,6 @@ try {
           }
         ]
       },
-      { // setchannel
-        name: 'setchannel',
-        description: '1日のカウント数を日本時間0時に送信するチャンネルを設定する。(送信後はカウントがリセットされます)',
-        options: [
-          {
-            type: ApplicationCommandOptionType.Channel,
-            name: 'channel',
-            description: 'チャンネル',
-            channelTypes: [ChannelType.GuildText],
-            required: true
-          }
-        ]
-      },
-      { // stopsendcount
-        name: 'stopsendcount',
-        description: 'メッセージ数の定期送信を止める。(再有効化は/setchannelで)'
-      },
       { // delmessages
         name: 'delmessages',
         description: '直前の指定した数のメッセージを全て削除する。',
@@ -1221,10 +1163,6 @@ try {
       { // deeplusage
         name: 'deeplusage',
         description: 'このBotのDeepLの使用状況を取得する。'
-      },
-      { // resetcount
-        name: 'resetcount',
-        description: 'メッセージカウントを無かったこと(ゼロ)にする。'
       },
       { // guildinfo
         name: 'guildinfo',
@@ -2073,27 +2011,6 @@ try {
             }
           ]
         })
-      } else if (command === 'messages') {
-        const json = JSON.parse(fs.readFileSync(guildsData))
-        const guild = json.find(guild => guild.id === interaction.guild.id)
-        if (!guild) {
-          writedefault(interaction.guild.id)
-          await interaction.reply({ content: 'データが新規に作成されました。\nカウント数の定期送信をするには/setchannelをして下さい。', ephemeral: true })
-          return
-        };
-
-        await interaction.reply({
-          embeds: [
-            {
-              author: {
-                name: interaction.guild.name,
-                icon_url: interaction.guild.iconURL({ extension: 'png', size: 4096 })
-              },
-              description: `メッセージ数: ${guild.count}${guild.send_count_channel !== null ? '' : '\n現在定期送信が停止されています。'}`,
-              color: mutaoColor
-            }
-          ]
-        })
       } else if (command === 'disconall') {
         let vc = option.getChannel('vc')
         if (vc === null && interaction.member.voice.channel) return await interaction.reply({ content: 'VCを指定するかVCに入室して下さい。', ephemeral: true })
@@ -2167,34 +2084,6 @@ try {
         };
 
         await interaction.followUp(cancel ? `${membersize}人をスピーカーミュートしました。` : `${membersize}人のスピーカーミュートを解除しました。`)
-      } else if (command === 'setchannel') {
-        await interaction.deferReply()
-        const channel = option.getChannel('channel')
-        const json = JSON.parse(fs.readFileSync(guildsData))
-        if (!json.find(guild => guild.id === interaction.guild.id)) {
-          json.push(
-            {
-              id: interaction.guild.id,
-              send_count_channel: channel.id,
-              count: 0
-            }
-          )
-          fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
-          return await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
-        };
-        json.find(guild => guild.id === interaction.guild.id).send_count_channel = channel.id
-        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
-        await interaction.followUp(`カウント数送信先チャンネルを設定しました。\n<#${channel.id}>`)
-      } else if (command === 'stopsendcount') {
-        const json = JSON.parse(fs.readFileSync(guildsData))
-        const guild = json.find(guild => guild.id === interaction.guild.id)
-        if (!guild) {
-          writedefault(interaction.guild.id)
-          return await interaction.reply({ content: 'データが新規に作成されました。定期送信はデフォルトで無効です。\n/setchannelで有効化します。', ephemeral: true })
-        };
-        json.find(guild => guild.id === interaction.guild.id).send_count_channel = null
-        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
-        await interaction.reply('定期送信をストップしました。')
       } else if (command === 'delmessages') {
         const channel = option.getChannel('channel')
 
@@ -2237,17 +2126,6 @@ try {
             }
           ]
         })
-      } else if (command === 'resetcount') {
-        const guilds = JSON.parse(fs.readFileSync(guildsData))
-        if (!guilds.find(guild => guild.id === interaction.guild.id)) {
-          writedefault(interaction.guild.id)
-          return await interaction.reply({ content: 'データが新規に作成されました。カウントはデフォルトで無効です。\n/setchannelで有効化します。', ephemeral: true })
-        };
-
-        guilds.find(guild => guild.id === interaction.guild.id).count = 0
-        fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(guilds)))
-
-        await interaction.reply('リセットが完了しました。')
       } else if (command === 'guildinfo') {
         const guild = interaction.guild
         const iconurl = guild.iconURL({ size: 4096, extension: 'png' })
@@ -2405,39 +2283,8 @@ try {
             }
           ]
         })
-      };
-
-      if (message.content === 'メッセージカウント') {
-        const json = JSON.parse(fs.readFileSync(guildsData))
-        let i = 0
-        const guild = await Promise.all(json.map(guild => {
-          return client.guilds.fetch(guild.id)
-            .then(fetchguild => {
-              if (guild.count === 0) return
-              return `**${fetchguild.name}:** ${guild.count} [${guild.send_count_channel === null ? ':red_circle:' : ':green_circle:'}] (${guild.id})`
-            })
-            .catch(_error => {
-              i++
-            })
-        }))
-        const ignore = guild.filter(string => string === undefined).length + i
-        await message.reply(guild.filter(string => string !== undefined).join('\n') + `\n\n除外: ${ignore} (fetch failed: ${i})\nデータ未生成: ${(await client.guilds.fetch()).size - json.length - i}`)
       }
     }
-
-    try {
-      const json = JSON.parse((fs.readFileSync(guildsData)))
-      const guild = json.find(guild => guild.id === message.guild.id)
-      if (!guild) return writedefault(message.guild.id)
-
-      const count = json.find(guild => guild.id === message.guild.id).count
-      json.find(guild => guild.id === message.guild.id).count = count + 1
-      fs.writeFileSync(guildsData, Buffer.from(JSON.stringify(json)))
-    } catch (error) {
-      logger.info(today())
-      logger.info('メッセージカウントエラー')
-      logger.error(error)
-    };
   })
 
   client.on(Events.GuildCreate, async guild => {
