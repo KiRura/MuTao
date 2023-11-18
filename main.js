@@ -10,11 +10,11 @@ import fs from 'fs'
 import crypto from 'crypto'
 import { Logger } from 'tslog'
 
-export const logger = new Logger({ hideLogPositionForProduction: true })
+const logger = new Logger({ hideLogPositionForProduction: true })
 logger.info('loaded modules')
-export const client = new Client({ intents: Object.values(GatewayIntentBits) })
-export const discordTogether = new DiscordTogether(client)
-export const discordplayer = Player.singleton(client)
+const client = new Client({ intents: Object.values(GatewayIntentBits) })
+const discordTogether = new DiscordTogether(client)
+const discordplayer = Player.singleton(client)
 discordplayer.extractors.loadDefault().then(result => {
   if (result.success) {
     logger.info('loaded discord-player extractors')
@@ -25,24 +25,24 @@ discordplayer.extractors.loadDefault().then(result => {
 
 config()
 
-export const API_KEY = process.env.DEEPL_API_KEY
-export const nicknameData = 'data/nickname.json'
+const API_KEY = process.env.DEEPL_API_KEY
+const nicknameData = 'data/nickname.json'
 
-export const mutaoColor = 16760703
-export const redcolor = 16744319
-export const greencolor = 9043849
+const mutaoColor = 16760703
+const redcolor = 16744319
+const greencolor = 9043849
 
-export const ataokanumber = '指定した数字があたおか'
-export const notHasManageRole = 'ロール管理の権限がありません。'
-export const cannotManageRole = 'このロールは管理できません。'
+const ataokanumber = '指定した数字があたおか'
+const notHasManageRole = 'ロール管理の権限がありません。'
+const cannotManageRole = 'このロールは管理できません。'
 
-export const urNotAdmin = '管理者権限所持者のみ実行できます。'
+const urNotAdmin = '管理者権限所持者のみ実行できます。'
 
 /**
  * @param {Date} date
  * @returns
  */
-export function today (date) {
+function today (date) {
   const dt = date || new Date()
   const y = dt.getFullYear()
   const m = dt.getMonth()
@@ -62,7 +62,7 @@ export function today (date) {
  * @param {number} sec
  * @returns
  */
-export function wait (sec) {
+function wait (sec) {
   return new Promise((resolve) => {
     setTimeout(resolve, sec * 1000)
   })
@@ -71,7 +71,7 @@ export function wait (sec) {
  * @param {User} user
  * @returns
  */
-export function avatarToURL (user) {
+function avatarToURL (user) {
   if (user.avatarURL()) {
     return user.avatarURL({ size: 4096 })
   } else {
@@ -83,7 +83,7 @@ export function avatarToURL (user) {
  * @param {import('discord.js').ChatInputCommandInteraction} interaction
  * @returns
  */
-export function returnMusic (interaction) {
+function returnMusic (interaction) {
   const queue = useQueue(interaction.guild.id)
   if (!queue && interaction.guild.members.me.voice.channel) return '多分再起動したのでplayをするかvcから蹴るかして下さいな。'
   if (!queue) return 'VCに入ってないよ！'
@@ -95,7 +95,7 @@ export function returnMusic (interaction) {
  * @param {number} length
  * @returns
  */
-export function times (length) {
+function times (length) {
   const hours = ('00' + Math.floor(length / 3600)).slice(-2)
   const minutes = ('00' + Math.floor((length % 3600) / 60)).slice(-2)
   const seconds = ('00' + Math.floor((length % 3600) % 60)).slice(-2)
@@ -107,7 +107,7 @@ export function times (length) {
     return `00:${seconds}`
   };
 }
-export async function googlePing () {
+async function googlePing () {
   return (await ping.promise.probe('8.8.8.8')).time
 }
 /**
@@ -116,10 +116,10 @@ export async function googlePing () {
  * @param {import('discord.js').Role} role
  * @returns
  */
-export function roleHas (user, role) {
+function roleHas (user, role) {
   return user.roles.cache.has(role.id)
 }
-export async function managerole (user, or, role, interaction) {
+async function managerole (user, or, role, interaction) {
   const has = user.roles.cache.has(role.id)
   if (or === 'add') {
     if (has) {
@@ -149,14 +149,14 @@ export async function managerole (user, or, role, interaction) {
       })
   }
 }
-export async function permissionHas (interaction, PermissionFlagsBits, String) {
+async function permissionHas (interaction, PermissionFlagsBits, String) {
   if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits)) {
     await interaction.reply({ content: String, ephemeral: true })
     return false
   };
   return true
 }
-export async function userPermissionHas (interaction, PermissionFlagsBits, String) {
+async function userPermissionHas (interaction, PermissionFlagsBits, String) {
   if (interaction.member.permissions.has(PermissionFlagsBits)) {
     return true
   } else {
@@ -164,7 +164,7 @@ export async function userPermissionHas (interaction, PermissionFlagsBits, Strin
     return false
   }
 }
-export async function isGuild (interaction) {
+async function isGuild (interaction) {
   if (!interaction.inGuild()) {
     await interaction.reply({ content: 'サーバー内でのみ実行できます。', ephemeral: true })
     return false
@@ -175,14 +175,8 @@ export async function isGuild (interaction) {
  * @param {Client} client
  * @returns
  */
-export async function admin (client) {
+async function admin (client) {
   return await client.users.fetch('606093171151208448')
-}
-export async function adminicon () {
-  return avatarToURL(await admin())
-}
-export async function adminname () {
-  return (await admin()).username
 }
 
 try {
@@ -1218,9 +1212,6 @@ try {
         ]
       })
 
-      const admin = await client.users.fetch('606093171151208448')
-      const adminicon = avatarToURL(admin)
-      const adminname = admin.username
       const command = interaction.command.name
       const option = interaction.options
       const inguildCommands = [
@@ -1273,14 +1264,15 @@ try {
       }
 
       if (command === 'help') {
+        const fetchAdmin = await admin(interaction.client)
         const result = await ping.promise.probe('8.8.8.8')
         await interaction.reply({
           embeds: [{
             description: '[サポート鯖](https://discord.com/invite/ky97Uqu3YY)\n\n**注意点**\n・音楽再生中にVCを移動させるとキューが消えます。仕様です。\n・数時間レベルの長さの曲を流そうとすると退出してしまう問題があります。原因が分かり次第修正します。\n・/songhistoryの合計時間は/skipすると現実時間よりも長い時間になります。\n・/setvolumeについて...実行した人が管理者権限を持っているか否かに基づいて制限が取っ払われます\n・メッセージカウント機能は/setchannelで有効化、/stopcountで無効化、/messagesで現時点のメッセージ数を送信します。\n・日本時間0時に/setchannelで指定したチャンネルに当日末時点のメッセージ数を送信し、カウントをリセットします。\n・デバッグが行き届いていない箇所が多いためじゃんじゃん想定外の事をして下さい。',
             color: mutaoColor,
             footer: {
-              icon_url: `${adminicon}`,
-              text: `Made by ${adminname}・${result.time}ms`
+              icon_url: `${avatarToURL(fetchAdmin)}`,
+              text: `Made by ${fetchAdmin.displayName} | ${fetchAdmin.username}・${result.time}ms`
             }
           }]
         })
@@ -1319,7 +1311,7 @@ try {
           ])
         await interaction.editReply({ embeds: [embed] })
       } else if (command === 'play') {
-        let vc = await option.getChannel('vc')
+        let vc = option.getChannel('vc')
         vc = vc || interaction.member.voice.channel
         vc = vc || interaction.guild.members.me.voice.channel
         if (!vc) return await interaction.reply({ content: 'playコマンド\nVCに入るか\nVC指定するか', ephemeral: true })
