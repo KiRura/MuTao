@@ -1667,7 +1667,7 @@ try {
 
         await queue.node.seek(seek * 1000) ? await interaction.followUp(`${seek}秒に移動したよ！`) : await interaction.followUp(ataokanumber)
       } else if (command === 'userinfo') {
-        const id = await option.getString('id')
+        const id = option.getString('id')
         let userinfo
         try {
           userinfo = await client.users.fetch(id)
@@ -1696,7 +1696,7 @@ try {
             if (!(await managerole(user, manage, role, interaction))) return
             const content = manage === 'add' ? `${user.displayName} への ${role.name} の付与が完了しました。` : `${user.displayName} から ${role.name} の剥奪が完了しました。`
             await interaction.reply(content)
-          } else {
+          } else if (manage === 'list') {
             const size = user.roles.cache.size
             if (size === 1) return await interaction.reply({ content: `対象のユーザー ${user.displayName} にロールが付いていません。`, ephemeral: true })
             const rolesize = (await interaction.guild.roles.fetch()).size
