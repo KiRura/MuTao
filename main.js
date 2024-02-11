@@ -1741,6 +1741,7 @@ try {
           let content = manage === 'add' ? `${membersize}人に ${role.name} の付与を開始します。` : `${membersize}人から ${role.name} の剥奪を開始します。`
           await interaction.reply(content)
 
+          let failed = 0
           await Promise.all(members.map(async member => {
             if (!member.manageable) return
             if (group === 'all') {
@@ -1749,16 +1750,21 @@ try {
               if (!member.user.bot) return
             };
             const has = roleHas(member, role)
-            if (manage === 'add') {
-              if (has) return
-              await member.roles.add(role)
-            } else {
-              if (!has) return
-              await member.roles.remove(role)
-            };
+            try {
+              if (manage === 'add') {
+                if (has) return
+                await member.roles.add(role)
+              } else {
+                if (!has) return
+                await member.roles.remove(role)
+              };
+            } catch (error) {
+              failed++
+            }
           }))
 
           content = manage === 'add' ? `${membersize}人への ${role.name} の付与が完了しました。` : `${membersize}人からの ${role.name} の剥奪が完了しました。`
+          content = content + failed ? `\n権限的に無理だった人数: ${failed}` : ''
           interaction.user.send(content).catch(_error => { })
           interaction.fetchReply()
             .then(async () => { return await interaction.editReply(content) })
