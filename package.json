@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@discord-player/extractor": "^4.4.6",
+    "@discord-player/extractor": "^4.4.7",
     "@distube/ytdl": "^2.0.6",
     "deepl": "^1.0.13",
     "discord-player": "^6.6.4",
