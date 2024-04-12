@@ -9,13 +9,13 @@
     "dotenv": "^16.4.5",
     "ffmpeg-static": "^5.2.0",
     "husky": "^9.0.11",
-    "mediaplex": "^0.0.8",
+    "mediaplex": "^0.0.9",
     "node-cron": "^3.0.3",
     "ping": "^0.4.4",
     "play-dl": "^1.9.7",
     "tslog": "^4.9.2",
-    "youtube-ext": "^1.1.16",
-    "yt-stream": "^1.4.13",
+    "youtube-ext": "^1.1.23",
+    "yt-stream": "^1.4.14",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
