@@ -19,3 +19,6 @@
 [導入](https://discord.com/api/oauth2/authorize?client_id=710757661364191273&permissions=275414117456&scope=applications.commands%20bot)
 
 [サポート鯖](https://discord.gg/ky97Uqu3YY)
+
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/KiRura/MuTao.svg?variant=adaptive)](https://starchart.cc/KiRura/MuTao)
