@@ -2,16 +2,9 @@
 
 暇つぶしに極稀に開発する
 
-To install dependencies:
+## 意義
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.17. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+- 定期実行の仕組みは無し
+  - メッセージカウントや予約投稿などの機能の稼働が長期に渡るもの
+  - configを保存, 参照するもの
+- 「コマンド実行して結果見てはい終わり」の地産地消的な便利ツールを基本とする
