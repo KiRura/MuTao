@@ -18,7 +18,9 @@
 	},
 	"dependencies": {
 		"@discordjs/core": "^2.2.0",
+		"bufferutil": "^4.0.9",
 		"discord.js": "^14.21.0",
-		"ping": "^0.4.4"
+		"ping": "^0.4.4",
+		"zlib-sync": "^0.1.10"
 	}
 }
