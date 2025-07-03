@@ -14,7 +14,7 @@ setInterval(
 	() => {
 		fetch("http://localhost:8000");
 	},
-	1000 * 60 * 55,
+	10 * 1000 * 60,
 );
 
 // Initialize the client
