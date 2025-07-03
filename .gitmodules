@@ -1,0 +1,3 @@
+[submodule "src/lib/homo"]
+   path = src/lib/homo
+   url = https://github.com/itorr/homo.git
