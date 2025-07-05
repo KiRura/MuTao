@@ -12,7 +12,7 @@ Bun.serve({
 
 setInterval(
 	() => {
-		fetch("http://localhost:8000");
+		fetch("https://informal-sianna-kirura-4839e326.koyeb.app");
 	},
 	10 * 1000 * 60,
 );
