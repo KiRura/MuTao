@@ -5,7 +5,7 @@ import {
 	type JSONEncodable,
 } from "discord.js";
 import ping from "ping";
-import type { Command } from "./index.ts";
+import type { Command } from ".";
 
 export default {
 	data: {
