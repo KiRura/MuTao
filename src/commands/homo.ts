@@ -2,8 +2,8 @@ import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 } from "discord.js";
-import type { Command } from ".";
 import homo from "../lib/homo/homo";
+import type { Command } from ".";
 
 export default {
 	data: {

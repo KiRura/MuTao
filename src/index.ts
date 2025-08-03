@@ -3,20 +3,6 @@ import { URL } from "node:url";
 import { Client, GatewayIntentBits } from "discord.js";
 import { loadEvents } from "./util/loaders.ts";
 
-Bun.serve({
-	port: 8000,
-	fetch() {
-		return new Response("Hello!");
-	},
-});
-
-setInterval(
-	() => {
-		fetch("https://informal-sianna-kirura-4839e326.koyeb.app");
-	},
-	10 * 1000 * 60,
-);
-
 // Initialize the client
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 

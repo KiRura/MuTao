@@ -1,10 +1,10 @@
 import type { PathLike } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { URL } from "node:url";
-import type { Command } from "../commands/index.ts";
-import { predicate as commandPredicate } from "../commands/index.ts";
-import type { Event } from "../events/index.ts";
-import { predicate as eventPredicate } from "../events/index.ts";
+import type { Command } from "../commands";
+import { predicate as commandPredicate } from "../commands";
+import type { Event } from "../events";
+import { predicate as eventPredicate } from "../events";
 
 /**
  * A predicate to check if the structure is valid
