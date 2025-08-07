@@ -4,7 +4,6 @@ import {
 	ApplicationCommandType,
 	type JSONEncodable,
 } from "discord.js";
-import ping from "ping";
 import type { Command } from ".";
 
 export default {
@@ -23,7 +22,6 @@ export default {
 				inline: true,
 			},
 			{ name: "API Endpoint", value: "Calculating...", inline: true },
-			{ name: "Ping one.one.one.one", value: "Waiting...", inline: true },
 		];
 
 		const embed: APIEmbed | JSONEncodable<APIEmbed> = {
@@ -38,11 +36,9 @@ export default {
 		const endpointLatency =
 			(await interaction.fetchReply()).createdTimestamp -
 			interaction.createdTimestamp;
-		const cloudflarePing = await ping.promise.probe("one.one.one.one");
 
 		if (fields[1] && fields[2]) {
 			fields[1].value = `${endpointLatency} ms`;
-			fields[2].value = `${cloudflarePing.time} ms`;
 		}
 
 		await interaction.editReply({ embeds: [embed] });
