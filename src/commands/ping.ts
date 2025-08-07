@@ -37,9 +37,7 @@ export default {
 			(await interaction.fetchReply()).createdTimestamp -
 			interaction.createdTimestamp;
 
-		if (fields[1] && fields[2]) {
-			fields[1].value = `${endpointLatency} ms`;
-		}
+		if (fields[1]) fields[1].value = `${endpointLatency} ms`;
 
 		await interaction.editReply({ embeds: [embed] });
 	},
