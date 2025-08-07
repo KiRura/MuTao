@@ -6,6 +6,7 @@
       "dependencies": {
         "@discordjs/core": "^2.2.0",
         "@evex/h0mo": "npm:@jsr/evex__h0mo",
+        "@network-utils/tcp-ping": "^1.2.3",
         "discord.js": "^14.21.0",
       },
       "devDependencies": {
@@ -52,6 +53,8 @@
     "@discordjs/ws": ["@discordjs/ws@2.0.3", "", { "dependencies": { "@discordjs/collection": "^2.1.1", "@discordjs/rest": "^2.5.1", "@discordjs/util": "^1.1.1", "@sapphire/async-queue": "^1.5.3", "@types/ws": "^8.5.12", "@vladfrangu/async_event_emitter": "^2.4.6", "discord-api-types": "^0.38.1", "tslib": "^2.6.3", "ws": "^8.18.0" } }, "sha512-c/Yd0eK2kFAvGn5/xECdUziSXLQh7tFO7kw2nfsj46B6txhPpJweR8yYjtYQ+kbUsaFcoQOrZ69wYqfetdqSHw=="],
 
     "@evex/h0mo": ["@jsr/evex__h0mo@1.0.1", "https://npm.jsr.io/~/11/@jsr/evex__h0mo/1.0.1.tgz", {}, "sha512-MH9Vuou6xL1j1EkhtaJF7tmbgPlBwLxrhcW6llOljY04nkmlqZwU0ApJG4n24nKKB3wqUxHwO9runACj47j4cw=="],
+
+    "@network-utils/tcp-ping": ["@network-utils/tcp-ping@1.2.3", "", {}, "sha512-YKSnfvKGabggw+r6xVk9mxF5AdvDSL0pXX2EydkaBpIspcOokK7HsG7N+i94eaakDnlVFxN2EcXEh0UYOSUKvw=="],
 
     "@sapphire/async-queue": ["@sapphire/async-queue@1.5.5", "", {}, "sha512-cvGzxbba6sav2zZkH8GPf2oGk9yYoD5qrNWdu9fRehifgnFZJMV+nuy2nON2roRO4yQQ+v7MK/Pktl/HgfsUXg=="],
 

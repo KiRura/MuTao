@@ -18,6 +18,7 @@
 	"dependencies": {
 		"@discordjs/core": "^2.2.0",
 		"@evex/h0mo": "npm:@jsr/evex__h0mo",
+		"@network-utils/tcp-ping": "^1.2.3",
 		"discord.js": "^14.21.0"
 	}
 }
