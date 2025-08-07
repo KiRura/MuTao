@@ -1,7 +1,7 @@
 FROM archlinux
 WORKDIR /app
 RUN pacman -Syu --noconfirm
-RUN pacman -S curl nodejs unzip python --noconfirm
+RUN pacman -S curl nodejs unzip node-gyp --noconfirm
 RUN curl -fsSL https://bun.sh/install | bash
 COPY package.json bun.lock* ./
 RUN ~/.bun/bin/bun i --frozen-lockfile
