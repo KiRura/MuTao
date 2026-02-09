@@ -2,6 +2,7 @@ import process from "node:process";
 import { URL } from "node:url";
 import { Client, GatewayIntentBits } from "discord.js";
 import dotenv from "dotenv";
+import express from "express";
 import { loadEvents } from "./util/loaders.ts";
 
 dotenv.config();
@@ -25,3 +26,8 @@ for (const event of events) {
 
 // Login to the client
 void client.login(process.env.DISCORD_TOKEN);
+
+const app = express();
+app.get("/", (_, res) => res.send("this is mu~~~tao"));
+
+app.listen(3000, () => console.log(`Listening: http://localhost:3000`));

@@ -5,6 +5,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.3",
 		"@types/bun": "^1.2.19",
+		"@types/express": "^5.0.6",
 		"tsx": "^4.21.0",
 		"zod": "^4.3.6"
 	},
@@ -21,6 +22,7 @@
 		"@evex/h0mo": "npm:@jsr/evex__h0mo",
 		"@network-utils/tcp-ping": "^1.2.3",
 		"discord.js": "^14.21.0",
-		"dotenv": "^17.2.4"
+		"dotenv": "^17.2.4",
+		"express": "^5.2.1"
 	}
 }
