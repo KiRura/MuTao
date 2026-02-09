@@ -3,7 +3,10 @@ import process from "node:process";
 import { URL } from "node:url";
 import { API } from "@discordjs/core/http-only";
 import { REST } from "discord.js";
+import dotenv from "dotenv";
 import { loadCommands } from "./loaders";
+
+dotenv.config();
 
 const commands = await loadCommands(new URL("../commands/", import.meta.url));
 const commandData = [...commands.values()].map((command) => command.data);

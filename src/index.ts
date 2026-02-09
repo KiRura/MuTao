@@ -1,7 +1,10 @@
 import process from "node:process";
 import { URL } from "node:url";
 import { Client, GatewayIntentBits } from "discord.js";
+import dotenv from "dotenv";
 import { loadEvents } from "./util/loaders.ts";
+
+dotenv.config();
 
 // Initialize the client
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
